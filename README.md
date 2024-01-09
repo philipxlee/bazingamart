@@ -1,4 +1,4 @@
-# Skeleton Code for CompSci 316 Standard Course Project.
+# Skeleton Code for CompSci 316/516 Standard Course Project.
 
 Originally created by [Rickard
 Stureborg](http://www.rickard.stureborg.com) and [Yihao
@@ -58,7 +58,7 @@ Depending on your setup, the URL will be different:
 
 * If you use the Duke OIT container, visit
   https://cmgr.oit.duke.edu/containers and open the CONTAINER CONTROLS
-  info pane for your CS316 container.  There will be a line specifying
+  info pane for your CS316/516 container.  There will be a line specifying
   a user-specific URL for accessing a Flask app.  Point your browser
   to that URL.
 
@@ -132,8 +132,8 @@ running `python gen.py`.
 
 Use the file `.flaskenv` for passwords/secret keys --- we are talking
 about passwords used to access your database server, for example (not
-user passwords for your website in CSV files described earlier).  This
-file is NOT tracked by `git` and it was automatically generated when
-you first ran `./install.sh`.  Don't check it into `git` because your
-credentials would be exposed to everybody on GitLab if you are not
-careful.
+user passwords for your website in CSV files for loading sample
+database).  This file is NOT tracked by `git` and it was automatically
+generated when you first ran `./install.sh`.  Don't check it into
+`git` because your credentials would be exposed to everybody on GitLab
+if you are not careful.
