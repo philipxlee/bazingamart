@@ -66,6 +66,39 @@ def gen_purchases(num_purchases, available_pids):
     return
 
 
-gen_users(num_users)
+def gen_carts(num_carts, num_users, available_pids):
+    with open('Cart.csv', 'w', newline='') as f:
+        writer = get_csv_writer(f)
+        print('Carts...', end=' ', flush=True)
+        for order_id in range(1, num_carts + 1):
+            if order_id % 50 == 0:
+                print(f'{order_id}', end=' ', flush=True)
+            user_id = fake.random_int(min=1, max=num_users)
+            created_at = fake.date_time_between(start_date='-6m', end_date='now')
+            total_price = 0.00
+            purchase_status = random.choice(['Pending', 'Completed', 'Cancelled'])
+            writer.writerow([order_id, user_id, created_at, total_price, purchase_status])
+        print(f'{num_carts} generated')
+    return
+
+
+def gen_cart_products(num_carts, max_products_per_cart, available_pids):
+    with open('CartProducts.csv', 'w', newline='') as f:
+        writer = get_csv_writer(f)
+        print('CartProducts...', end=' ', flush=True)
+        for order_id in range(1, num_carts + 1):
+            num_products = fake.random_int(min=1, max=max_products_per_cart)
+            selected_pids = random.sample(available_pids, min(num_products, len(available_pids)))
+            for pid in selected_pids:
+                quantity = fake.random_int(min=1, max=5)
+                unit_price = float(fake.pydecimal(left_digits=3, right_digits=2, positive=True))
+                writer.writerow([order_id, pid, quantity, unit_price])
+        print(f'CartProducts for {num_carts} carts generated')
+    return
+
+
 available_pids = gen_products(num_products)
+gen_users(num_users)
 gen_purchases(num_purchases, available_pids)
+gen_carts(num_carts, num_users, available_pids)
+gen_cart_products(num_carts, max_products_per_cart, available_pids)
