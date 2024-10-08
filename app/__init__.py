@@ -2,9 +2,6 @@ from flask import Flask
 from flask_login import LoginManager
 from .config import Config
 from .db import DB
-from .index import bp as index_bp
-from .users import bp as user_bp
-from .carts import bp as carts_bp
 
 login = LoginManager()
 login.login_view = 'users.login'
@@ -16,6 +13,11 @@ def create_app():
 
     app.db = DB(app)
     login.init_app(app)
+
+    # Imports must happen after app is created to avoid circular imports
+    from .index import bp as index_bp
+    from .users import bp as user_bp
+    from .carts import bp as carts_bp
 
     app.register_blueprint(index_bp)
     app.register_blueprint(user_bp)
