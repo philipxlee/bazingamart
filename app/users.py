@@ -67,6 +67,10 @@ def register():
             return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
 
+@bp.route("/user_home")
+def user_home():
+    return render_template("user_home.html")
+
 
 @bp.route('/logout')
 def logout():

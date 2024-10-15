@@ -12,4 +12,5 @@ Link to gitlab: https://gitlab.oit.duke.edu/lbk15/cs-316-mini-amazon-project-24-
 Updates:
 1. Updated users table to include balance
 2. Added ability to get all purchases by a user
+3. Added button + page to see user info
 
