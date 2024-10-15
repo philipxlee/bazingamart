@@ -10,3 +10,5 @@ Team Roles:
 Link to gitlab: https://gitlab.oit.duke.edu/lbk15/cs-316-mini-amazon-project-24-fall
 
 Updates:
+1. Updated users table to include balance
+
