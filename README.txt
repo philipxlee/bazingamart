@@ -13,4 +13,5 @@ Updates:
 1. Updated users table to include balance
 2. Added ability to get all purchases by a user
 3. Added button + page to see user info
+4. Added ability to see user information including balance
 

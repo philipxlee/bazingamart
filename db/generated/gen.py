@@ -1,10 +1,13 @@
 from werkzeug.security import generate_password_hash
 import csv
 from faker import Faker
+import random
 
 num_users = 100
 num_products = 2000
 num_purchases = 2500
+num_carts = 100
+max_products_per_cart = 50
 
 Faker.seed(0)
 fake = Faker()
@@ -28,7 +31,8 @@ def gen_users(num_users):
             name_components = profile['name'].split(' ')
             firstname = name_components[0]
             lastname = name_components[-1]
-            writer.writerow([uid, email, password, firstname, lastname])
+            balance = 0.0 
+            writer.writerow([uid, email, password, firstname, lastname, balance])
         print(f'{num_users} generated')
     return
 

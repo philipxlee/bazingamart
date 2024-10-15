@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>You will see your user info here! (eventually)</h2>
+<p>
+    <strong>First Name:</strong> {{ current_user.firstname }}<br/>
+    <strong>Last Name:</strong> {{ current_user.lastname }}<br/>
+    <strong>Email:</strong> {{ current_user.email }}<br/>
+    <strong>Balance:</strong> {{ current_user.balance }}<br/>
+</p>
 {% endblock %}
