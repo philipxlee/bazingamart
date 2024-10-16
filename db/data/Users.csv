@@ -1,1 +1,2 @@
 0,icecream@tastes.good,pbkdf2:sha256:260000$1GvmeoAkcWb89TyU$5f711eafb243c1c1a884715dd9bd6d185f29ccd3dab59ad19cc201a7260091cb,Joey,Shmoey
+1,test@test.com,pbkdf2:sha256:600000$IzV5u2MGev4UIIxf$de783a9540d00de0b5543351cfbd319147c7f91475126b68db9b32d6f2afd110,Test,Test
