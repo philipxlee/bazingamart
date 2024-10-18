@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 class DB:
     """Hosts all functions for querying the database.
@@ -21,6 +21,7 @@ class DB:
     def __init__(self, app):
         self.engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'],
                                     execution_options={"isolation_level": "SERIALIZABLE"})
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
 
     def execute(self, sqlstr, **kwargs):
         """Execute a single SQL statement sqlstr.
@@ -44,3 +45,13 @@ class DB:
                 return result.fetchall()
             else:
                 return result.rowcount
+
+    def commit(self):
+        self.Session.commit()
+
+    def rollback(self):
+        self.Session.rollback()
+
+    def remove(self):
+        self.Session.remove()
+            
