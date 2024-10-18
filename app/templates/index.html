@@ -15,14 +15,26 @@
   </thead>
   <tbody>
     {% for product in avail_products%}
-      <tr>
-        <th scope="row">{{product.id}}</th>
-        <td>{{product.name}}</td>
-        <td>{{product.price}}</td>
-      </tr>
+    <tr>
+      <th scope="row">{{product.id}}</th>
+      <td>{{product.name}}</td>
+      <td>{{product.price}}</td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>
+
+<br />
+<h2>Add Item to Cart</h2>
+<form action="{{ url_for('carts.add_to_cart') }}" method="post">
+  <label for="product_id">Product ID:</label>
+  <input type="number" name="product_id" id="product_id" required>
+  <br />
+  <label for="quantity">Quantity:</label>
+  <input type="number" name="quantity" id="quantity" value="1" min="1" required>
+  <br /><br />
+  <button type="submit">Add to Cart</button>
+</form>
 
 <br><br>
 {% if current_user.is_authenticated %}
@@ -37,11 +49,11 @@
   </thead>
   <tbody>
     {% for purchase in purchase_history%}
-      <tr>
-        <th scope="row">{{purchase.id}}</th>
-        <td>{{purchase.pid}}</td>
-        <td>{{purchase.time_purchased}}</td>
-      </tr>
+    <tr>
+      <th scope="row">{{purchase.id}}</th>
+      <td>{{purchase.pid}}</td>
+      <td>{{purchase.time_purchased}}</td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>
