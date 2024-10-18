@@ -37,4 +37,9 @@ CREATE TABLE CartProducts (
     PRIMARY KEY (order_id, product_id)
 );
 
-
+CREATE TABLE Inventory(
+    product_id INT NOT NULL REFERENCES Products(id) ON DELETE CASCADE,
+    seller_id INT NOT NULL REFERENCES Users(id),
+    product_quantity INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (product_id, seller_id)
+);
