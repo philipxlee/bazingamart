@@ -1,17 +1,3 @@
-from flask import Blueprint, render_template
-from flask_login import login_required, current_user
-from app.models.cart_items import CartItems
-
-bp = Blueprint('carts', __name__)
-
-@bp.route('/view_cart')
-@login_required
-def view_cart():
-    user_id = current_user.id
-    cart_items = CartItems.get_all_items(user_id)
-    return render_template('view_carts_page.html', cart_items=cart_items)
-
-
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from app.models.cart_items import CartItems
