@@ -1,5 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Nothing here to see yet lol (im lazy)</h2>
+<h2>Your Cart Items</h2>
+
+{% if cart_items %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Order ID</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.product_id }}</td>
+            <td>{{ item.order_id }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.unit_price) }}</td>
+            <td>${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
 {% endblock %}
