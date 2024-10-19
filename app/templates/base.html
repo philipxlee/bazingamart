@@ -14,12 +14,12 @@
 
     .main-head {
       height: 150px;
-      background: #FFF;
+      background: #ffffff;
     }
 
     .sidenav {
       height: 100%;
-      background-color: #000;
+      background-color: #03f72c;
       overflow-x: hidden;
       padding-top: 20px;
     }
@@ -48,20 +48,21 @@
 <body>
   <div class="sidenav">
     {% block msg %}
-    <h1 style="color:aliceblue">Welcome to CompSci 316 Mini Amazon!</h1>
-    <div style="color: aliceblue; text-align: right; margin-bottom: 25px">
+    <h1 style="color:rgb(0, 0, 0)">BazingaMart!</h1>
+    <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px">
       {% if current_user.is_authenticated %}
       Hello <a href="{{ url_for('users.user_home') }}">{{ current_user.firstname }}</a>!
       <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
       <a href="{{ url_for('carts.view_cart') }}" class="btn btn-light">View Cart</a>
-        {% else %}
+      {% else %}
       <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
       {% endif %}
     </div>
     {% endblock %}
   </div>
   <div class="main">
-    {% block content %}{% endblock %}
+    {% block content %}
+    {% endblock %}
   </div>
 </body>
 
