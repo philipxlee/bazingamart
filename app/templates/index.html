@@ -25,6 +25,12 @@
 </table>
 
 <br />
+{% if current_user.is_authenticated %}
+  <h2>View your product inventory</h2>
+  <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-primary">View items here</a>
+{% endif %}
+
+<br />
 <h2>Add Item to Cart</h2>
 <form action="{{ url_for('carts.add_to_cart') }}" method="post">
   <label for="product_id">Product ID:</label>
