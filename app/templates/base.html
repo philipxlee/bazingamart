@@ -54,10 +54,10 @@
       Hello <a href="{{ url_for('users.user_home') }}">{{ current_user.firstname }}</a>!
       <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
       <a href="{{ url_for('carts.view_cart') }}" class="btn btn-light">View Cart</a>
-      <!--<a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-light">View Inventory</a>-->
+      <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-light">View Inventory</a>
       {% else %}
-      <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
-      {% endif %}
+      <!--<a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
+      {% endif %}-->
     </div>
     {% endblock %}
   </div>
