@@ -37,4 +37,10 @@ CREATE TABLE CartProducts (
     PRIMARY KEY (order_id, product_id)
 );
 
-
+CREATE TABLE Inventory (
+    seller_id INT NOT NULL,
+    product_id INT NOT NULL,
+    product_name VARCHAR(255) UNIQUE NOT NULL,
+    product_quantity INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (product_id, seller_id)
+);

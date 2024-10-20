@@ -22,3 +22,5 @@ SELECT pg_catalog.setval('public.cart_order_id_seq',
                         false);
 
 \COPY CartProducts FROM 'CartProducts.csv' WITH DELIMITER ',' NULL '' CSV;
+
+\COPY Inventory FROM 'Inventory.csv' WITH DELIMITER ',' NULL '' CSV;
