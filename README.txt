@@ -16,3 +16,4 @@ Updates:
 4. Added ability to see user information including balance
 5. Added test account with purchases
 6. Added list of purchases to user home
+7. Added button + page to see inventory items of logged in user
