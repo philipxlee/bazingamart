@@ -10,7 +10,7 @@ Team Roles:
 Link to gitlab: https://gitlab.oit.duke.edu/lbk15/cs-316-mini-amazon-project-24-fall
 
 Milestone 3:
-Link to video: 
+Link to video: https://duke.zoom.us/rec/share/5s5DI-qc4bQDjm4HI4AStBuHO0zaTjS7uDuD0tsDrWMM0tSGbaPrhwrcI01NzL0S.FRz7omfrfbPK5gN5?startTime=1729543717000
 Where to find end points:
 1. Users Guru: Given a user id, find all purchases of that user.
     - inside of models/purchases.py in the get_all_by_user(uid) function
