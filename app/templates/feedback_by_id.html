@@ -6,7 +6,7 @@
 <!-- Input the user ID -->
 <form method="POST" action="{{ url_for('reviews.search_user_feedback') }}">
   <label for="user_id">Enter User ID:</label>
-  <input type="number" name="user_id" id="user_id" min="1" required>
+  <input type="number" name="user_id" id="user_id" min="0" required>
   <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
@@ -29,7 +29,8 @@
       <th scope="row">{{feedback.review_id}}</th>
       <td>{{feedback.reviewer_type}}</td>
       <td>{{feedback.stars if feedback.stars else 'N/A'}}</td>
-      <td>{{feedback.review_text[:50] + '...' if feedback.review_text and feedback.review_text|length > 50 else feedback.review_text or 'N/A'}}</td>
+      <td>{{feedback.review_text[:50] + '...' if feedback.review_text and feedback.review_text|length > 50 else
+        feedback.review_text or 'N/A'}}</td>
       <td>{{feedback.time_written}}</td>
     </tr>
     {% endfor %}
