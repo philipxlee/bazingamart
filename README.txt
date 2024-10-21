@@ -9,11 +9,17 @@ Team Roles:
 
 Link to gitlab: https://gitlab.oit.duke.edu/lbk15/cs-316-mini-amazon-project-24-fall
 
-Updates:
-1. Updated users table to include balance
-2. Added ability to get all purchases by a user
-3. Added button + page to see user info
-4. Added ability to see user information including balance
-5. Added test account with purchases
-6. Added list of purchases to user home
-7. Added button + page to see inventory items of logged in user
+Milestone 3:
+Link to video: 
+Where to find end points:
+1. Users Guru: Given a user id, find all purchases of that user.
+    - inside of models/purchases.py in the get_all_by_user(uid) function
+2. Products Guru: Given an integer k, find top k most expensive products.
+    - 
+3. Carts Guru: Given a user id, find the items in the cart for that user.
+    -
+4. Sellers Guru: Given id of a merchant/seller, find the products that are in their inventory.
+    -
+5. Social Guru: Given a user id, find the 5 most recent feedback they posted.
+    -
+
