@@ -17,7 +17,7 @@ Where to find end points:
 2. Products Guru: Given an integer k, find top k most expensive products.
     - 
 3. Carts Guru: Given a user id, find the items in the cart for that user.
-    -
+    - inside of models/cart_items.py in the get_all_items(user_id) function
 4. Sellers Guru: Given id of a merchant/seller, find the products that are in their inventory.
     -
 5. Social Guru: Given a user id, find the 5 most recent feedback they posted.
