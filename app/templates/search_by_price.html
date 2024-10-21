@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Search Number of Products by Most Expensive:</h2>
+
+<!-- Form to input the value for k  -->
+<form method="POST" action="{{ url_for('products.search_by_price') }}">
+  <label for="k_value">Enter a number for your search:</label>
+  <input type="number" name="k_value" id="k_value" min="1" required>
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<br><br>
+
+{% if top_products %}
+<h2>Top {{ top_products|length }} Most Expensive Products</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Product ID</th>
+      <th scope="col">Product Name</th>
+      <th scope="col">Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in top_products %}
+    <tr>
+      <th scope="row">{{product.id}}</th>
+      <td>{{product.name}}</td>
+      <td>{{product.price}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% endblock %}
