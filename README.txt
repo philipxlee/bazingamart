@@ -21,5 +21,5 @@ Where to find end points:
 4. Sellers Guru: Given id of a merchant/seller, find the products that are in their inventory.
     -inside of models/inventory_items in the get_all_by_user(seller_id) function
 5. Social Guru: Given a user id, find the 5 most recent feedback they posted.
-    -
+    - inside models/reviews.py, in the get_recent_feedback(user_id, limit=5) function.
 
