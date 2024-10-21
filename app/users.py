@@ -71,8 +71,7 @@ def register():
 
 @bp.route("/user_home")
 def user_home():
-    purchases = Purchase.get_all_by_user_since(
-            current_user.id, datetime.datetime(1980, 9, 14, 0, 0, 0))
+    purchases = Purchase.get_all_by_user(current_user.id)
     return render_template("user_home.html", purchase_history=purchases)
 
 
