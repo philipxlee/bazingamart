@@ -9,7 +9,6 @@ import datetime
 from .models.user import User
 from .models.purchase import Purchase
 
-
 from flask import Blueprint
 bp = Blueprint('users', __name__)
 

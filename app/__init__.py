@@ -20,8 +20,10 @@ def create_app():
     from .carts import bp as carts_bp
     from .inventory import bp as inventory_bp
     from .products import bp as products_bp
+    from .reviews import bp as reviews_bp
+    
     app.register_blueprint(products_bp)
-
+    app.register_blueprint(reviews_bp)
     app.register_blueprint(index_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(carts_bp)
