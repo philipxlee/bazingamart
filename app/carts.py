@@ -24,6 +24,30 @@ def add_to_cart():
     else:
         return "Failed to add item to cart", 500
 
+@bp.route('/update_quantity', methods=['POST'])
+@login_required
+def update_quantity():
+    product_id = request.form.get('product_id', type=int)
+    new_quantity = request.form.get('quantity', type=int)
+    user_id = current_user.id
+    result = CartItems.update_item_quantity(user_id, product_id, new_quantity)
+    if result == "success":
+        return redirect(url_for('carts.view_cart'))
+    else:
+        return result, 500  
+
+@bp.route('/remove_item', methods=['POST'])
+@login_required
+def remove_item():
+    product_id = request.form.get('product_id', type=int)
+    user_id = current_user.id
+    result = CartItems.remove_item(user_id, product_id)
+    if result == "success":
+        return redirect(url_for('carts.view_cart'))
+    else:
+        return result, 500 
+
+        
 """
 Commented out code below is for the version where the product_id is passed as a URL parameter
 instead of as a form parameter.
