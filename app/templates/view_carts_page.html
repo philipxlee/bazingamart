@@ -41,6 +41,13 @@
         {% endfor %}
     </tbody>
 </table>
+
+
+<!-- Submit Cart Logic -->
+<form action="{{ url_for('carts.submit_cart') }}" method="post">
+    <button type="submit" class="btn btn-success">Submit Cart</button>
+</form>
+
 {% else %}
 <p>Your cart is empty.</p>
 {% endif %}
