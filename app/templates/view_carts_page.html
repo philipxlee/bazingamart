@@ -12,6 +12,7 @@
             <th>Quantity</th>
             <th>Unit Price</th>
             <th>Total Price</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -19,9 +20,21 @@
         <tr>
             <td>{{ item.product_id }}</td>
             <td>{{ item.order_id }}</td>
-            <td>{{ item.quantity }}</td>
+            <td>
+                <form action="{{ url_for('carts.update_quantity') }}" method="post">
+                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0">
+                    <input type="submit" value="Update">
+                </form>
+            </td>
             <td>${{ "%.2f"|format(item.unit_price) }}</td>
             <td>${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+            <td>
+                <form action="{{ url_for('carts.remove_item') }}" method="post">
+                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                    <input type="submit" value="Remove">
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
