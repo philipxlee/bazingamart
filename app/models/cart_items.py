@@ -9,8 +9,9 @@ class CartItems:
     methods to view the items and calculate the total cost of all items in the cart.
     """
 
-    def __init__(self, product_id, order_id, quantity, unit_price):
+    def __init__(self, product_id, order_id, quantity, unit_price, product_name):
         self.product_id = product_id
+        self.product_name = product_name
         self.order_id = order_id
         self.quantity = quantity
         self.unit_price = unit_price
@@ -18,21 +19,23 @@ class CartItems:
     @staticmethod
     def get_all_items(user_id) -> list:
         """
-        Returns all items in the cart for the given user.
+        Returns all items in the cart for the given user, including product name.
         @param user_id: The user ID to get the cart items for.
         """
         rows = current_app.db.execute(
             """
-            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price
+            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.name
             FROM CartProducts cp
             JOIN Cart c ON cp.order_id = c.order_id
+            JOIN Products p ON cp.product_id = p.id
             WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
             """,
             user_id=user_id,
         )
 
-        items_in_cart = [CartItems(*row) for row in rows]
+        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_cart
+
 
     @staticmethod
     @handle_db_exceptions
