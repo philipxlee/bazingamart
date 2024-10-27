@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from app.models.cart_items import CartItems
+from app.models.cart_submission import CartSubmission
 
 bp = Blueprint('carts', __name__)
 
@@ -24,19 +25,35 @@ def add_to_cart():
     else:
         return "Failed to add item to cart", 500
 
-"""
-Commented out code below is for the version where the product_id is passed as a URL parameter
-instead of as a form parameter.
-Waiting on Products to be implemented before this can be used.
-
-@bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@bp.route('/update_quantity', methods=['POST'])
 @login_required
-def add_to_cart(product_id):
-    quantity = request.form.get('quantity', 1, type=int)
+def update_quantity():
+    product_id = request.form.get('product_id', type=int)
+    new_quantity = request.form.get('quantity', type=int)
     user_id = current_user.id
-    result = CartItems.add_item(user_id, product_id, quantity)
+    result = CartItems.update_item_quantity(user_id, product_id, new_quantity)
     if result == "success":
         return redirect(url_for('carts.view_cart'))
     else:
-        return "Failed to add item to cart", 500
-"""
+        return result, 500  
+
+@bp.route('/remove_item', methods=['POST'])
+@login_required
+def remove_item():
+    product_id = request.form.get('product_id', type=int)
+    user_id = current_user.id
+    result = CartItems.remove_item(user_id, product_id)
+    if result == "success":
+        return redirect(url_for('carts.view_cart'))
+    else:
+        return result, 500 
+
+@bp.route('/submit_cart', methods=['POST'])
+@login_required
+def submit_cart():
+    result = CartSubmission.submit_cart(current_user.id)
+    if result == "Purchase successful!":
+        flash("Your purchase was completed successfully!")
+    else:
+        flash(result)
+    return redirect(url_for('carts.view_cart'))
