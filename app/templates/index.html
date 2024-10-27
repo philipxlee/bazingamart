@@ -4,67 +4,63 @@
 
 <br><br>
 
-<h2>Products for sale:</h2>
-<!-- Button for "Search By Price" -->
-<a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
+<h2 class="text-center">Products for Sale</h2>
 
-<!-- New button for "Search User Feedback" -->
-<a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Search User Feedback</a>
+<!-- Button for "Search By Price" and "Search User Feedback" -->
+<div class="text-center mb-4">
+  <a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
+  <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Search User Feedback</a>
+</div>
 
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Product ID</th>
-      <th scope="col">Product Name</th>
-      <th scope="col">Price</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for product in avail_products%}
-    <tr>
-      <th scope="row">{{product.id}}</th>
-      <td>{{product.name}}</td>
-      <td>{{product.price}}</td>
-    </tr>
+<!-- Product Grid -->
+<div class="container">
+  <div class="row">
+    {% for product in avail_products %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text">Price: ${{ product.price }}</p>
+          <!-- Add to Cart form -->
+          <form action="{{ url_for('carts.add_to_cart') }}" method="post">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <label for="quantity_{{ product.id }}">Quantity:</label>
+            <input type="number" name="quantity" id="quantity_{{ product.id }}" value="1" min="1" required
+              class="form-control mb-2">
+            <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
     {% endfor %}
-  </tbody>
-</table>
-
-<br />
-<h2>Add Item to Cart</h2>
-<form action="{{ url_for('carts.add_to_cart') }}" method="post">
-  <label for="product_id">Product ID:</label>
-  <input type="number" name="product_id" id="product_id" required>
-  <br />
-  <label for="quantity">Quantity:</label>
-  <input type="number" name="quantity" id="quantity" value="1" min="1" required>
-  <br /><br />
-  <button type="submit">Add to Cart</button>
-</form>
+  </div>
+</div>
 
 <br><br>
 {% if current_user.is_authenticated %}
-<h2>Your recent purchases:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Purchase ID</th>
-      <th scope="col">Product Name</th>
-      <th scope="col">Date Purchased</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for purchase in purchase_history%}
-    <tr>
-      <th scope="row">{{purchase.id}}</th>
-      <td>{{purchase.pid}}</td>
-      <td>{{purchase.time_purchased}}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<h2>Your Recent Purchases</h2>
+<div class="container">
+  <table class='table table-hover table-bordered'>
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Purchase ID</th>
+        <th scope="col">Product Name</th>
+        <th scope="col">Date Purchased</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for purchase in purchase_history %}
+      <tr>
+        <th scope="row">{{ purchase.id }}</th>
+        <td>{{ purchase.pid }}</td>
+        <td>{{ purchase.time_purchased }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
+<p class="text-center"><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
 {% endif %}
 
 {% endblock %}
