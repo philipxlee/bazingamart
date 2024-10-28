@@ -21,9 +21,11 @@ def add_to_cart():
     user_id = current_user.id
     result = CartItems.add_item(user_id, product_id, quantity)
     if result == "success":
-        return redirect(url_for('carts.view_cart'))
+        flash("Item successfully added to cart!", "success")
     else:
-        return "Failed to add item to cart", 500
+        flash("Failed to add item to cart.", "error")
+    
+    return redirect(url_for('index.index', product_id=product_id))
 
 @bp.route('/update_quantity', methods=['POST'])
 @login_required
