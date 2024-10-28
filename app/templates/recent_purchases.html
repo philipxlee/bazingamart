@@ -12,6 +12,8 @@
                 <th scope="col">Purchase ID</th>
                 <th scope="col">Product Name</th>
                 <th scope="col">Quantity</th>
+                <th scope="col">Price per Unit</th>
+                <th scope="col">Total Spent</th>
                 <th scope="col">Date Purchased</th>
             </tr>
         </thead>
@@ -21,6 +23,8 @@
                 <th scope="row">{{ purchase.id }}</th>
                 <td>{{ purchase.name }}</td>
                 <td>{{ purchase.quantity }}</td>
+                <td>${{ "%.2f"|format(purchase.price) }}</td>
+                <td>${{ "%.2f"|format(purchase.total_spent) }}</td>
                 <td>{{ purchase.time_purchased.strftime('%B %d, %Y') }}</td>
             </tr>
             {% endfor %}
