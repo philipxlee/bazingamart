@@ -10,7 +10,7 @@ bp = Blueprint('purchases', __name__)
 def recent_purchases():
     purchases = current_app.db.execute(
         """
-        SELECT p.id, pr.name, p.quantity, p.time_purchased
+        SELECT p.id, pr.name, p.quantity, p.price, (p.quantity * p.price) AS total_spent, p.time_purchased
         FROM Purchases p
         JOIN Products pr ON p.pid = pr.id
         WHERE p.uid = :user_id
