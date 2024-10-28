@@ -24,6 +24,14 @@
       padding-top: 20px;
     }
 
+    .sidenav h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+      padding-left: 20px;
+      text-align: left;
+    }
+
     .main {
       padding: 0px 10px;
     }
@@ -51,7 +59,12 @@
     <h1 style="color:rgb(0, 0, 0)">BazingaMart!</h1>
     <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px">
       {% if current_user.is_authenticated %}
-      Hello <a href="{{ url_for('users.user_home') }}">{{ current_user.firstname }}</a>!
+      <div style="text-align: left">
+        <a href="{{ url_for('users.user_home') }}"
+          style="color: #000000; font-size: 1.5rem; font-weight: bold; padding-left: 20px;">
+          Hello {{current_user.firstname}}!
+        </a>
+      </div>
       <a href="{{ url_for('index.index') }}" class="btn btn-light">Home</a>
       <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-light">View Inventory</a>
       <a href="{{ url_for('carts.view_cart') }}" class="btn btn-light">View Cart</a>
