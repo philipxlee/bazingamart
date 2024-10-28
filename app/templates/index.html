@@ -12,6 +12,7 @@
   <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Search User Feedback</a>
 </div>
 
+
 <!-- Product Grid -->
 <div class="container">
   <div class="row">
@@ -35,32 +36,5 @@
     {% endfor %}
   </div>
 </div>
-
-<br><br>
-{% if current_user.is_authenticated %}
-<h2>Your Recent Purchases</h2>
-<div class="container">
-  <table class='table table-hover table-bordered'>
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">Purchase ID</th>
-        <th scope="col">Product Name</th>
-        <th scope="col">Date Purchased</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for purchase in purchase_history %}
-      <tr>
-        <th scope="row">{{ purchase.id }}</th>
-        <td>{{ purchase.pid }}</td>
-        <td>{{ purchase.time_purchased }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<p class="text-center"><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
-{% endif %}
 
 {% endblock %}
