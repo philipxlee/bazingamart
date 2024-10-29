@@ -75,12 +75,17 @@ def user_home():
 
 @bp.route('/update_balance',  methods=['GET', 'POST'])
 def update_balance():
+    current_balance = float(User.get_balance(current_user.id))
+    
     if request.method == 'POST':
         amt = float(request.form['amount'])
         action = request.form['action'] 
         
-        if action == "withdraw" :
-            amt = amt * -1
+        if action == "withdraw":
+            if amt <= current_balance:
+                amt = amt * -1
+            else:
+                return render_template('update_balance.html', error="Insufficient balance.")
             
         User.update_balance(current_user.id, amt)
         return redirect(url_for('users.update_balance'))
