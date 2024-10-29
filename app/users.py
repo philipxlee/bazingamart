@@ -85,10 +85,12 @@ def update_balance():
             if amt <= current_balance:
                 amt = amt * -1
             else:
-                return render_template('update_balance.html', error="Insufficient balance.")
+                return render_template('update_balance.html', 
+                                       error="Trying to withdraw amount greater than balance.")
             
         User.update_balance(current_user.id, amt)
         return redirect(url_for('users.update_balance'))
+  
     return render_template('update_balance.html')
 
 
