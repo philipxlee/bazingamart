@@ -1,6 +1,8 @@
 from flask import current_app
 from app.models.cart_items import CartItems
-
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
+from app.models.user import User
+from flask_login import current_user
 
 class CartSubmission:
     """
@@ -9,6 +11,7 @@ class CartSubmission:
     """
 
     @staticmethod
+    @handle_db_exceptions
     def submit_cart(user_id):
         """
         Submits the cart as an order after checking product availability, user balance,
@@ -24,7 +27,7 @@ class CartSubmission:
         total_cost = sum(item.quantity * item.unit_price for item in cart_items)
 
         # 3. Check user balance
-        user_balance = CartSubmission._get_user_balance(user_id)
+        user_balance = User.get_balance(user_id)
         if user_balance < total_cost:
             return "Insufficient balance to complete the purchase."
 
@@ -35,7 +38,8 @@ class CartSubmission:
                 return f"Not enough inventory for {item.product_name}."
 
         # 5. Deduct the total cost from user's balance
-        CartSubmission._deduct_user_balance(user_id, total_cost)
+        deduct_total = -1 * total_cost
+        User.update_balance(user_id, deduct_total)
 
         # 6. Update seller balances and inventory
         for item in cart_items:
@@ -53,30 +57,8 @@ class CartSubmission:
             CartSubmission._log_purchase(
                 user_id, item.product_id, item.quantity, item.unit_price
             )
-
+        
         return "Purchase successful!"
-
-    @staticmethod
-    def _get_user_balance(user_id):
-        balance_row = current_app.db.execute(
-            """
-            SELECT balance FROM Users WHERE id = :user_id
-            """,
-            user_id=user_id,
-        )
-        return balance_row[0][0] if balance_row else 0
-
-    @staticmethod
-    def _deduct_user_balance(user_id, amount):
-        current_app.db.execute(
-            """
-            UPDATE Users
-            SET balance = balance - :amount
-            WHERE id = :user_id
-            """,
-            user_id=user_id,
-            amount=amount,
-        )
 
     @staticmethod
     def _increase_seller_balance(seller_id, amount):
@@ -92,11 +74,6 @@ class CartSubmission:
     
     @staticmethod
     def _decrease_inventory(product_id, quantity):
-        """
-        Decreases the product's inventory by the given quantity.
-        @param product_id: The ID of the product.
-        @param quantity: The quantity to decrease.
-        """
         current_app.db.execute(
             """
             UPDATE Inventory
@@ -109,10 +86,6 @@ class CartSubmission:
     
     @staticmethod
     def _get_seller_id(product_id):
-        """
-        Returns the seller ID for the given product.
-        @param product_id: The product ID.
-        """
         seller_row = current_app.db.execute(
             """
             SELECT seller_id
@@ -125,10 +98,6 @@ class CartSubmission:
     
     @staticmethod
     def _mark_cart_as_completed(user_id):
-        """
-        Marks the user's cart as completed after the order has been placed.
-        @param user_id: The user ID whose cart should be marked as completed.
-        """
         current_app.db.execute(
             """
             UPDATE Cart
@@ -140,13 +109,6 @@ class CartSubmission:
     
     @staticmethod
     def _log_purchase(user_id, product_id, quantity, unit_price):
-        """
-        Logs a purchase in the Purchases table.
-        @param user_id: The ID of the user making the purchase.
-        @param product_id: The ID of the product being purchased.
-        @param quantity: The quantity of the product being purchased.
-        @param unit_price: The price of the product at the time of purchase.
-        """
         current_app.db.execute(
             """
             INSERT INTO Purchases (uid, pid, quantity, price, time_purchased)
@@ -157,4 +119,3 @@ class CartSubmission:
             quantity=quantity,
             unit_price=unit_price
         )
-
