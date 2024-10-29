@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from werkzeug.urls import url_parse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import datetime
 
@@ -72,6 +72,14 @@ def register():
 def user_home():
     purchases = Purchase.get_all_by_user(current_user.id)
     return render_template("user_home.html", purchase_history=purchases)
+
+@bp.route('/add_to_balance',  methods=['GET', 'POST'])
+def add_to_balance():
+    if request.method == 'POST':
+        amt = float(request.form['add'])
+        User.update_balance(current_user.id, amt)
+        return redirect(url_for('users.add_to_balance'))
+    return render_template('add_to_balance.html')
 
 
 @bp.route('/logout')

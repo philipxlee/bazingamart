@@ -70,3 +70,15 @@ WHERE id = :id
 """,
                               id=id)
         return User(*(rows[0])) if rows else None
+    
+    @staticmethod
+    def update_balance(uid, amount):
+        app.db.execute(
+            """
+            UPDATE Users
+            SET balance = balance + :amount
+            WHERE id = :uid
+            """,
+            uid=uid,
+            amount=amount
+        )
