@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-
 {% block content %}
 <strong>Balance:</strong> {{ current_user.balance }}  
 <form method="POST" action="{{ url_for('users.update_balance') }}">
