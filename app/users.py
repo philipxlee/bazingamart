@@ -73,13 +73,18 @@ def user_home():
     purchases = Purchase.get_all_by_user(current_user.id)
     return render_template("user_home.html", purchase_history=purchases)
 
-@bp.route('/add_to_balance',  methods=['GET', 'POST'])
-def add_to_balance():
+@bp.route('/update_balance',  methods=['GET', 'POST'])
+def update_balance():
     if request.method == 'POST':
-        amt = float(request.form['add'])
+        amt = float(request.form['amount'])
+        action = request.form['action'] 
+        
+        if action == "withdraw" :
+            amt = amt * -1
+            
         User.update_balance(current_user.id, amt)
-        return redirect(url_for('users.add_to_balance'))
-    return render_template('add_to_balance.html')
+        return redirect(url_for('users.update_balance'))
+    return render_template('update_balance.html')
 
 
 @bp.route('/logout')
