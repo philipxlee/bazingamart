@@ -4,13 +4,13 @@
 <strong>Balance:</strong> {{ current_user.balance }}  
 <form method="POST" action="{{ url_for('users.update_balance') }}">
     <label for="add_amount">Enter an amount to add to balance:</label>
-    <input type="decimal" name="amount" id="add_amount" required value="{{ add_amount }}" step="0.01">
+    <input type="number" name="amount" id="add_amount" required value="{{ add_amount }}" step="0.01">
     <button type="submit" class="btn btn-primary" name="action" value="add">Add</button>
 </form> 
 <br>
 <form method="POST" action="{{ url_for('users.update_balance') }}">
     <label for="withdraw_amount">Enter an amount to withdraw from balance:</label>
-    <input type="decimal" name="amount" id="withdraw_amount" max="{{ current_balance }}" required value="{{ withdraw_amount }}" step="0.01">
+    <input type="number" name="amount" id="withdraw_amount" max="{{ current_balance }}" required value="{{ withdraw_amount }}" step="0.01">
     <button type="submit" class="btn btn-primary" name="action" value="withdraw">Withdraw</button>
 </form>   
 
