@@ -1,7 +1,7 @@
 from flask import current_app as app
 
 class Reviews:
-    def __init__(self, review_id, user_id, reviewer_type, product_id, seller_id, stars, review_text, time_written, upvotes, images):
+    def __init__(self, review_id, user_id, reviewer_type, product_id, stars, review_text, time_written, upvotes, images):
         self.review_id = review_id
         self.user_id = user_id
         self.reviewer_type = reviewer_type
@@ -23,15 +23,15 @@ class Reviews:
         ''', user_id=user_id, limit=limit)
         return rows
 
-"""
+
     @staticmethod
     def add_review(user_id, reviewer_type, product_id, seller_id, stars, review_text, images=None):
         try:
             rows = app.db.execute('''
-                INSERT INTO Reviews(user_id, reviewer_type, product_id, seller_id, stars, review_text, images)
+                INSERT INTO Reviews(user_id, reviewer_type, product_id, stars, review_text, images)
                 VALUES(:user_id, :reviewer_type, :product_id, :seller_id, :stars, :review_text, :images)
                 RETURNING review_id
-            ''', user_id=user_id, reviewer_type=reviewer_type, product_id=product_id, seller_id=seller_id,
+            ''', user_id=user_id, reviewer_type=reviewer_type, product_id=product_id,
                 stars=stars, review_text=review_text, images=images)
             review_id = rows[0][0]
             return review_id
@@ -80,7 +80,7 @@ class Reviews:
     @staticmethod
     def get_reviews_by_product(product_id, limit=10):
         rows = app.db.execute('''
-            SELECT review_id, user_id, reviewer_type, product_id, seller_id, stars, review_text, time_written, upvotes, images
+            SELECT review_id, user_id, reviewer_type, product_id, stars, review_text, time_written, upvotes, images
             FROM Reviews
             WHERE product_id = :product_id
             ORDER BY time_written DESC
@@ -91,11 +91,10 @@ class Reviews:
     @staticmethod
     def get_reviews_by_seller(seller_id, limit=10):
         rows = app.db.execute('''
-            SELECT review_id, user_id, reviewer_type, product_id, seller_id, stars, review_text, time_written, upvotes, images
+            SELECT review_id, user_id, reviewer_type, product_id, stars, review_text, time_written, upvotes, images
             FROM Reviews
             WHERE seller_id = :seller_id
             ORDER BY time_written DESC
             LIMIT :limit
         ''', seller_id=seller_id, limit=limit)
         return [Reviews(*row) for row in rows]
-"""
