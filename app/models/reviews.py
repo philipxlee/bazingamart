@@ -89,12 +89,12 @@ class Reviews:
         return [Reviews(*row) for row in rows]
 
     @staticmethod
-    def get_reviews_by_seller(seller_id, limit=10):
+    def get_reviews_by_user(user_id, limit=10):
         rows = app.db.execute('''
             SELECT review_id, user_id, reviewer_type, product_id, stars, review_text, time_written, upvotes, images
             FROM Reviews
             WHERE seller_id = :seller_id
             ORDER BY time_written DESC
             LIMIT :limit
-        ''', seller_id=seller_id, limit=limit)
+        ''', user_id=user_id, limit=limit)
         return [Reviews(*row) for row in rows]
