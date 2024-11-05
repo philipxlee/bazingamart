@@ -28,7 +28,8 @@ CREATE TABLE Cart (
     user_id INT NOT NULL REFERENCES Users(id),
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
     total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    purchase_status VARCHAR(50) NOT NULL DEFAULT 'Pending'
+    purchase_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+    coupon_code VARCHAR(50)
 );
 
 CREATE TABLE CartProducts (
@@ -37,6 +38,11 @@ CREATE TABLE CartProducts (
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(12,2) NOT NULL,
     PRIMARY KEY (order_id, product_id)
+);
+
+CREATE TABLE Coupons (
+    coupon_code VARCHAR(50) PRIMARY KEY,
+    discount_percentage INT NOT NULL CHECK (discount_percentage > 0 AND discount_percentage <= 100)
 );
 
 CREATE TABLE Inventory (
