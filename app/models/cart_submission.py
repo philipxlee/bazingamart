@@ -2,7 +2,9 @@ from flask import current_app
 from app.models.cart_items import CartItems
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 from app.models.user import User
+from app.models.coupons import Coupons
 from flask_login import current_user
+from decimal import Decimal
 
 class CartSubmission:
     """
@@ -23,8 +25,16 @@ class CartSubmission:
         if not cart_items:
             return "Your cart is empty."
 
-        # 2. Calculate total cart cost
-        total_cost = sum(item.quantity * item.unit_price for item in cart_items)
+        # 2. Calculate total cart cost and apply coupons if applicable
+        total_cost = sum(Decimal(item.quantity) * item.unit_price for item in cart_items)
+        coupon_code = CartItems.get_coupon_code(user_id)
+        discount_percentage = 0
+        discount_amount = Decimal('0.00')
+        if coupon_code:
+            discount_percentage = Coupons.get_discount(coupon_code) or 0
+            discount_rate = Decimal(discount_percentage) / Decimal('100')
+            discount_amount = total_cost * discount_rate
+            total_cost -= discount_amount
 
         # 3. Check user balance
         user_balance = User.get_balance(user_id)
