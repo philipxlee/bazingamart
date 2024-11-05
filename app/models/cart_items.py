@@ -73,6 +73,23 @@ class CartItems:
             CartItems._insert_cart_item(order_id, product_id, quantity, unit_price)
 
         return "success"
+    
+    @staticmethod
+    @handle_db_exceptions
+    def delete_cart(user_id):
+        """Deletes the entire cart and all items within it for the given user."""
+        order_id = CartItems._get_pending_cart_id(user_id)
+        
+        if not order_id:
+            return "No pending cart found."
+
+        current_app.db.execute(
+            """
+            DELETE FROM Cart WHERE order_id = :order_id;
+            """,
+            order_id=order_id
+        )
+        return "success"
 
     @staticmethod
     @handle_db_exceptions
