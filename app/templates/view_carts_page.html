@@ -5,6 +5,18 @@
     <h2 class="text-center mb-4">Your Cart Items</h2>
 
     {% if cart_items %}
+
+    <!-- Coupon Code Form -->
+    <form action="{{ url_for('carts.apply_coupon') }}" method="post" class="form-inline mt-3 mb-3">
+        <div class="form-group">
+            <label for="coupon_code">Coupon Code:</label>
+            <input type="text" name="coupon_code" class="form-control mx-2" placeholder="Enter code"
+                value="{{ coupon_code if discount_percentage else '' }}">
+            <button type="submit" class="btn btn-secondary">Apply</button>
+        </div>
+    </form>
+
+    <!-- Cart Items Table -->
     <div class="table-responsive">
         <table class="table table-hover table-bordered">
             <thead class="thead-dark">
@@ -46,9 +58,34 @@
         </table>
     </div>
 
-    <!-- Submit Cart Logic -->
+    <!-- Display Totals -->
+    <div class="mt-4">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Total Cost:</th>
+                    <td>${{ "%.2f"|format(total_cost) }}</td>
+                </tr>
+                {% if discount_percentage %}
+                <tr>
+                    <th>Discount ({{ discount_percentage }}%):</th>
+                    <td>-${{ "%.2f"|format(discount_amount) }}</td>
+                </tr>
+                <tr>
+                    <th>Total After Discount:</th>
+                    <td>${{ "%.2f"|format(total_cost_after_discount) }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Delete and Submit Cart Logic -->
     <div class="text-right">
-        <form action="{{ url_for('carts.submit_cart') }}" method="post">
+        <form action="{{ url_for('carts.delete_cart') }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-lg">Delete Cart</button>
+        </form>
+        <form action="{{ url_for('carts.submit_cart') }}" method="post" style="display:inline;">
             <button type="submit" class="btn btn-success btn-lg">Submit Cart</button>
         </form>
     </div>

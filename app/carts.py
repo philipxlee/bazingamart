@@ -2,16 +2,39 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from app.models.cart_items import CartItems
 from app.models.cart_submission import CartSubmission
+from app.models.coupons import Coupons
+from decimal import Decimal
 
 bp = Blueprint('carts', __name__)
+
 
 @bp.route('/view_cart')
 @login_required
 def view_cart():
     user_id = current_user.id
     cart_items = CartItems.get_all_items(user_id)
-    return render_template('view_carts_page.html', cart_items=cart_items)
+    total_cost = sum(Decimal(item.quantity) * item.unit_price for item in cart_items)
+    coupon_code = request.args.get('coupon_code') or CartItems.get_coupon_code(user_id)
+    discount_percentage = 0
+    discount_amount = Decimal('0.00')
+    
+    if coupon_code:
+        discount_percentage = Coupons.get_discount(coupon_code) or 0
+        discount_rate = Decimal(discount_percentage) / Decimal('100')
+        discount_amount = total_cost * discount_rate
+        total_cost_after_discount = total_cost - discount_amount
+    else:
+        total_cost_after_discount = total_cost
 
+    return render_template(
+        'view_carts_page.html',
+        cart_items=cart_items,
+        total_cost=total_cost,
+        total_cost_after_discount=total_cost_after_discount,
+        discount_percentage=discount_percentage,
+        discount_amount=discount_amount,
+        coupon_code=coupon_code
+    )
 
 @bp.route('/add_to_cart', methods=['POST'])
 @login_required
@@ -58,4 +81,29 @@ def submit_cart():
         flash("Your purchase was completed successfully!")
     else:
         flash(result)
+    return redirect(url_for('carts.view_cart'))
+
+
+@bp.route('/apply_coupon', methods=['POST'])
+@login_required
+def apply_coupon():
+    coupon_code = request.form.get('coupon_code')
+    user_id = current_user.id
+    result = CartItems.apply_coupon_code(user_id, coupon_code)
+    if result == "success":
+        flash("Coupon code applied successfully!", "success")
+    else:
+        CartItems.clear_coupon_code(user_id)
+        flash(result, "error")
+    return redirect(url_for('carts.view_cart'))
+
+@bp.route('/delete_cart', methods=['POST'])
+@login_required
+def delete_cart():
+    user_id = current_user.id
+    result = CartItems.delete_cart(user_id)
+    if result == "success":
+        flash("Cart deleted successfully!", "success")
+    else:
+        flash("Failed to delete cart.", "error")
     return redirect(url_for('carts.view_cart'))
