@@ -17,6 +17,18 @@
     </form>
 
     <!-- Cart Items Table -->
+
+    <!-- Coupon Code Form -->
+    <form action="{{ url_for('carts.apply_coupon') }}" method="post" class="form-inline mt-3 mb-3">
+        <div class="form-group">
+            <label for="coupon_code">Coupon Code:</label>
+            <input type="text" name="coupon_code" class="form-control mx-2" placeholder="Enter code"
+                value="{{ coupon_code if discount_percentage else '' }}">
+            <button type="submit" class="btn btn-secondary">Apply</button>
+        </div>
+    </form>
+
+    <!-- Cart Items Table -->
     <div class="table-responsive">
         <table class="table table-hover table-bordered">
             <thead class="thead-dark">
@@ -80,7 +92,7 @@
         </table>
     </div>
 
-    <!-- Delete and Submit Cart Logic -->
+    <!-- Submit Cart Logic -->
     <div class="text-right">
         <form action="{{ url_for('carts.delete_cart') }}" method="post" style="display:inline;">
             <button type="submit" class="btn btn-danger btn-lg">Delete Cart</button>
