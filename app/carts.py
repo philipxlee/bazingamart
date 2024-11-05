@@ -121,3 +121,14 @@ def apply_coupon():
         CartItems.clear_coupon_code(user_id)
         flash(result, "error")
     return redirect(url_for('carts.view_cart'))
+
+@bp.route('/delete_cart', methods=['POST'])
+@login_required
+def delete_cart():
+    user_id = current_user.id
+    result = CartItems.delete_cart(user_id)
+    if result == "success":
+        flash("Cart deleted successfully!", "success")
+    else:
+        flash("Failed to delete cart.", "error")
+    return redirect(url_for('carts.view_cart'))
