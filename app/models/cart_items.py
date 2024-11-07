@@ -1,5 +1,6 @@
 from flask import current_app
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
+from app.models.coupons import Coupons
 
 
 class CartItems:
@@ -72,6 +73,23 @@ class CartItems:
             CartItems._insert_cart_item(order_id, product_id, quantity, unit_price)
 
         return "success"
+    
+    @staticmethod
+    @handle_db_exceptions
+    def delete_cart(user_id):
+        """Deletes the entire cart and all items within it for the given user."""
+        order_id = CartItems._get_pending_cart_id(user_id)
+        
+        if not order_id:
+            return "No pending cart found."
+
+        current_app.db.execute(
+            """
+            DELETE FROM Cart WHERE order_id = :order_id;
+            """,
+            order_id=order_id
+        )
+        return "success"
 
     @staticmethod
     @handle_db_exceptions
@@ -108,6 +126,58 @@ class CartItems:
             return "Not enough inventory available."
 
         CartItems._update_cart_item(order_id, product_id, new_quantity)
+        return "success"
+    
+    @staticmethod
+    def apply_coupon_code(user_id, coupon_code):
+        """Applies a coupon code to the user's pending cart."""
+
+        order_id = CartItems._get_pending_cart_id(user_id)
+        if not order_id:
+            return "No pending cart found."
+
+        discount_percentage = Coupons.get_discount(coupon_code)
+        if discount_percentage is None:
+            return "Invalid coupon code."
+
+        current_app.db.execute(
+            """
+            UPDATE Cart
+            SET coupon_code = :coupon_code
+            WHERE order_id = :order_id
+            """,
+            coupon_code=coupon_code,
+            order_id=order_id
+        )
+        return "success"
+
+    @staticmethod
+    def get_coupon_code(user_id):
+        """Retrieves the coupon code associated with the user's pending cart."""
+        coupon_code_row = current_app.db.execute(
+            """
+            SELECT coupon_code FROM Cart
+            WHERE user_id = :user_id AND purchase_status = 'Pending'
+            """,
+            user_id=user_id
+        )
+        return coupon_code_row[0][0] if coupon_code_row else None
+
+    @staticmethod
+    def clear_coupon_code(user_id):
+        """Clears the coupon code associated with the user's pending cart."""
+        order_id = CartItems._get_pending_cart_id(user_id)
+        if not order_id:
+            return "No pending cart found."
+
+        current_app.db.execute(
+            """
+            UPDATE Cart
+            SET coupon_code = NULL
+            WHERE order_id = :order_id
+            """,
+            order_id=order_id
+        )
         return "success"
 
     @staticmethod
