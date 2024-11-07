@@ -93,6 +93,48 @@ def update_balance():
   
     return render_template('update_balance.html')
 
+class UpdateForm(FlaskForm):
+    firstname = StringField('First Name')
+    lastname = StringField('Last Name')
+    email = StringField('Email')
+    password = PasswordField('Password')
+    password2 = PasswordField(
+        'Repeat Password', validators=[EqualTo('password')])
+    
+    submit = SubmitField('Update')
+
+
+@bp.route('/update_user_info', methods=['GET', 'POST'])
+def update_user_info():
+    user = User.get(current_user.id)
+
+    form = UpdateForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        firstname = form.firstname.data if form.firstname.data else user.firstname
+        lastname = form.lastname.data if form.lastname.data else user.lastname
+        email = form.email.data if form.email.data else user.email
+        password = form.password.data if form.password.data else user.password
+
+        if email != user.email and email is not None and User.email_exists(email):
+            flash("This email is already in use. Please choose a different one.")
+            return render_template('update_user_info.html', title='Update Info', form=form)
+
+        # Update the user's information
+        User.update_info(
+            uid=current_user.id,
+            firstname=firstname,
+            lastname=lastname,
+            email=email,
+            password=password if password else None  # Only update password if provided
+        )
+        
+        flash('User info updated')
+        return redirect(url_for('users.user_home'))
+
+    return render_template('update_user_info.html', title='Update Info', form=form)
+
+
 
 @bp.route('/logout')
 def logout():
