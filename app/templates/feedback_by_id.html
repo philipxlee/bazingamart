@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Original content -->
 <h2>Search Recent Feedback by User ID:</h2>
 
 <!-- Input the user ID -->
@@ -36,5 +37,135 @@
     {% endfor %}
   </tbody>
 </table>
+
+<!-- New review functionality -->
+<h2>Product Reviews</h2>
+
+<!-- Add Review Form -->
+<h3>Add a Review</h3>
+<form id="addReviewForm" method="POST" action="{{ url_for('reviews.add_review') }}" enctype="multipart/form-data">
+    <input type="hidden" name="user_id" value="{{ current_user.id }}">
+    <input type="hidden" name="product_id" value="{{ product_id }}">
+    <div class="form-group">
+        <label for="reviewer_type">Reviewer Type:</label>
+        <select name="reviewer_type" id="reviewer_type" required>
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="stars">Stars:</label>
+        <input type="number" name="stars" id="stars" min="1" max="5" required>
+    </div>
+    <div class="form-group">
+        <label for="review_text">Review:</label>
+        <textarea name="review_text" id="review_text" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="images">Images (optional):</label>
+        <input type="file" name="images" id="images" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+</form>
+
+<!-- Display Reviews -->
+<h3>Product Reviews</h3>
+<div id="reviewsList">
+    {% for review in reviews %}
+    <div class="review-item" data-review-id="{{ review.review_id }}">
+        <p>User: {{ review.user_id }} | Type: {{ review.reviewer_type }} | Stars: {{ review.stars }}</p>
+        <p>{{ review.review_text }}</p>
+        <p>Written on: {{ review.time_written }} | Upvotes: {{ review.upvotes }}</p>
+        {% if review.images %}
+            {% for image in review.images %}
+            <img src="{{ image }}" alt="Review Image" class="review-image">
+            {% endfor %}
+        {% endif %}
+        <button class="upvote-btn" data-review-id="{{ review.review_id }}">Upvote</button>
+        {% if current_user.id == review.user_id %}
+        <button class="edit-review-btn" data-review-id="{{ review.review_id }}">Edit</button>
+        <button class="delete-review-btn" data-review-id="{{ review.review_id }}">Delete</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Edit Review Modal -->
+<div id="editReviewModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Review</h3>
+        <form id="editReviewForm" method="POST" action="{{ url_for('reviews.update_review') }}" enctype="multipart/form-data">
+            <input type="hidden" name="review_id" id="edit_review_id">
+            <div class="form-group">
+                <label for="edit_stars">Stars:</label>
+                <input type="number" name="stars" id="edit_stars" min="1" max="5" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_review_text">Review:</label>
+                <textarea name="review_text" id="edit_review_text" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit_images">Images (optional):</label>
+                <input type="file" name="images" id="edit_images" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Review</button>
+            <button type="button" class="btn btn-secondary" id="closeEditModal">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // JavaScript for handling upvotes, edit, and delete actions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Upvote functionality
+        document.querySelectorAll('.upvote-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                fetch(`{{ url_for('reviews.upvote_review') }}/${reviewId}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update the upvote count in the UI
+                            const upvoteElement = this.parentElement.querySelector('.upvotes');
+                            upvoteElement.textContent = parseInt(upvoteElement.textContent) + 1;
+                        }
+                    });
+            });
+        });
+
+        // Edit review functionality
+        document.querySelectorAll('.edit-review-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                const reviewElement = this.closest('.review-item');
+                document.getElementById('edit_review_id').value = reviewId;
+                document.getElementById('edit_stars').value = reviewElement.querySelector('.stars').textContent;
+                document.getElementById('edit_review_text').value = reviewElement.querySelector('.review-text').textContent;
+                document.getElementById('editReviewModal').style.display = 'block';
+            });
+        });
+
+        // Close edit modal
+        document.getElementById('closeEditModal').addEventListener('click', function() {
+            document.getElementById('editReviewModal').style.display = 'none';
+        });
+
+        // Delete review functionality
+        document.querySelectorAll('.delete-review-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                if (confirm('Are you sure you want to delete this review?')) {
+                    fetch(`{{ url_for('reviews.delete_review') }}/${reviewId}`, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.closest('.review-item').remove();
+                            }
+                        });
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}
