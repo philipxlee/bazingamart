@@ -6,8 +6,9 @@
   <strong>First Name:</strong> {{ current_user.firstname }}<br />
   <strong>Last Name:</strong> {{ current_user.lastname }}<br />
   <strong>Email:</strong> {{ current_user.email }}<br />
-  <strong>Balance:</strong> {{ current_user.balance }}
+  <strong>Balance:</strong> {{ current_user.balance }} <br />
   <a href="{{ url_for('users.update_balance') }}" class="btn btn-primary">Add or Withdraw Balance</a>
+  <a href="{{ url_for('users.update_user_info') }}" class="btn btn-primary">Update User Info</a>
 </p>
 <br><br>
 
