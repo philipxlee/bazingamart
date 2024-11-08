@@ -59,10 +59,25 @@ class CartSubmission:
                 seller_id, item.quantity * item.unit_price
             )
 
-        # 7. Mark cart as purchased (change purchase_status to 'Completed')
+        # 7. Create an order in the Orders table
+        order_id = CartItems._get_pending_cart_id(user_id)
+
+        if order_id:
+            current_app.db.execute(
+                """
+                INSERT INTO Orders (order_id, user_id, created_at, total_price, purchase_status, coupon_code)
+                VALUES (:order_id, :user_id, current_timestamp, :total_price, 'Completed', :coupon_code)
+                """,
+                order_id=order_id,
+                user_id=user_id,
+                total_price=total_cost,
+                coupon_code=coupon_code
+            )
+
+        # 8. Mark cart as purchased (change purchase_status to 'Completed')       
         CartSubmission._mark_cart_as_completed(user_id)
 
-        # 8. Log the purchase in the Purchases table
+        # 9. Log the purchase in the Purchases table
         for item in cart_items:
             CartSubmission._log_purchase(
                 user_id, item.product_id, item.quantity, item.unit_price
