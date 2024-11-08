@@ -114,20 +114,27 @@ def update_user_info():
         firstname = form.firstname.data if form.firstname.data else user.firstname
         lastname = form.lastname.data if form.lastname.data else user.lastname
         email = form.email.data if form.email.data else user.email
-        password = form.password.data if form.password.data else user.password
+        password = form.password.data
 
         if email != user.email and email is not None and User.email_exists(email):
             flash("This email is already in use. Please choose a different one.")
             return render_template('update_user_info.html', title='Update Info', form=form)
 
-        # Update the user's information
-        User.update_info(
-            uid=current_user.id,
-            firstname=firstname,
-            lastname=lastname,
-            email=email,
-            password=password if password else None  # Only update password if provided
-        )
+        if password: 
+            User.update_info(
+                uid=current_user.id,
+                firstname=firstname,
+                lastname=lastname,
+                email=email,
+                password=password
+            )
+        else:
+            User.update_info(
+                uid=current_user.id,
+                firstname=firstname,
+                lastname=lastname,
+                email=email
+            )
         
         flash('User info updated')
         return redirect(url_for('users.user_home'))
