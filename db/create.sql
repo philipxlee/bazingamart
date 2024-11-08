@@ -45,6 +45,16 @@ CREATE TABLE Coupons (
     discount_percentage INT NOT NULL CHECK (discount_percentage > 0 AND discount_percentage <= 100)
 );
 
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY REFERENCES Cart(order_id),
+    user_id INT NOT NULL REFERENCES Users(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
+    total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    purchase_status VARCHAR(50) NOT NULL DEFAULT 'Completed',
+    coupon_code VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
 CREATE TABLE Inventory (
     seller_id INT NOT NULL,
     product_id INT NOT NULL,
