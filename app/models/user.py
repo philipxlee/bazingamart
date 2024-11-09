@@ -70,3 +70,61 @@ WHERE id = :id
 """,
                               id=id)
         return User(*(rows[0])) if rows else None
+    
+    @staticmethod
+    def get_balance(uid):
+        bal = app.db.execute(
+            """
+            SELECT balance
+            FROM Users
+            WHERE id = :uid
+            """,
+            uid=uid,
+        )
+        return bal[0][0] if bal else 0
+    
+    @staticmethod
+    def update_balance(uid, amount):
+        app.db.execute(
+            """
+            UPDATE Users
+            SET balance = balance + :amount
+            WHERE id = :uid
+            """,
+            uid=uid,
+            amount=amount
+        )
+        
+    @staticmethod
+    def update_info(uid, email, password, firstname, lastname):
+        app.db.execute(
+            """
+            UPDATE Users
+            SET firstname = :firstname,
+            lastname= :lastname,
+            email= :email,
+            password= :password
+            WHERE id = :uid
+            """,
+            uid=uid,
+            firstname=firstname,
+            lastname=lastname,
+            email=email,
+            password=generate_password_hash(password)
+        )
+        
+    @staticmethod
+    def update_info(uid, email, firstname, lastname):
+        app.db.execute(
+            """
+            UPDATE Users
+            SET firstname = :firstname,
+            lastname= :lastname,
+            email= :email
+            WHERE id = :uid
+            """,
+            uid=uid,
+            firstname=firstname,
+            lastname=lastname,
+            email=email,
+        )

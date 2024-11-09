@@ -2,13 +2,12 @@ from flask import render_template, redirect, url_for, flash, request
 from werkzeug.urls import url_parse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import datetime
 
 from .models.user import User
 from .models.purchase import Purchase
-
 
 from flask import Blueprint
 bp = Blueprint('users', __name__)
@@ -73,6 +72,75 @@ def register():
 def user_home():
     purchases = Purchase.get_all_by_user(current_user.id)
     return render_template("user_home.html", purchase_history=purchases)
+
+@bp.route('/update_balance',  methods=['GET', 'POST'])
+def update_balance():
+    current_balance = float(User.get_balance(current_user.id))
+    
+    if request.method == 'POST':
+        amt = float(request.form['amount'])
+        action = request.form['action'] 
+        
+        if action == "withdraw":
+            if amt <= current_balance:
+                amt = amt * -1
+            else:
+                return render_template('update_balance.html', 
+                                       error="Trying to withdraw amount greater than balance.")
+            
+        User.update_balance(current_user.id, amt)
+        return redirect(url_for('users.update_balance'))
+  
+    return render_template('update_balance.html')
+
+class UpdateForm(FlaskForm):
+    firstname = StringField('First Name')
+    lastname = StringField('Last Name')
+    email = StringField('Email')
+    password = PasswordField('Password')
+    password2 = PasswordField(
+        'Repeat Password', validators=[EqualTo('password')])
+    
+    submit = SubmitField('Update')
+
+
+@bp.route('/update_user_info', methods=['GET', 'POST'])
+def update_user_info():
+    user = User.get(current_user.id)
+
+    form = UpdateForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        firstname = form.firstname.data if form.firstname.data else user.firstname
+        lastname = form.lastname.data if form.lastname.data else user.lastname
+        email = form.email.data if form.email.data else user.email
+        password = form.password.data
+
+        if email != user.email and email is not None and User.email_exists(email):
+            flash("This email is already in use. Please choose a different one.")
+            return render_template('update_user_info.html', title='Update Info', form=form)
+
+        if password: 
+            User.update_info(
+                uid=current_user.id,
+                firstname=firstname,
+                lastname=lastname,
+                email=email,
+                password=password
+            )
+        else:
+            User.update_info(
+                uid=current_user.id,
+                firstname=firstname,
+                lastname=lastname,
+                email=email
+            )
+        
+        flash('User info updated')
+        return redirect(url_for('users.user_home'))
+
+    return render_template('update_user_info.html', title='Update Info', form=form)
+
 
 
 @bp.route('/logout')

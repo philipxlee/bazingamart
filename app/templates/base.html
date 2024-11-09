@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Mini Amazon</title>
+  <title>BazingaMart</title>
   <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
@@ -22,6 +22,14 @@
       background-color: #03f72c;
       overflow-x: hidden;
       padding-top: 20px;
+    }
+
+    .sidenav h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+      padding-left: 20px;
+      text-align: left;
     }
 
     .main {
@@ -51,10 +59,18 @@
     <h1 style="color:rgb(0, 0, 0)">BazingaMart!</h1>
     <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px">
       {% if current_user.is_authenticated %}
-      Hello <a href="{{ url_for('users.user_home') }}">{{ current_user.firstname }}</a>!
-      <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
+      <div style="text-align: left">
+        <a href="{{ url_for('users.user_home') }}"
+          style="color: #000000; font-size: 1.5rem; font-weight: bold; padding-left: 20px;">
+          Hello {{current_user.firstname}}!
+        </a>
+      </div>
+      <a href="{{ url_for('index.index') }}" class="btn btn-light">Home</a>
       <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-light">View Inventory</a>
       <a href="{{ url_for('carts.view_cart') }}" class="btn btn-light">View Cart</a>
+      <a href="{{ url_for('orders.view_orders') }}" class="btn btn-light">View Orders</a>
+      <a href="{{ url_for('purchases.recent_purchases') }}" class="btn btn-light">View Purchases</a>
+      <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
       {% else %}
       <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
       {% endif %}
@@ -62,6 +78,15 @@
     {% endblock %}
   </div>
   <div class="main">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-info" role="alert">
+      {% for message in messages %}
+      {{ message }}
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
     {% block content %}
     {% endblock %}
   </div>

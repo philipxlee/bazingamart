@@ -1,32 +1,99 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Your Cart Items</h2>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Your Cart Items</h2>
 
-{% if cart_items %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Order ID</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Total Price</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in cart_items %}
-        <tr>
-            <td>{{ item.product_id }}</td>
-            <td>{{ item.order_id }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>${{ "%.2f"|format(item.unit_price) }}</td>
-            <td>${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>Your cart is empty.</p>
-{% endif %}
+    {% if cart_items %}
+
+    <!-- Coupon Code Form -->
+    <form action="{{ url_for('carts.apply_coupon') }}" method="post" class="form-inline mt-3 mb-3">
+        <div class="form-group">
+            <label for="coupon_code">Coupon Code:</label>
+            <input type="text" name="coupon_code" class="form-control mx-2" placeholder="Enter code"
+                value="{{ coupon_code if discount_percentage else '' }}">
+            <button type="submit" class="btn btn-secondary">Apply</button>
+        </div>
+    </form>
+
+    <!-- Cart Items Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Product ID</th>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Unit Price</th>
+                    <th scope="col">Total Price</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.product_id }}</td>
+                    <td>{{ item.order_id }}</td>
+                    <td>
+                        <form action="{{ url_for('carts.update_quantity') }}" method="post" class="form-inline">
+                            <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="0"
+                                class="form-control form-control-sm mr-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </form>
+                    </td>
+                    <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                    <td>${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+                    <td>
+                        <form action="{{ url_for('carts.remove_item') }}" method="post">
+                            <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Display Totals -->
+    <div class="mt-4">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Total Cost:</th>
+                    <td>${{ "%.2f"|format(total_cost) }}</td>
+                </tr>
+                {% if discount_percentage %}
+                <tr>
+                    <th>Discount ({{ discount_percentage }}%):</th>
+                    <td>-${{ "%.2f"|format(discount_amount) }}</td>
+                </tr>
+                <tr>
+                    <th>Total After Discount:</th>
+                    <td>${{ "%.2f"|format(total_cost_after_discount) }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Delete and Submit Cart Logic -->
+    <div class="text-right">
+        <form action="{{ url_for('carts.delete_cart') }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-lg">Delete Cart</button>
+        </form>
+        <form action="{{ url_for('carts.submit_cart') }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-success btn-lg">Submit Cart</button>
+        </form>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center">
+        <p>Your cart is empty.</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
