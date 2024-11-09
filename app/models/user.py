@@ -6,12 +6,13 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, id, email, firstname, lastname, balance):
+    def __init__(self, id, email, firstname, lastname, balance, seller=False):
         self.id = id
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.balance = balance
+        self.seller = seller
 
     @staticmethod
     def get_by_auth(email, password):
