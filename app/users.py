@@ -136,6 +136,9 @@ def update_user_info():
     return render_template('update_user_info.html', title='Update Info', form=form)
 
 
+@bp.route('/user_public_view')
+def user_public_view():
+    return render_template('user_public_view.html')
 
 @bp.route('/logout')
 def logout():
