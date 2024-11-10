@@ -4,6 +4,7 @@ CREATE TABLE Users (
     password VARCHAR(255) NOT NULL,
     firstname VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
+    seller BOOLEAN DEFAULT FALSE,
     balance DECIMAL(12,2) DEFAULT 0
 );
 
