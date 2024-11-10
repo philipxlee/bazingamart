@@ -97,6 +97,7 @@ class UpdateForm(FlaskForm):
     firstname = StringField('First Name')
     lastname = StringField('Last Name')
     email = StringField('Email')
+    address = StringField('Address')
     password = PasswordField('Password')
     password2 = PasswordField(
         'Repeat Password', validators=[EqualTo('password')])
@@ -114,27 +115,20 @@ def update_user_info():
         firstname = form.firstname.data if form.firstname.data else user.firstname
         lastname = form.lastname.data if form.lastname.data else user.lastname
         email = form.email.data if form.email.data else user.email
+        address = form.address.data if form.address.data else user.address
         password = form.password.data
 
         if email != user.email and email is not None and User.email_exists(email):
             flash("This email is already in use. Please choose a different one.")
             return render_template('update_user_info.html', title='Update Info', form=form)
-
-        if password: 
-            User.update_info(
+        
+        User.update_info(
                 uid=current_user.id,
                 firstname=firstname,
                 lastname=lastname,
                 email=email,
-                password=password
-            )
-        else:
-            User.update_info(
-                uid=current_user.id,
-                firstname=firstname,
-                lastname=lastname,
-                email=email
-            )
+                address=address,
+                password=password)
         
         flash('User info updated')
         return redirect(url_for('users.user_home'))
