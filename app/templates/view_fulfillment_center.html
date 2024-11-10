@@ -5,7 +5,7 @@
 
 {% if orders %}
     {% for order in orders %}
-        <div class="order-summary{% if all(item.fulfillment_status == 'Fulfilled' for item in order.items) %} order-fulfilled{% endif %}">
+    <div class="order-summary{% if order.items | selectattr('fulfillment_status', 'equalto', 'Fulfilled') | list | length == order.total_items %} order-fulfilled{% endif %}">
             <h3>Order ID: {{ order.order_id }}</h3>
             <p><strong>Buyer:</strong> {{ order.buyer_name }}</p>
             <p><strong>Address:</strong> {{ order.buyer_address }}</p>

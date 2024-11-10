@@ -40,8 +40,7 @@ def fulfill_item():
     item_belongs_to_seller = current_app.db.execute('''
         SELECT 1 
         FROM CartProducts cp
-        JOIN Products p ON cp.product_id = p.id
-        WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND p.seller_id = :seller_id
+       JOIN inventory i ON p.id = i.product_id WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND i.seller_id = :seller_id
     ''', order_id=order_id, product_id=product_id, seller_id=seller_id)
     
     if not item_belongs_to_seller:

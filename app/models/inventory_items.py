@@ -28,17 +28,18 @@ class InventoryItems:
             SUM(cp.quantity * cp.unit_price) AS total_price,
             SUM(cp.quantity) AS total_items,
             cp.product_id,
-            p.product_name,
+            p.name AS product_name,
             cp.quantity AS item_quantity,
-            cp.fulfillment_status
+            o.fulfillment_status
         FROM orders o
         JOIN users u ON o.user_id = u.id
         JOIN cartproducts cp ON o.order_id = cp.order_id
         JOIN products p ON cp.product_id = p.id
-        WHERE p.seller_id = :seller_id
-        GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.product_name, cp.quantity, cp.fulfillment_status
+        JOIN inventory i ON p.id = i.product_id  -- Proper join for inventory
+        WHERE i.seller_id = :seller_id
+        GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.name, cp.quantity, o.fulfillment_status
         ORDER BY o.created_at DESC
-        ''', seller_id=seller_id)
+        ''', seller_id = seller_id)  
 
         # Organize rows by order and item details
         orders = {}
