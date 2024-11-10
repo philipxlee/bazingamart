@@ -6,17 +6,19 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, id, email, firstname, lastname, balance):
+    def __init__(self, id, email, firstname, lastname, balance, seller, address):
         self.id = id
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.balance = balance
+        self.seller = seller
+        self.address = address
 
     @staticmethod
     def get_by_auth(email, password):
         rows = app.db.execute("""
-SELECT password, id, email, firstname, lastname, balance
+SELECT password, id, email, firstname, lastname, balance, seller, address
 FROM Users
 WHERE email = :email
 """,
@@ -44,14 +46,13 @@ WHERE email = :email
         try:
             balance = 0.0
             rows = app.db.execute("""
-INSERT INTO Users(email, password, firstname, lastname, balance)
-VALUES(:email, :password, :firstname, :lastname, :balance)
+INSERT INTO Users(email, password, firstname, lastname)
+VALUES(:email, :password, :firstname, :lastname)
 RETURNING id
 """,
                                   email=email,
                                   password=generate_password_hash(password),
-                                  firstname=firstname, lastname=lastname, 
-                                  balance=balance)
+                                  firstname=firstname, lastname=lastname)
             id = rows[0][0]
             return User.get(id)
         except Exception as e:
@@ -64,13 +65,19 @@ RETURNING id
     @login.user_loader
     def get(id):
         rows = app.db.execute("""
-SELECT id, email, firstname, lastname, balance
-FROM Users
-WHERE id = :id
-""",
-                              id=id)
-        return User(*(rows[0])) if rows else None
-    
+        SELECT id, email, firstname, lastname, balance, seller, address
+        FROM Users
+        WHERE id = :id
+        """, id=id)
+        
+        if rows:
+            # Explicitly unpack the columns into variables
+            id, email, firstname, lastname, balance, seller, address = rows[0]
+            # If address is None, assign a default value
+            address = address or "No address provided"
+            return User(id, email, firstname, lastname, balance, seller, address)
+        return None
+
     @staticmethod
     def get_balance(uid):
         bal = app.db.execute(
@@ -96,35 +103,38 @@ WHERE id = :id
         )
         
     @staticmethod
-    def update_info(uid, email, password, firstname, lastname):
-        app.db.execute(
-            """
-            UPDATE Users
-            SET firstname = :firstname,
-            lastname= :lastname,
-            email= :email,
-            password= :password
-            WHERE id = :uid
-            """,
-            uid=uid,
-            firstname=firstname,
-            lastname=lastname,
-            email=email,
-            password=generate_password_hash(password)
-        )
-        
-    @staticmethod
-    def update_info(uid, email, firstname, lastname):
-        app.db.execute(
-            """
-            UPDATE Users
-            SET firstname = :firstname,
-            lastname= :lastname,
-            email= :email
-            WHERE id = :uid
-            """,
-            uid=uid,
-            firstname=firstname,
-            lastname=lastname,
-            email=email,
-        )
+    def update_info(uid, email, password, firstname, lastname, address):
+        if password:
+            app.db.execute(
+                """
+                UPDATE Users
+                SET firstname = :firstname,
+                lastname= :lastname,
+                email= :email,
+                address= :address,
+                password= :password
+                WHERE id = :uid
+                """,
+                uid=uid,
+                firstname=firstname,
+                lastname=lastname,
+                email=email,
+                address=address,
+                password=generate_password_hash(password)
+            )
+        else:
+            app.db.execute(
+                """
+                UPDATE Users
+                SET firstname = :firstname,
+                lastname= :lastname,
+                email= :email,
+                address= :address
+                WHERE id = :uid
+                """,
+                uid=uid,
+                firstname=firstname,
+                lastname=lastname,
+                email=email,
+                address=address
+            )
