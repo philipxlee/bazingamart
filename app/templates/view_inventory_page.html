@@ -2,6 +2,7 @@
 
 {% block content %}
 <h2>Your Inventory Items</h2>
+<p>Below is a list of all items in your inventory. Use this page to manage your stock levels.</p>
 
 {% if inventory_items %}
 <table border="1" cellpadding="5" cellspacing="0">
@@ -25,4 +26,7 @@
 {% else %}
 <p>Your inventory is empty.</p>
 {% endif %}
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('inventory.fulfillment_center') }}" class="btn btn-primary">Go to Fulfillment Center</a>
+</div>
 {% endblock %}

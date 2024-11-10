@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Fulfillment Center</h2>
+
+{% if orders %}
+    {% for order in orders %}
+        <div class="order-summary{% if all(item.fulfillment_status == 'Fulfilled' for item in order.items) %} order-fulfilled{% endif %}">
+            <h3>Order ID: {{ order.order_id }}</h3>
+            <p><strong>Buyer:</strong> {{ order.buyer_name }}</p>
+            <p><strong>Address:</strong> {{ order.buyer_address }}</p>
+            <p><strong>Date Placed:</strong> {{ order.order_date }}</p>
+            <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
+            <p><strong>Total Items:</strong> {{ order.total_items }}</p>
+            
+            <h4>Items:</h4>
+            <ul>
+                {% for item in order.items %}
+                    <li>
+                        {{ item.product_name }} - {{ item.quantity }} units
+                        <span>Status: {{ item.fulfillment_status }}</span>
+                        {% if item.fulfillment_status != 'Fulfilled' %}
+                            <form action="{{ url_for('inventory.fulfill_item') }}" method="post" style="display:inline;">
+                                <input type="hidden" name="order_id" value="{{ order.order_id }}">
+                                <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                                <button type="submit">Mark as Fulfilled</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+    {% endfor %}
+{% else %}
+    <p>No orders found.</p>
+{% endif %}
+{% endblock %}
