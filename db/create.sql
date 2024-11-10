@@ -52,7 +52,7 @@ CREATE TABLE Orders (
     user_id INT NOT NULL REFERENCES Users(id),
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
     total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    purchase_status VARCHAR(50) NOT NULL DEFAULT 'Completed',
+    fulfillment_status VARCHAR(50) NOT NULL DEFAULT 'Incomplete',
     coupon_code VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
