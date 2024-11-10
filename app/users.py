@@ -136,9 +136,12 @@ def update_user_info():
     return render_template('update_user_info.html', title='Update Info', form=form)
 
 
-@bp.route('/user_public_view')
-def user_public_view():
-    return render_template('user_public_view.html')
+@bp.route('/user/<int:id>', methods=['GET'])
+def user_public_view(id):
+    user = User.get(id)
+    if not user:
+        return "User not found", 404
+    return render_template('user_public_view.html', user=user)
 
 @bp.route('/logout')
 def logout():

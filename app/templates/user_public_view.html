@@ -1,1 +1,18 @@
 {% extends "base.html" %}
+
+{% block content %}
+<h4>Basic Information:</h4>
+<strong>User ID:</strong> {{ user.id }}<br />
+<strong>First Name:</strong> {{ user.firstname }}<br />
+<strong>Last Name:</strong> {{ user.lastname }}<br />
+<br />
+
+<h4>Reviews Given:</h4>
+
+{% if current_user.seller %}
+    <h4>Reviews Recieved:</h4>
+    <strong>Email:</strong> {{ user.email }}<br />
+    <strong>Address:</strong> {{ user.address }}<br />
+{% endif %}
+
+{% endblock %}
