@@ -25,10 +25,10 @@ class CartItems:
         """
         rows = current_app.db.execute(
             """
-            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.name
+            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
             FROM CartProducts cp
             JOIN Cart c ON cp.order_id = c.order_id
-            JOIN Products p ON cp.product_id = p.id
+            JOIN Products p ON cp.product_id = p.product_id
             WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
             """,
             user_id=user_id,
@@ -184,7 +184,7 @@ class CartItems:
     def _get_available_inventory(product_id):
         inventory_row = current_app.db.execute(
             """
-            SELECT product_quantity FROM Inventory
+            SELECT product_quantity FROM Products
             WHERE product_id = :product_id
             """,
             product_id=product_id,

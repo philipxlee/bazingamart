@@ -10,9 +10,9 @@ class InventoryItems:
     @staticmethod
     def get_all_by_user(seller_id):
         rows = app.db.execute('''
-        SELECT i.product_id, i.product_name, i.product_quantity
-            FROM Inventory i
-            WHERE i.seller_id = :seller_id
+        SELECT p.product_id, p.product_name, p.product_quantity
+            FROM Products p
+            WHERE p.seller_id = :seller_id
         ''', seller_id=seller_id)
         items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
         return items_in_inventory
@@ -28,16 +28,15 @@ class InventoryItems:
             SUM(cp.quantity * cp.unit_price) AS total_price,
             SUM(cp.quantity) AS total_items,
             cp.product_id,
-            p.name AS product_name,
+            p.product_name AS product_name,
             cp.quantity AS item_quantity,
             o.fulfillment_status
         FROM orders o
         JOIN users u ON o.user_id = u.id
         JOIN cartproducts cp ON o.order_id = cp.order_id
-        JOIN products p ON cp.product_id = p.id
-        JOIN inventory i ON p.id = i.product_id  -- Proper join for inventory
-        WHERE i.seller_id = :seller_id
-        GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.name, cp.quantity, o.fulfillment_status
+        JOIN products p ON cp.product_id = p.product_id
+        WHERE p.seller_id = :seller_id
+        GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.product_name, cp.quantity, o.fulfillment_status
         ORDER BY o.created_at DESC
         ''', seller_id = seller_id)  
 

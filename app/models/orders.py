@@ -41,9 +41,9 @@ class Order:
         """
         rows = current_app.db.execute(
             """
-            SELECT p.name, cp.quantity, cp.unit_price
+            SELECT p.product_name, cp.quantity, cp.unit_price
             FROM CartProducts cp
-            JOIN Products p ON cp.product_id = p.id
+            JOIN Products p ON cp.product_id = p.product_id
             WHERE cp.order_id = :order_id
             """,
             order_id=order_id

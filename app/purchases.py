@@ -12,7 +12,7 @@ def recent_purchases():
         """
         SELECT p.id, pr.name, p.quantity, p.price, (p.quantity * p.price) AS total_spent, p.time_purchased
         FROM Purchases p
-        JOIN Products pr ON p.pid = pr.id
+        JOIN Products pr ON p.pid = pr.product_id
         WHERE p.uid = :user_id
         ORDER BY p.time_purchased DESC
         """,

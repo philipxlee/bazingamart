@@ -38,28 +38,6 @@ def view_cart():
         discount_amount=discount_amount,
         coupon_code=coupon_code
     )
-    total_cost = sum(Decimal(item.quantity) * item.unit_price for item in cart_items)
-    coupon_code = request.args.get('coupon_code') or CartItems.get_coupon_code(user_id)
-    discount_percentage = 0
-    discount_amount = Decimal('0.00')
-    
-    if coupon_code:
-        discount_percentage = Coupons.get_discount(coupon_code) or 0
-        discount_rate = Decimal(discount_percentage) / Decimal('100')
-        discount_amount = total_cost * discount_rate
-        total_cost_after_discount = total_cost - discount_amount
-    else:
-        total_cost_after_discount = total_cost
-
-    return render_template(
-        'view_carts_page.html',
-        cart_items=cart_items,
-        total_cost=total_cost,
-        total_cost_after_discount=total_cost_after_discount,
-        discount_percentage=discount_percentage,
-        discount_amount=discount_amount,
-        coupon_code=coupon_code
-    )
 
 @bp.route('/add_to_cart', methods=['POST'])
 @login_required
