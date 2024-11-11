@@ -65,8 +65,8 @@ class CartSubmission:
         if order_id:
             current_app.db.execute(
                 """
-                INSERT INTO Orders (order_id, user_id, created_at, total_price, purchase_status, coupon_code)
-                VALUES (:order_id, :user_id, current_timestamp, :total_price, 'Completed', :coupon_code)
+                INSERT INTO Orders (order_id, user_id, created_at, total_price, fulfillment_status, coupon_code)
+                VALUES (:order_id, :user_id, current_timestamp, :total_price, 'Incomplete', :coupon_code)
                 """,
                 order_id=order_id,
                 user_id=user_id,
