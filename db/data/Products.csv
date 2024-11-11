@@ -1,6 +1,9 @@
-1,vanilla ice cream,2.99,true
-2,chocolate ice cream,2.99,true
-3,strawberry ice cream,2.99,true
-4,6-pack of paycheck pilsners,11.49,true
-5,seven fabergé easter eggs,1199000.00,true
-6,painting - storm at galilee,44000000.00,true
+1,vanilla ice cream,2.99,true,1,123
+2,chocolate ice cream,2.99,true,1,321
+3,strawberry ice cream,2.99,true,1,888
+4,6-pack of paycheck pilsners,11.49,true,1,123
+5,seven fabergé easter eggs,1199000.00,true,1,35325
+6,painting - storm at galilee,44000000.00,true,1,12389
+100,i love nyc mug,12.99,true,1,25
+101,i love paris mug,12.99,true,1,15
+102,i love rome mug,12.99,true,1,11

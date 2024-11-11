@@ -101,7 +101,7 @@ class CartSubmission:
     def _decrease_inventory(product_id, quantity):
         current_app.db.execute(
             """
-            UPDATE Inventory
+            UPDATE Products
             SET product_quantity = product_quantity - :quantity
             WHERE product_id = :product_id
             """,
@@ -114,7 +114,7 @@ class CartSubmission:
         seller_row = current_app.db.execute(
             """
             SELECT seller_id
-            FROM Inventory
+            FROM Products
             WHERE product_id = :product_id
             """,
             product_id=product_id
