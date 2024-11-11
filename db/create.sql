@@ -7,6 +7,9 @@ CREATE TABLE Users (
     address VARCHAR(255) NOT NULL DEFAULT ' ',
     seller BOOLEAN DEFAULT FALSE,
     balance DECIMAL(12,2) DEFAULT 0
+    address VARCHAR(255) NOT NULL DEFAULT ' ',
+    seller BOOLEAN DEFAULT FALSE,
+    balance DECIMAL(12,2) DEFAULT 0
 );
 
 CREATE TABLE Products (
@@ -36,6 +39,8 @@ CREATE TABLE Cart (
     total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     purchase_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
     coupon_code VARCHAR(50)
+    purchase_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+    coupon_code VARCHAR(50)
 );
 
 CREATE TABLE CartProducts (
@@ -44,6 +49,21 @@ CREATE TABLE CartProducts (
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(12,2) NOT NULL,
     PRIMARY KEY (order_id, product_id)
+);
+
+CREATE TABLE Coupons (
+    coupon_code VARCHAR(50) PRIMARY KEY,
+    discount_percentage INT NOT NULL CHECK (discount_percentage > 0 AND discount_percentage <= 100)
+);
+
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY REFERENCES Cart(order_id),
+    user_id INT NOT NULL REFERENCES Users(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
+    total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    fulfillment_status VARCHAR(50) NOT NULL DEFAULT 'Incomplete',
+    coupon_code VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
 CREATE TABLE Coupons (

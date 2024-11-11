@@ -2,16 +2,25 @@ from flask import current_app
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 from app.models.coupons import Coupons
 
+from flask import current_app
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
+from app.models.coupons import Coupons
+
 
 class CartItems:
     """
     This class represents all the items within a user's cart. It provides API services
     to add, remove, and update item quantities from the cart. Additionally, it provides
     methods to view the items and calculate the total cost of all items in the cart.
+    to add, remove, and update item quantities from the cart. Additionally, it provides
+    methods to view the items and calculate the total cost of all items in the cart.
     """
 
     def __init__(self, product_id, order_id, quantity, unit_price, product_name):
+
+    def __init__(self, product_id, order_id, quantity, unit_price, product_name):
         self.product_id = product_id
+        self.product_name = product_name
         self.product_name = product_name
         self.order_id = order_id
         self.quantity = quantity
@@ -33,12 +42,17 @@ class CartItems:
             """,
             user_id=user_id,
         )
+            """,
+            user_id=user_id,
+        )
 
+        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_cart
 
 
     @staticmethod
+    @handle_db_exceptions
     @handle_db_exceptions
     def add_item(user_id, product_id, quantity):
         """
@@ -271,6 +285,15 @@ class CartItems:
             user_id=user_id,
         )
         return order_id_row[0][0] if order_id_row else None
+    def _get_pending_cart_id(user_id):
+        order_id_row = current_app.db.execute(
+            """
+            SELECT order_id FROM Cart
+            WHERE user_id = :user_id AND purchase_status = 'Pending'
+            """,
+            user_id=user_id,
+        )
+        return order_id_row[0][0] if order_id_row else None
 
     @staticmethod
     def _delete_cart_item(order_id, product_id):
@@ -283,7 +306,23 @@ class CartItems:
             product_id=product_id,
         )
 
+    def _delete_cart_item(order_id, product_id):
+        current_app.db.execute(
+            """
+            DELETE FROM CartProducts
+            WHERE order_id = :order_id AND product_id = :product_id
+            """,
+            order_id=order_id,
+            product_id=product_id,
+        )
+
     @staticmethod
+    def _is_valid_quantity(product_id, requested_quantity):
+        available_quantity = CartItems._get_available_inventory(product_id)
+        return (
+            available_quantity is not None and requested_quantity <= available_quantity
+        )
+
     def _is_valid_quantity(product_id, requested_quantity):
         available_quantity = CartItems._get_available_inventory(product_id)
         return (

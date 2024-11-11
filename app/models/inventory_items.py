@@ -7,6 +7,7 @@ class InventoryItems:
         self.product_name = product_name
         self.product_quantity = product_quantity
 
+
     @staticmethod
     def get_all_by_user(seller_id):
         rows = app.db.execute('''

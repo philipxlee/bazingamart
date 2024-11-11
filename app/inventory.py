@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from app.models.inventory_items import InventoryItems
 
@@ -10,7 +11,11 @@ def view_inventory():
     """
     Displays the seller's inventory items.
     """
+    """
+    Displays the seller's inventory items.
+    """
     seller_id = current_user.id
+    # Use the helper method to retrieve all inventory items for the seller
     # Use the helper method to retrieve all inventory items for the seller
     inventory_items = InventoryItems.get_all_by_user(seller_id)
     return render_template('view_inventory_page.html', inventory_items=inventory_items)

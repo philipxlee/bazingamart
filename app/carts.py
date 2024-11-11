@@ -4,11 +4,8 @@ from app.models.cart_items import CartItems
 from app.models.cart_submission import CartSubmission
 from app.models.coupons import Coupons
 from decimal import Decimal
-from app.models.coupons import Coupons
-from decimal import Decimal
 
 bp = Blueprint('carts', __name__)
-
 
 
 @bp.route('/view_cart')
