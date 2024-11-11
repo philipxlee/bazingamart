@@ -217,7 +217,7 @@ class CartItems:
     def _get_product_price(product_id):
         price_row = current_app.db.execute(
             """
-            SELECT price FROM Products WHERE id = :product_id
+            SELECT price FROM Products WHERE product_id = :product_id
             """,
             product_id=product_id,
         )

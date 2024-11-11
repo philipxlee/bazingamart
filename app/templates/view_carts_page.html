@@ -16,17 +16,6 @@
         </div>
     </form>
 
-    <!-- Cart Items Table -->
-
-    <!-- Coupon Code Form -->
-    <form action="{{ url_for('carts.apply_coupon') }}" method="post" class="form-inline mt-3 mb-3">
-        <div class="form-group">
-            <label for="coupon_code">Coupon Code:</label>
-            <input type="text" name="coupon_code" class="form-control mx-2" placeholder="Enter code"
-                value="{{ coupon_code if discount_percentage else '' }}">
-            <button type="submit" class="btn btn-secondary">Apply</button>
-        </div>
-    </form>
 
     <!-- Cart Items Table -->
     <div class="table-responsive">
