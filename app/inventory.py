@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
-from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from app.models.inventory_items import InventoryItems
 from app.models.orders import Order
@@ -11,16 +10,18 @@ bp = Blueprint('inventory', __name__)
 @login_required
 def view_inventory():
     """
-    Displays the seller's inventory items.
-    """
-    """
-    Displays the seller's inventory items.
+    Displays the seller's inventory items with pagination.
     """
     seller_id = current_user.id
-    # Use the helper method to retrieve all inventory items for the seller
-    # Use the helper method to retrieve all inventory items for the seller
-    inventory_items = InventoryItems.get_all_by_user(seller_id)
-    return render_template('view_inventory_page.html', inventory_items=inventory_items)
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 15
+
+    # Use the helper method to retrieve paginated inventory items for the seller
+    inventory_items = InventoryItems.get_paginated_by_user(seller_id, page, items_per_page)
+    total_items = InventoryItems.get_count_by_user(seller_id)
+    total_pages = (total_items + items_per_page - 1) // items_per_page
+
+    return render_template('view_inventory_page.html', inventory_items=inventory_items, page=page, total_pages=total_pages)
 
 @bp.route('/fulfillment_center')
 @login_required
