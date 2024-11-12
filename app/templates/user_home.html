@@ -6,32 +6,44 @@
   <strong>First Name:</strong> {{ current_user.firstname }}<br />
   <strong>Last Name:</strong> {{ current_user.lastname }}<br />
   <strong>Email:</strong> {{ current_user.email }}<br />
-  <strong>Address:</strong> {{ current_user.address if current_user.address not in [None, '', ' '] else 'No address on file.' }}<br />
+  <strong>Address:</strong> {{ current_user.address if current_user.address not in [None, '', ' '] else 'No address on
+  file.' }}<br />
   <strong>Balance:</strong> {{ current_user.balance }} <br />
   <a href="{{ url_for('users.update_balance') }}" class="btn btn-primary">Add or Withdraw Balance</a>
   <a href="{{ url_for('users.update_user_info') }}" class="btn btn-primary">Update User Info</a>
   <a href="{{ url_for('users.user_public_view', id=current_user.id) }}" class="btn btn-primary">See Public View</a>
 </p>
-<br><br>
 
-<h2>Your Recent Purchases:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Purchase ID</th>
-      <th scope="col">Product Name</th>
-      <th scope="col">Date Purchased</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for purchase in purchase_history %}
-    <tr>
-      <th scope="row">{{ purchase.id }}</th>
-      <td>{{ purchase.pid }}</td>
-      <td>{{ purchase.time_purchased }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="container mt-5">
+  <h2>Your Orders</h2>
+  {% if orders %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Total Price</th>
+        <th>Order Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>{{ order.order_id }}</td>
+        <td>${{ "%.2f"|format(order.total_price) }}</td>
+        <td>{{ order.created_at.strftime('%B %d, %Y') }}</td>
+        <td>
+          <a href="{{ url_for('orders.order_details', order_id=order.order_id) }}" class="btn btn-primary btn-sm">View
+            Details</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>You have no orders yet.</p>
+  {% endif %}
+</div>
+
 
 {% endblock %}

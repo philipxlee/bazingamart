@@ -2,16 +2,23 @@ from flask import current_app
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 from app.models.coupons import Coupons
 
+from flask import current_app
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
+from app.models.coupons import Coupons
+
 
 class CartItems:
     """
     This class represents all the items within a user's cart. It provides API services
     to add, remove, and update item quantities from the cart. Additionally, it provides
     methods to view the items and calculate the total cost of all items in the cart.
+    to add, remove, and update item quantities from the cart. Additionally, it provides
+    methods to view the items and calculate the total cost of all items in the cart.
     """
 
     def __init__(self, product_id, order_id, quantity, unit_price, product_name):
         self.product_id = product_id
+        self.product_name = product_name
         self.product_name = product_name
         self.order_id = order_id
         self.quantity = quantity
@@ -25,10 +32,10 @@ class CartItems:
         """
         rows = current_app.db.execute(
             """
-            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.name
+            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
             FROM CartProducts cp
             JOIN Cart c ON cp.order_id = c.order_id
-            JOIN Products p ON cp.product_id = p.id
+            JOIN Products p ON cp.product_id = p.product_id
             WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
             """,
             user_id=user_id,
@@ -39,6 +46,7 @@ class CartItems:
 
 
     @staticmethod
+    @handle_db_exceptions
     @handle_db_exceptions
     def add_item(user_id, product_id, quantity):
         """
@@ -70,7 +78,8 @@ class CartItems:
                 return "Not enough inventory available for the requested quantity."
             CartItems._update_cart_item(order_id, product_id, new_quantity)
         else:
-            CartItems._insert_cart_item(order_id, product_id, quantity, unit_price)
+            seller_id = user_id
+            CartItems._insert_cart_item(order_id, product_id, seller_id, quantity, unit_price)
 
         return "success"
     
@@ -184,7 +193,7 @@ class CartItems:
     def _get_available_inventory(product_id):
         inventory_row = current_app.db.execute(
             """
-            SELECT product_quantity FROM Inventory
+            SELECT product_quantity FROM Products
             WHERE product_id = :product_id
             """,
             product_id=product_id,
@@ -217,7 +226,7 @@ class CartItems:
     def _get_product_price(product_id):
         price_row = current_app.db.execute(
             """
-            SELECT price FROM Products WHERE id = :product_id
+            SELECT price FROM Products WHERE product_id = :product_id
             """,
             product_id=product_id,
         )
@@ -249,19 +258,29 @@ class CartItems:
         )
 
     @staticmethod
-    def _insert_cart_item(order_id, product_id, quantity, unit_price):
+    def _insert_cart_item(order_id, product_id, seller_id, quantity, unit_price):
         current_app.db.execute(
             """
-            INSERT INTO CartProducts (order_id, product_id, quantity, unit_price)
-            VALUES (:order_id, :product_id, :quantity, :unit_price)
+            INSERT INTO CartProducts (order_id, product_id, seller_id, quantity, unit_price)
+            VALUES (:order_id, :product_id, :seller_id, :quantity, :unit_price)
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
             quantity=quantity,
             unit_price=unit_price,
         )
 
     @staticmethod
+    def _get_pending_cart_id(user_id):
+        order_id_row = current_app.db.execute(
+            """
+            SELECT order_id FROM Cart
+            WHERE user_id = :user_id AND purchase_status = 'Pending'
+            """,
+            user_id=user_id,
+        )
+        return order_id_row[0][0] if order_id_row else None
     def _get_pending_cart_id(user_id):
         order_id_row = current_app.db.execute(
             """
@@ -283,7 +302,23 @@ class CartItems:
             product_id=product_id,
         )
 
+    def _delete_cart_item(order_id, product_id):
+        current_app.db.execute(
+            """
+            DELETE FROM CartProducts
+            WHERE order_id = :order_id AND product_id = :product_id
+            """,
+            order_id=order_id,
+            product_id=product_id,
+        )
+
     @staticmethod
+    def _is_valid_quantity(product_id, requested_quantity):
+        available_quantity = CartItems._get_available_inventory(product_id)
+        return (
+            available_quantity is not None and requested_quantity <= available_quantity
+        )
+
     def _is_valid_quantity(product_id, requested_quantity):
         available_quantity = CartItems._get_available_inventory(product_id)
         return (

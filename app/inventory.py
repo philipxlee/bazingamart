@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from app.models.inventory_items import InventoryItems
 from app.models.orders import Order
@@ -12,7 +13,11 @@ def view_inventory():
     """
     Displays the seller's inventory items.
     """
+    """
+    Displays the seller's inventory items.
+    """
     seller_id = current_user.id
+    # Use the helper method to retrieve all inventory items for the seller
     # Use the helper method to retrieve all inventory items for the seller
     inventory_items = InventoryItems.get_all_by_user(seller_id)
     return render_template('view_inventory_page.html', inventory_items=inventory_items)
@@ -42,9 +47,9 @@ def fulfill_item():
     item_belongs_to_seller = current_app.db.execute('''
         SELECT 1 
         FROM CartProducts cp
-        JOIN inventory i ON cp.product_id = i.product_id
-        WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND i.seller_id = :seller_id
-    ''', [order_id, product_id, seller_id])
+        JOIN Products p ON cp.product_id = p.product_id 
+        WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND p.seller_id = :seller_id
+    ''', order_id=order_id, product_id=product_id, seller_id=seller_id)
     
     if not item_belongs_to_seller:
         flash("Unauthorized action.", "error")
