@@ -78,7 +78,8 @@ class CartItems:
                 return "Not enough inventory available for the requested quantity."
             CartItems._update_cart_item(order_id, product_id, new_quantity)
         else:
-            CartItems._insert_cart_item(order_id, product_id, quantity, unit_price)
+            seller_id = user_id
+            CartItems._insert_cart_item(order_id, product_id, seller_id, quantity, unit_price)
 
         return "success"
     
@@ -257,14 +258,15 @@ class CartItems:
         )
 
     @staticmethod
-    def _insert_cart_item(order_id, product_id, quantity, unit_price):
+    def _insert_cart_item(order_id, product_id, seller_id, quantity, unit_price):
         current_app.db.execute(
             """
-            INSERT INTO CartProducts (order_id, product_id, quantity, unit_price)
-            VALUES (:order_id, :product_id, :quantity, :unit_price)
+            INSERT INTO CartProducts (order_id, product_id, seller_id, quantity, unit_price)
+            VALUES (:order_id, :product_id, :seller_id, :quantity, :unit_price)
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
             quantity=quantity,
             unit_price=unit_price,
         )
