@@ -76,13 +76,6 @@ class CartSubmission:
 
         # 8. Mark cart as purchased (change purchase_status to 'Completed')       
         CartSubmission._mark_cart_as_completed(user_id)
-
-        # 9. Log the purchase in the Purchases table
-        for item in cart_items:
-            CartSubmission._log_purchase(
-                user_id, item.product_id, item.quantity, item.unit_price
-            )
-        
         return "Purchase successful!"
 
     @staticmethod
@@ -132,15 +125,4 @@ class CartSubmission:
             user_id=user_id
         )
     
-    @staticmethod
-    def _log_purchase(user_id, product_id, quantity, unit_price):
-        current_app.db.execute(
-            """
-            INSERT INTO Purchases (uid, pid, quantity, price, time_purchased)
-            VALUES (:user_id, :product_id, :quantity, :unit_price, current_timestamp)
-            """,
-            user_id=user_id,
-            product_id=product_id,
-            quantity=quantity,
-            unit_price=unit_price
-        )
+  

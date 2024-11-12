@@ -10,11 +10,6 @@ SELECT pg_catalog.setval('public.products_product_id_seq',
                          (SELECT MAX(product_id)+1 FROM Products),
                          false);
 
-\COPY Purchases FROM 'Purchases.csv' WITH DELIMITER ',' NULL '' CSV
-SELECT pg_catalog.setval('public.purchases_id_seq',
-                         (SELECT MAX(id)+1 FROM Purchases),
-                         false);
-
 \COPY Reviews FROM 'Reviews.csv' WITH DELIMITER ',' NULL '' CSV
 SELECT pg_catalog.setval('public.reviews_review_id_seq',
                          (SELECT MAX(review_id)+1 FROM reviews),

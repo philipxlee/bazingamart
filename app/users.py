@@ -7,9 +7,9 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import datetime
 
 from .models.user import User
-from .models.purchase import Purchase
-
+from .models.orders import Order
 from flask import Blueprint
+
 bp = Blueprint('users', __name__)
 
 
@@ -70,8 +70,9 @@ def register():
 
 @bp.route("/user_home")
 def user_home():
-    purchases = Purchase.get_all_by_user(current_user.id)
-    return render_template("user_home.html", purchase_history=purchases)
+    user_id = current_user.id
+    orders = Order.get_all_orders(user_id)
+    return render_template("user_home.html", orders=orders)
 
 @bp.route('/update_balance',  methods=['GET', 'POST'])
 def update_balance():
