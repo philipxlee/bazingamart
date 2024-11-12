@@ -7,7 +7,6 @@ class InventoryItems:
         self.product_name = product_name
         self.product_quantity = product_quantity
 
-
     @staticmethod
     def get_all_by_user(seller_id):
         rows = app.db.execute('''
@@ -17,6 +16,27 @@ class InventoryItems:
         ''', seller_id=seller_id)
         items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
         return items_in_inventory
+
+    @staticmethod
+    def get_paginated_by_user(seller_id, page, items_per_page):
+        offset = (page - 1) * items_per_page
+        rows = app.db.execute('''
+        SELECT p.product_id, p.product_name, p.product_quantity
+            FROM Products p
+            WHERE p.seller_id = :seller_id
+            LIMIT :items_per_page OFFSET :offset
+        ''', seller_id=seller_id, items_per_page=items_per_page, offset=offset)
+        items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
+        return items_in_inventory
+
+    @staticmethod
+    def get_count_by_user(seller_id):
+        row = app.db.execute('''
+        SELECT COUNT(*)
+            FROM Products p
+            WHERE p.seller_id = :seller_id
+        ''', seller_id=seller_id)
+        return row[0][0] if row else 0
 
     @staticmethod
     def get_seller_orders(seller_id):
@@ -39,7 +59,7 @@ class InventoryItems:
         WHERE p.seller_id = :seller_id
         GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.product_name, cp.quantity, o.fulfillment_status
         ORDER BY o.created_at DESC
-        ''', seller_id = seller_id)  
+        ''', seller_id=seller_id)  
 
         # Organize rows by order and item details
         orders = {}
@@ -53,8 +73,9 @@ class InventoryItems:
                     "order_date": row[3],
                     "total_price": row[4],
                     "total_items": row[5],
-                    "items": []
+                    "items": []  # Ensure items is initialized as a list
                 }
+                
             # Append each product in the order to the items list
             orders[order_id]["items"].append({
                 "product_id": row[6],
@@ -63,4 +84,7 @@ class InventoryItems:
                 "fulfillment_status": row[9]
             })
 
-        return list(orders.values())
+        # Ensure items is always a list
+        
+
+        return [order for order in orders.values()]

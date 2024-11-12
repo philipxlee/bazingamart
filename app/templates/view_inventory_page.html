@@ -23,6 +23,15 @@
         {% endfor %}
     </tbody>
 </table>
+
+<div style="margin-top: 20px;">
+    {% if page > 1 %}
+        <a href="{{ url_for('inventory.view_inventory', page=page-1) }}" class="btn btn-secondary">Previous</a>
+    {% endif %}
+    {% if page < total_pages %}
+        <a href="{{ url_for('inventory.view_inventory', page=page+1) }}" class="btn btn-secondary">Next</a>
+    {% endif %}
+</div>
 {% else %}
 <p>Your inventory is empty.</p>
 {% endif %}
