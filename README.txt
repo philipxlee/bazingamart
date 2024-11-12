@@ -37,3 +37,10 @@ Where to find end points:
 5. Social Guru: Given a user id, find the 5 most recent feedback they posted.
     - inside models/reviews.py, in the get_recent_feedback(user_id, limit=5) function.
 
+Milestone 4:
+Link to video:
+1. Users Guru:
+2. Products Guru:
+3. Carts Guru:
+4. Sellers Guru
+5. Sellers Guru: 
