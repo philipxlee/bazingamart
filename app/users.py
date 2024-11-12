@@ -68,11 +68,22 @@ def register():
             return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
 
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
+from .models.orders import Order
+
 @bp.route("/user_home")
 def user_home():
     user_id = current_user.id
-    orders = Order.get_all_orders(user_id)
-    return render_template("user_home.html", orders=orders)
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5 
+
+    # Fetch paginated orders
+    orders = Order.get_all_orders(user_id, page, per_page)
+    total_orders = Order.count_orders(user_id)
+    total_pages = (total_orders + per_page - 1) // per_page
+
+    return render_template("user_home.html", orders=orders, page=page, total_pages=total_pages)
 
 @bp.route('/update_balance',  methods=['GET', 'POST'])
 def update_balance():

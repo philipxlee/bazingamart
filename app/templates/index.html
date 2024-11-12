@@ -1,19 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <br><br>
 
 <h2 class="text-center">Products for Sale</h2>
 
-<!-- Button for "Search By Price" and "Search User Feedback" -->
-<div class="text-center mb-4">
-  <a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
-  <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Search User Feedback</a>
-</div>
-
-
-<!-- Product Grid -->
 <div class="container">
   <div class="row">
     {% for product in avail_products %}
@@ -22,7 +13,6 @@
         <div class="card-body">
           <h5 class="card-title">{{ product.product_name }}</h5>
           <p class="card-text">Price: ${{ product.price }}</p>
-          <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
             <label for="quantity_{{ product.product_id }}">Quantity:</label>
@@ -36,7 +26,42 @@
     {% endfor %}
   </div>
 </div>
-  </div>
+
+<!-- Pagination Controls -->
+<div class="d-flex justify-content-center mt-4">
+  <nav aria-label="Product Pagination">
+    <ul class="pagination">
+      <!-- Previous button -->
+      {% if page > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('index.index', page=page-1) }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link" aria-hidden="true">&laquo; Previous</span>
+      </li>
+      {% endif %}
+
+      <!-- Current page display (this is the middle part between the left and right buttons)-->
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page }}</span>
+      </li>
+
+      <!-- Next button -->
+      {% if page < total_pages %} <li class="page-item">
+        <a class="page-link" href="{{ url_for('index.index', page=page+1) }}" aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link" aria-hidden="true">Next &raquo;</span>
+        </li>
+        {% endif %}
+    </ul>
+  </nav>
 </div>
 
 {% endblock %}

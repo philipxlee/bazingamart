@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request
 from flask_login import current_user
 import datetime
 
@@ -10,8 +10,10 @@ bp = Blueprint('index', __name__)
 
 @bp.route('/')
 def index():
-    # get all available products for sale:
-    products = Product.get_all(True)
-    # render the page by adding information to the index.html file
+    page = request.args.get('page', 1, type=int)
+    per_page = 9
+    products, total_pages = Product.get_all(available=True, page=page, per_page=per_page)
     return render_template('index.html',
-                           avail_products=products)
+                           avail_products=products,
+                           page=page,
+                           total_pages=total_pages)
