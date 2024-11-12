@@ -14,9 +14,11 @@ fake = Faker()
 seller_user_ids = []
 product_ids = []
 
+# Function to get CSV writer
 def get_csv_writer(f):
     return csv.writer(f, dialect='unix')
 
+# Generate users
 def gen_users(num_users):
     with open('db/generated/Users.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
@@ -52,7 +54,9 @@ def gen_users(num_users):
         print(f'{num_users} generated')
     return
 
+# Generate products
 def gen_products(num_products, num_users):
+    products = []
     with open('db/generated/Products.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('Products...', end=' ', flush=True)
@@ -64,11 +68,13 @@ def gen_products(num_products, num_users):
             available = fake.boolean()
             seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
             product_quantity = fake.random_int(min=1, max=100)
-            product_ids.append(pid)
+            products.append((pid, name, price, available, seller_id, product_quantity))
             writer.writerow([pid, name, price, available, seller_id, product_quantity])
+            product_ids.append(pid)
         print(f'{num_products} generated')
-    return
+    return products
 
+# Generate carts
 def gen_carts(num_carts, num_users):
     with open('db/generated/Cart.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
@@ -76,8 +82,8 @@ def gen_carts(num_carts, num_users):
         for order_id in range(1, num_carts + 1):
             if order_id % 50 == 0:
                 print(f'{order_id}', end=' ', flush=True)
-            user_id = fake.random_int(min=0, max=num_users)  # Including custom user with ID 0
-            created_at = fake.date_time_this_year(before_now=True, after_now=False)            
+            user_id = fake.random_int(min=0, max=num_users) 
+            created_at = fake.date_time_this_year(before_now=True, after_now=False)             
             total_price = round(random.uniform(10, 1000), 2)
             purchase_status = random.choice(['Pending', 'Completed', 'Cancelled'])
             coupon_code = fake.bothify(text='???-##', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ') if fake.boolean(chance_of_getting_true=20) else None
@@ -85,21 +91,25 @@ def gen_carts(num_carts, num_users):
         print(f'{num_carts} generated')
     return
 
-def gen_cart_products(num_carts, max_products_per_cart, num_products):
+# Generate cart products
+def gen_cart_products(num_carts, max_products_per_cart, products):
     with open('db/generated/CartProducts.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('CartProducts...', end=' ', flush=True)
         for order_id in range(1, num_carts + 1):
             num_products_in_cart = fake.random_int(min=1, max=max_products_per_cart)
-            selected_pids = random.sample(product_ids, min(num_products_in_cart, len(product_ids)))
-            for pid in selected_pids:
-                seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
-                quantity = fake.random_int(min=1, max=5)
-                unit_price = round(random.uniform(5, 500), 2)
-                writer.writerow([order_id, pid, seller_id, quantity, unit_price])
+            selected_products = random.sample(products, min(num_products_in_cart, len(products)))
+            for product in selected_products:
+                pid, _, _, available, _, product_quantity = product
+                if available and product_quantity > 0:
+                    quantity = fake.random_int(min=1, max=min(5, product_quantity))
+                    seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
+                    unit_price = round(random.uniform(5, 500), 2)
+                    writer.writerow([order_id, pid, seller_id, quantity, unit_price])
         print(f'CartProducts for {num_carts} carts generated')
     return
 
+# Generate orders
 def gen_orders(num_carts, num_users):
     with open('db/generated/Orders.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
@@ -107,8 +117,8 @@ def gen_orders(num_carts, num_users):
         for order_id in range(1, num_carts + 1):
             if order_id % 50 == 0:
                 print(f'{order_id}', end=' ', flush=True)
-            user_id = fake.random_int(min=0, max=num_users)  # Including custom user with ID 0
-            created_at = fake.date_time_this_year(before_now=True, after_now=False)            
+            user_id = fake.random_int(min=0, max=num_users)  
+            created_at = fake.date_time_this_year(before_now=True, after_now=False)             
             total_price = round(random.uniform(10, 1000), 2)
             fulfillment_status = random.choice(['Incomplete', 'Shipped', 'Delivered'])
             coupon_code = fake.bothify(text='???-##', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ') if fake.boolean(chance_of_getting_true=20) else None
@@ -116,6 +126,7 @@ def gen_orders(num_carts, num_users):
         print(f'{num_carts} generated')
     return
 
+# Generate coupons
 def gen_coupons(num_coupons=50):
     with open('db/generated/Coupons.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
@@ -127,6 +138,7 @@ def gen_coupons(num_coupons=50):
         print(f'{num_coupons} generated')
     return
 
+# Generate reviews
 def gen_reviews(num_reviews=500, num_users=num_users, num_products=num_products):
     with open('db/generated/Reviews.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
@@ -134,24 +146,23 @@ def gen_reviews(num_reviews=500, num_users=num_users, num_products=num_products)
         for review_id in range(1, num_reviews + 1):
             if review_id % 100 == 0:
                 print(f'{review_id}', end=' ', flush=True)
-            user_id = fake.random_int(min=0, max=num_users)  # Including custom user with ID 0
+            user_id = fake.random_int(min=0, max=num_users)  
             seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
             reviewer_type = random.choice(['buyer', 'seller'])
             product_id = random.choice(product_ids)
             stars = fake.random_int(min=1, max=5)
             review_text = fake.text(max_nb_chars=200)
-            time_written = fake.date_time_between(start_date='-6m', end_date='now')
+            time_written = fake.date_time_this_year(before_now=True, after_now=False)   
             upvotes = fake.random_int(min=0, max=100)
             writer.writerow([review_id, user_id, seller_id, reviewer_type, product_id, stars, review_text, time_written, upvotes])
         print(f'{num_reviews} generated')
     return
 
-
 # Generate the data
 gen_users(num_users)
-gen_products(num_products, num_users)
+products = gen_products(num_products, num_users)
 gen_carts(num_carts, num_users)
-gen_cart_products(num_carts, max_products_per_cart, num_products)
+gen_cart_products(num_carts, max_products_per_cart, products)
 gen_orders(num_carts, num_users)
 gen_coupons()
 gen_reviews()
