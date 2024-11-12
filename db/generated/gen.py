@@ -85,7 +85,7 @@ def gen_carts(num_carts, num_users):
             user_id = fake.random_int(min=0, max=num_users) 
             created_at = fake.date_time_this_year(before_now=True, after_now=False)             
             total_price = round(random.uniform(10, 1000), 2)
-            purchase_status = random.choice(['Pending', 'Completed', 'Cancelled'])
+            purchase_status = random.choice(['Completed', 'Cancelled'])
             coupon_code = fake.bothify(text='???-##', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ') if fake.boolean(chance_of_getting_true=20) else None
             writer.writerow([order_id, user_id, created_at, total_price, purchase_status, coupon_code])
         print(f'{num_carts} generated')
