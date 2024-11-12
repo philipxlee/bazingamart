@@ -32,9 +32,10 @@ CREATE TABLE Cart (
 CREATE TABLE CartProducts (
     order_id INT NOT NULL REFERENCES Cart(order_id) ON DELETE CASCADE,
     product_id INT NOT NULL REFERENCES Products(product_id),
+    seller_id INT NOT NULL REFERENCES Users(id),
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(12,2) NOT NULL,
-    PRIMARY KEY (order_id, product_id)
+    PRIMARY KEY (order_id, product_id, seller_id)
 );
 
 CREATE TABLE Coupons (
