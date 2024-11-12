@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from app.models.inventory_items import InventoryItems
+from app.models.orders import Order
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 bp = Blueprint('inventory', __name__)
 
@@ -29,7 +31,7 @@ def fulfillment_center():
     seller_id = current_user.id
     # Use the helper method to retrieve all orders associated with the seller's products
     orders = InventoryItems.get_seller_orders(seller_id)
-    return render_template('view_fulfillment_center.html', orders=orders)
+    return render_template('view_fulfillment_center.html', orders=orders if isinstance(orders, list) else list(orders))
 
 @bp.route('/fulfill_item', methods=['POST'])
 @login_required

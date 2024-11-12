@@ -53,8 +53,9 @@ class InventoryItems:
                     "order_date": row[3],
                     "total_price": row[4],
                     "total_items": row[5],
-                    "items": []
+                    "items": []  # Ensure items is initialized as a list
                 }
+                
             # Append each product in the order to the items list
             orders[order_id]["items"].append({
                 "product_id": row[6],
@@ -63,4 +64,7 @@ class InventoryItems:
                 "fulfillment_status": row[9]
             })
 
-        return list(orders.values())
+        # Ensure items is always a list
+        
+
+        return [order for order in orders.values()]
