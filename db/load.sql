@@ -10,11 +10,20 @@ SELECT pg_catalog.setval('public.products_product_id_seq',
                          (SELECT MAX(product_id) + 1 FROM Products),
                          false);
 
-\COPY Reviews FROM 'Reviews.csv' WITH DELIMITER ',' NULL '' CSV;
--- Adjusting the sequence for Reviews' auto-generated primary key:
+\COPY Reviews FROM 'Reviews.csv' WITH DELIMITER ',' NULL '' CSV
+SELECT pg_catalog.setval('public.reviews_review_id_seq',
+                         (SELECT MAX(review_id)+1 FROM reviews),
+                         false);
+\COPY Reviews FROM 'Reviews.csv' WITH DELIMITER ',' NULL '' CSV
+SELECT pg_catalog.setval('public.reviews_review_id_seq',
+                         (SELECT MAX(review_id)+1 FROM reviews),
+                         false);
 
-\COPY Cart FROM 'Cart.csv' WITH DELIMITER ',' NULL '' CSV;
--- Adjusting the sequence for Cart's auto-generated primary key:
+\COPY Cart(order_id, user_id, created_at, total_price, purchase_status, coupon_code) FROM 'Cart.csv' WITH DELIMITER ',' NULL '' CSV;
+SELECT pg_catalog.setval('public.cart_order_id_seq',
+                         (SELECT MAX(order_id) + 1 FROM Cart),
+                         false);
+\COPY Cart(order_id, user_id, created_at, total_price, purchase_status, coupon_code) FROM 'Cart.csv' WITH DELIMITER ',' NULL '' CSV;
 SELECT pg_catalog.setval('public.cart_order_id_seq',
                          (SELECT MAX(order_id) + 1 FROM Cart),
                          false);
