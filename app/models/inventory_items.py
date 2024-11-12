@@ -35,7 +35,7 @@ class InventoryItems:
         JOIN users u ON o.user_id = u.id
         JOIN cartproducts cp ON o.order_id = cp.order_id
         JOIN products p ON cp.product_id = p.id
-        JOIN inventory i ON p.id = i.product_id  -- Proper join for inventory
+        JOIN inventory i ON cp.product_id = i.product_id AND i.seller_id = :seller_id  -- Proper join for inventory
         WHERE i.seller_id = :seller_id
         GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.name, cp.quantity, o.fulfillment_status
         ORDER BY o.created_at DESC
@@ -53,8 +53,9 @@ class InventoryItems:
                     "order_date": row[3],
                     "total_price": row[4],
                     "total_items": row[5],
-                    "items": []
+                    "items": []  # Ensure items is initialized as a list
                 }
+                
             # Append each product in the order to the items list
             orders[order_id]["items"].append({
                 "product_id": row[6],
@@ -63,4 +64,7 @@ class InventoryItems:
                 "fulfillment_status": row[9]
             })
 
-        return list(orders.values())
+        # Ensure items is always a list
+        
+
+        return [order for order in orders.values()]

@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from app.models.inventory_items import InventoryItems
+from app.models.orders import Order
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 bp = Blueprint('inventory', __name__)
 
@@ -24,7 +26,7 @@ def fulfillment_center():
     seller_id = current_user.id
     # Use the helper method to retrieve all orders associated with the seller's products
     orders = InventoryItems.get_seller_orders(seller_id)
-    return render_template('view_fulfillment_center.html', orders=orders)
+    return render_template('view_fulfillment_center.html', orders=orders if isinstance(orders, list) else list(orders))
 
 @bp.route('/fulfill_item', methods=['POST'])
 @login_required
@@ -40,8 +42,9 @@ def fulfill_item():
     item_belongs_to_seller = current_app.db.execute('''
         SELECT 1 
         FROM CartProducts cp
-       JOIN inventory i ON p.id = i.product_id WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND i.seller_id = :seller_id
-    ''', order_id=order_id, product_id=product_id, seller_id=seller_id)
+        JOIN inventory i ON cp.product_id = i.product_id
+        WHERE cp.order_id = :order_id AND cp.product_id = :product_id AND i.seller_id = :seller_id
+    ''', [order_id, product_id, seller_id])
     
     if not item_belongs_to_seller:
         flash("Unauthorized action.", "error")
