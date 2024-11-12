@@ -83,4 +83,8 @@ class InventoryItems:
                 "quantity": row[8],
                 "fulfillment_status": row[9]
             })
+
+        # Ensure items is always a list
+        
+
         return [order for order in orders.values()]
