@@ -17,8 +17,6 @@ class CartItems:
     """
 
     def __init__(self, product_id, order_id, quantity, unit_price, product_name):
-
-    def __init__(self, product_id, order_id, quantity, unit_price, product_name):
         self.product_id = product_id
         self.product_name = product_name
         self.product_name = product_name
@@ -42,11 +40,7 @@ class CartItems:
             """,
             user_id=user_id,
         )
-            """,
-            user_id=user_id,
-        )
 
-        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_cart
 
