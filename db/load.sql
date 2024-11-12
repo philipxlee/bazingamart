@@ -19,7 +19,7 @@ SELECT pg_catalog.setval('public.cart_order_id_seq',
                          (SELECT MAX(order_id) + 1 FROM Cart),
                          false);
 
--- \COPY CartProducts FROM 'CartProducts.csv' WITH DELIMITER ',' NULL '' CSV;
+\COPY CartProducts FROM 'CartProducts.csv' WITH DELIMITER ',' NULL '' CSV;
 
 \COPY Coupons FROM 'Coupons.csv' WITH DELIMITER ',' CSV;
 
