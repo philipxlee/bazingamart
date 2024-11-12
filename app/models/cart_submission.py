@@ -59,10 +59,19 @@ class CartSubmission:
                 seller_id, item.quantity * item.unit_price
             )
 
-        # 7. Create an order in the Orders table
+        # 7. Check if an order already exists
         order_id = CartItems._get_pending_cart_id(user_id)
+        result = current_app.db.execute(
+            """
+            SELECT 1 FROM Orders WHERE order_id = :order_id
+            """,
+            order_id=order_id
+        )
+        existing_order = result[0] if result else None
 
-        if order_id:
+        # 8. Insert or update the order as necessary
+        if existing_order is None:
+            # Order does not exist, create a new one
             current_app.db.execute(
                 """
                 INSERT INTO Orders (order_id, user_id, created_at, total_price, fulfillment_status, coupon_code)
@@ -73,8 +82,21 @@ class CartSubmission:
                 total_price=total_cost,
                 coupon_code=coupon_code
             )
+        else:
+            # Order exists, optionally update its status
+            current_app.db.execute(
+                """
+                UPDATE Orders
+                SET fulfillment_status = 'Incomplete', total_price = :total_price, coupon_code = :coupon_code
+                WHERE order_id = :order_id
+                """,
+                order_id=order_id,
+                total_price=total_cost,
+                coupon_code=coupon_code
+            )
 
-        # 8. Mark cart as purchased (change purchase_status to 'Completed')       
+
+        # 9. Mark cart as purchased (change purchase_status to 'Completed')       
         CartSubmission._mark_cart_as_completed(user_id)
         return "Purchase successful!"
 
@@ -125,4 +147,3 @@ class CartSubmission:
             user_id=user_id
         )
     
-  
