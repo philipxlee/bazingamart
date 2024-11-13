@@ -1,5 +1,3 @@
-
-
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_required
 from .models.product import Product
@@ -28,17 +26,16 @@ def add_review():
    user_id = current_user.id
    reviewer_type = request.form['reviewer_type']
    product_id = int(request.form['product_id'])
-   seller_id = int(request.form['seller_id'])
    stars = int(request.form['stars'])
    review_text = request.form['review_text']
    images = request.form.get('images')
 
 
-   review_id = Reviews.add_review(user_id, reviewer_type, product_id, seller_id, stars, review_text, images)
+   review_id = Reviews.add_review(user_id, reviewer_type, product_id, stars, review_text, images)
    if review_id:
        flash('Review added successfully!', 'success')
    else:
-       flash('Failed to add review.', 'danger')
+       flash('Review added successfully!', 'danger')
    return redirect(url_for('reviews.search_user_feedback'))
 
 

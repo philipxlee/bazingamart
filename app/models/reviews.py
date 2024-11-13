@@ -33,7 +33,7 @@ class Reviews:
        try:
            rows = app.db.execute('''
                INSERT INTO Reviews(user_id, reviewer_type, product_id, stars, review_text, images)
-               VALUES(:user_id, :reviewer_type, :product_id, :seller_id, :stars, :review_text, :images)
+               VALUES(:user_id, :reviewer_type, :product_id, :stars, :review_text, :images)
                RETURNING review_id
            ''', user_id=user_id, reviewer_type=reviewer_type, product_id=product_id,
                stars=stars, review_text=review_text, images=images)
