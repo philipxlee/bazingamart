@@ -1,91 +1,98 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<br><br>
+<head>
+  <title>BazingaMart</title>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/example.css') }}">
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+    }
 
+    .main-head {
+      height: 150px;
+      background: #ffffff;
+    }
 
-<h2 class="text-center">Products for Sale</h2>
+    .sidenav {
+        height: 100%;
+      background-color: #03f72c;
+      overflow-x: hidden;
+      padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+    }
 
-<!-- Button for "Search By Price" and "Search User Feedback" -->
-<div class="text-center mb-4">
-  <a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
-  <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Search User Feedback</a>
-</div>
+    .sidenav h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+      padding-left: 20px;
+      text-align: left;
+    }
 
-<div class="container">
-  <div class="row">
-    {% for product in product_items %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5 class="card-title">
-            <a href="{{ url_for('products.product_detail', product_id=product.product_id) }}">
-              {{ product.product_name }}</h5>
-          <p class="card-text">Price: ${{ product.price }}</p>
-          </a>
-          <!-- Add to Cart form -->
-          <form action="{{ url_for('carts.add_to_cart') }}" method="post">
-            <input type="hidden" name="product_id" value="{{ product.product_id }}">
-            <label for="quantity_{{ product.product_id }}">Quantity:</label>
-            <input type="number" name="quantity" id="quantity_{{ product.product_id }}" value="1" min="1" required
-              class="form-control mb-2">
-            <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
-          </form>
-        </div>
+    .main {
+      padding: 0px 10px;
+    }
+
+    .login-main-text {
+      margin-top: 20%;
+      padding: 60px;
+      color: #fff;
+    }
+
+    .login-main-text h2 {
+      font-weight: 300;
+    }
+
+    .btn-black {
+      background-color: #000 !important;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidenav">
+    {% block msg %}
+    <h1 style="color:rgb(0, 0, 0); padding-right: 20px;">BazingaMart!</h1>
+    <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px">
+      {% if current_user.is_authenticated %}
+      <div style="text-align: left">
+        <a href="{{ url_for('users.user_home') }}"
+          style="color: #000000; font-size: 1.5rem; font-weight: bold; padding-left: 20px;">
+          Hello {{current_user.firstname}}!
+        </a>
       </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Pagination Controls -->
-<div class="d-flex justify-content-center mt-4">
-  <nav aria-label="Product Pagination">
-    <ul class="pagination">
-      <!-- Previous button -->
-      {% if page > 1 %}
-      <li class="page-item">
-        <a class="page-link" href="{{ url_for('index.index', page=page-1) }}" aria-label="Previous">
-          <span aria-hidden="true">&laquo; Previous</span>
-        </a>
-      </li>
+      <a href="{{ url_for('index.index') }}" class="btn btn-light">Home</a>
+      <a href="{{ url_for('carts.view_cart') }}" class="btn btn-light">View Cart</a>
+      <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
+      <div style="margin-top: 10px;">
+        <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-black">View Inventory</a>
+        <a href="{{ url_for('inventory.fulfillment_center') }}" class="btn btn-black">Fulfillment Center</a>
+      </div>
       {% else %}
-      <li class="page-item disabled">
-        <span class="page-link" aria-hidden="true">&laquo; Previous</span>
-      </li>
+      <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
       {% endif %}
+    </div>
+    {% endblock %}
+  </div>
+  <div class="main">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-info" role="alert">
+      {% for message in messages %}
+      {{ message }}
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
 
-      <!-- Current page display (this is the middle part between the left and right buttons)-->
-      <li class="page-item disabled">
-        <span class="page-link">Page {{ page }}</span>
-      </li>
-
-      <!-- Next button -->
-      {% if page < total_pages %} <li class="page-item">
-        <a class="page-link" href="{{ url_for('index.index', page=page+1) }}" aria-label="Next">
-          <span aria-hidden="true">Next &raquo;</span>
-        </a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-          <span class="page-link" aria-hidden="true">Next &raquo;</span>
-        </li>
-        {% endif %}
-    </ul>
-  </nav>
-</div>
-
-<!-- Pagination Navigation -->
-<div class="text-center mt-4">
-  {% if page > 1 %}
-  <a href="{{ url_for('index.index', page=page-1) }}" class="btn btn-secondary">Previous</a>
-  {% endif %}
-  {% if page < total_pages %}
-  <a href="{{ url_for('index.index', page=page+1) }}" class="btn btn-secondary">Next</a>
-  {% endif %}
-</div>
-
-<!-- Extra Padding at the Bottom -->
-<div style="padding-bottom: 50px;"></div>
-
-{% endblock %}
+</html>
