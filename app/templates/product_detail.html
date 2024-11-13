@@ -5,7 +5,7 @@
     <title>{{ product.product_name }} - Product Details</title>
 </head>
 <body>
-    <!-- Product Details Section -->
+    <!-- Product Details Section hi-->
     <h1>{{ product.product_name }}</h1>
     <p><strong>Price:</strong> ${{ product.price }}</p>
     <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
@@ -16,7 +16,7 @@
     
     <!-- Sellers Section -->
     <h2>Sellers</h2>
-    {% if sellers %}
+    {% if sellers %} 
         <table>
             <tr>
                 <th>Seller</th>
