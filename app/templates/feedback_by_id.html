@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Search Recent Feedback by User ID:</h2>
+
+<!-- Input the user ID hi-->
+<form method="POST" action="{{ url_for('reviews.search_user_feedback') }}">
+  <label for="user_id">Enter User ID:</label>
+  <input type="number" name="user_id" id="user_id" min="0" required>
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<br><br>
+
+<h2>5 Most Recent Feedback Entries for User ID: {{ user_id }}</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Review ID</th>
+      <th scope="col">Type</th>
+      <th scope="col">Stars</th>
+      <th scope="col">Review Text</th>
+      <th scope="col">Time Written</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for feedback in recent_feedback %}
+    <tr>
+      <th scope="row">{{feedback.review_id}}</th>
+      <td>{{feedback.reviewer_type}}</td>
+      <td>{{feedback.stars if feedback.stars else 'N/A'}}</td>
+      <td>{{feedback.review_text[:50] + '...' if feedback.review_text and feedback.review_text|length > 50 else
+        feedback.review_text or 'N/A'}}</td>
+      <td>{{feedback.time_written}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
