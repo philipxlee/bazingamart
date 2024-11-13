@@ -19,10 +19,11 @@
       <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">
-            <a href="{{ url_for('products.product_detail', product_id=product.product_id) }}">
+            <a href="/product/{{ product.product_id }}">
               {{ product.product_name }}</h5>
+            </a>
           <p class="card-text">Price: ${{ product.price }}</p>
-          </a>
+          
           <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
