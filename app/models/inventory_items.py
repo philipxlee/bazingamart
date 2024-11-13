@@ -16,6 +16,36 @@ class InventoryItems:
         ''', seller_id=seller_id)
         items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
         return items_in_inventory
+    
+    @staticmethod
+    def get_all_by_product(product_id):
+        rows = app.db.execute('''
+        SELECT p.seller_id, p.product_quantity
+            FROM Products p
+            WHERE p.product_id = :product_id
+        ''', product_id=product_id)
+        return [{"seller_id": row[0], "product_quantity": row[1]} for row in rows]
+
+    @staticmethod
+    def get_paginated_by_user(seller_id, page, items_per_page):
+        offset = (page - 1) * items_per_page
+        rows = app.db.execute('''
+        SELECT p.product_id, p.product_name, p.product_quantity
+            FROM Products p
+            WHERE p.seller_id = :seller_id
+            LIMIT :items_per_page OFFSET :offset
+        ''', seller_id=seller_id, items_per_page=items_per_page, offset=offset)
+        items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
+        return items_in_inventory
+
+    @staticmethod
+    def get_count_by_user(seller_id):
+        row = app.db.execute('''
+        SELECT COUNT(*)
+            FROM Products p
+            WHERE p.seller_id = :seller_id
+        ''', seller_id=seller_id)
+        return row[0][0] if row else 0
 
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):

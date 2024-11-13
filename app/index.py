@@ -1,10 +1,10 @@
 from flask import render_template, request
 from flask_login import current_user
 import datetime
-
 from .models.product import Product
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
-from flask import Blueprint
+
 bp = Blueprint('index', __name__)
 
 

@@ -15,7 +15,7 @@ class Product:
         FROM Products
         WHERE product_id = :product_id
         ''',
-                              id=id)
+                              product_id=product_id)
         return Product(*(rows[0])) if rows is not None else None
 
     @staticmethod
