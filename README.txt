@@ -38,9 +38,29 @@ Where to find end points:
     - inside models/reviews.py, in the get_recent_feedback(user_id, limit=5) function.
 
 Milestone 4:
-Link to video:
+Link to video: https://duke.zoom.us/rec/play/pgtW8oIfcpS-7kh3s_GH9KzGGDn6TXzlRrKSVA7JNtZGzkB0xFr1C-joDbqerurJPq8YGc9JlSfMHpqw.Br3noU9xHdAkh-hR?canPlayFromShare=true&from=share_recording_detail&startTime=1731439501000&componentName=rec-play&originRequestUrl=https%3A%2F%2Fduke.zoom.us%2Frec%2Fshare%2F8Qnjsho-aiTpoNmhklsGEbFhi1noEgG8DWE1e5sKveT5IsgiUmrhcRuGvyi4mizX.5J5irZP_RQtXPH48%3FstartTime%3D1731439501000
 1. Users Guru:
+    - Updated gen.py to generate appropriate data for new schema & updated features to use large data
+    - Added address as a user field in database
+    - Added ability to edit any subset of user information except user id
+    - Added public view page & ability to view your personal public page
+    - Added ability to add and withdraw from balance
+    - Added pagination to products on index.html
+
 2. Products Guru:
+
+
 3. Carts Guru:
+    - Added update quantity, remove rows, delete cart, submit cart functionality for carts.
+    - Added orders table to record a cart submission
+    - Made orders paginated and added the order list and detail order view pages to user home.
+    - Added coupon table and coupon functionality for price discounts.
+    - Generated data for carts, cart products, and orders.
+    - UI updates via pagination / grid browsing.
+
 4. Sellers Guru
-5. Sellers Guru: 
+    -Updated gen.py to randomly populate and generate large testing database
+    -Debugged gen.py and generated data -Created template to implement pagination across most pages (Inventory, Products, Reviews)
+    -Added Seller View pages/buttons of View Inventory and Fulfillment Center
+    -UI updates via pagination, reflecting updated database schema
+5. Social Guru: 
