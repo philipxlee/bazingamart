@@ -4,8 +4,9 @@ from .models.product import Product
 from .models.user import User
 from .models.reviews import Reviews
 from flask import Blueprint
+from app.models.orders import Order
 
-
+bp = Blueprint('orders', __name__)
 bp = Blueprint('reviews', __name__)
 
 
@@ -30,12 +31,11 @@ def add_review():
    review_text = request.form['review_text']
    images = request.form.get('images')
 
-
    review_id = Reviews.add_review(user_id, reviewer_type, product_id, stars, review_text, images)
    if review_id:
        flash('Review added successfully!', 'success')
    else:
-       flash('Review added successfully!', 'danger')
+       flash('Error while adding review', 'danger')
    return redirect(url_for('reviews.search_user_feedback'))
 
 
