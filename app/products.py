@@ -7,7 +7,7 @@ import datetime
 
 bp = Blueprint('products', __name__)
 
-@bp.route('/product/<int:product_id>', methods=['GET'])
+@bp.route('/<int:product_id>', methods=['GET'])
 def product_detail(product_id):
     product = Product.get(product_id)    # Fetch product details
     sellers = InventoryItems.get_all_by_product(product_id)   # Fetch sellers for this product

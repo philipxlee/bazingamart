@@ -29,29 +29,4 @@
         </tbody>
     </table>
 </div>
-<!-- Add New Review -->
-<h2>Add a New Review</h2>
-<form method="POST" action="{{ url_for('reviews.add_review') }}">
- <input type="hidden" name="user_id" value="{{ current_user.id }}">
- <label for="reviewer_type">Reviewer Type:</label>
- <input type="text" name="reviewer_type" id="reviewer_type" required>
-
-
- <label for="product_id">Product ID:</label>
- <input type="number" name="product_id" id="product_id" min="0" required>
-
- <label for="stars">Stars:</label>
- <input type="number" name="stars" id="stars" min="1" max="5" required>
-
-
- <label for="review_text">Review Text:</label>
- <textarea name="review_text" id="review_text" rows="3" required></textarea>
-
-
- <label for="images">Images (optional):</label>
- <input type="text" name="images" id="images">
-
-
- <button type="submit" class="btn btn-primary">Submit Review</button>
-</form>
 {% endblock %}

@@ -1,45 +1,8 @@
-{% extends "base.html" %}
-
-{% block content %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ product.product_name }} - Product Details</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 4px; /* Reduced padding for shorter rows */
-        }
-        th {
-            background-color: #f2f2f2;
-            text-align: left;
-        }
-        td {
-            vertical-align: top;
-        }
-        th:nth-child(1), td:nth-child(1) {
-            width: 20%; /* Adjusted column width to make columns smaller */
-        }
-        th:nth-child(2), td:nth-child(2) {
-            width: 20%; /* Adjusted column width to make columns smaller */
-        }
-        th:nth-child(3), td:nth-child(3) {
-            width: 60%; /* Adjusted column width to make columns smaller */
-        }
-        .quantity-input {
-            width: 60px; /* Made the quantity input shorter */
-            display: inline-block;
-        }
-        .add-to-cart-btn {
-            display: inline-block;
-        }
-    </style>
 </head>
 <body>
     <!-- Product Details Section -->
@@ -68,8 +31,8 @@
                     <form action="{{ url_for('carts.add_to_cart') }}" method="post">
                         <input type="hidden" name="product_id" value="{{ product.product_id }}">
                         <input type="hidden" name="seller_id" value="{{ seller.seller_id }}">
-                        <input type="number" name="quantity" min="1" max="{{ seller.product_quantity }}" placeholder="Qty" class="quantity-input">
-                        <button type="submit" class="btn btn-primary add-to-cart-btn">Add to Cart</button>
+                        <input type="number" name="quantity" min="1" max="{{ seller.product_quantity }}" placeholder="Qty">
+                        <button type="submit">Add to Cart</button>
                     </form>
                 </td>
             </tr>
@@ -82,25 +45,23 @@
     <!-- Reviews Section -->
     <h2>Reviews</h2>
     {% if reviews %}
-        <table>
-            <tr>
-                <th>Rating</th>
-                <th>Review</th>
-                <th>Details</th>
-                <th>Upvotes</th>
-            </tr>
-            {% for review in reviews %}
-            <tr>
-                <td>{{ review.stars }}/5</td>
-                <td>{{ review.review_text }}</td>
-                <td>Written by User {{ review.user_id }} on {{ review.time_written }}</td>
-                <td>{{ review.upvotes }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        {% for review in reviews %}
+            <div class="review">
+                <p><strong>Rating:</strong> {{ review.stars }}/5</p>
+                <p><strong>Review:</strong> {{ review.review_text }}</p>
+                <p><small>Written by User {{ review.user_id }} on {{ review.time_written }}</small></p>
+                {% if review.images %}
+                    <div class="review-images">
+                        {% for image in review.images %}
+                            <img src="{{ image }}" alt="Review Image">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p><strong>Upvotes:</strong> {{ review.upvotes }}</p>
+            </div>
+        {% endfor %}
     {% else %}
         <p>No reviews for this product yet. Be the first to review!</p>
     {% endif %}
 </body>
 </html>
-{% endblock %}
