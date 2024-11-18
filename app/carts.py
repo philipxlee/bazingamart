@@ -12,7 +12,11 @@ bp = Blueprint('carts', __name__)
 @login_required
 def view_cart():
     user_id = current_user.id
-    cart_items = CartItems.get_all_items(user_id)
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
+    cart_items, total_items = CartItems.get_all_items(user_id, page, per_page)
+    total_pages = (total_items + per_page - 1) // per_page
+
     total_cost = sum(Decimal(item.quantity) * item.unit_price for item in cart_items)
     coupon_code = request.args.get('coupon_code') or CartItems.get_coupon_code(user_id)
     discount_percentage = 0
@@ -33,7 +37,9 @@ def view_cart():
         total_cost_after_discount=total_cost_after_discount,
         discount_percentage=discount_percentage,
         discount_amount=discount_amount,
-        coupon_code=coupon_code
+        coupon_code=coupon_code,
+        page=page,
+        total_pages=total_pages
     )
 
 @bp.route('/add_to_cart', methods=['POST'])

@@ -25,7 +25,7 @@ class CartItems:
         self.unit_price = unit_price
 
     @staticmethod
-    def get_all_items(user_id) -> list:
+    def get_all_cart_items(user_id) -> list:
         """
         Returns all items in the cart for the given user, including product name.
         @param user_id: The user ID to get the cart items for.
@@ -43,6 +43,42 @@ class CartItems:
 
         items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_cart
+
+    @staticmethod
+    def get_all_items(user_id, page=1, per_page=5) -> tuple:
+        """
+        Returns paginated items in the cart for the given user, including product name.
+        @param user_id: The user ID to get the cart items for.
+        @param page: The current page number for pagination.
+        @param per_page: The number of items per page.
+        @return: A tuple of (items_in_cart, total_items).
+        """
+        offset = (page - 1) * per_page
+        rows = current_app.db.execute(
+            """
+            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
+            FROM CartProducts cp
+            JOIN Cart c ON cp.order_id = c.order_id
+            JOIN Products p ON cp.product_id = p.product_id
+            WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
+            LIMIT :per_page OFFSET :offset
+            """,
+            user_id=user_id,
+            per_page=per_page,
+            offset=offset,
+        )
+        total_items = current_app.db.execute(
+            """
+            SELECT COUNT(*)
+            FROM CartProducts cp
+            JOIN Cart c ON cp.order_id = c.order_id
+            WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
+            """,
+            user_id=user_id,
+        )[0][0]
+
+        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
+        return items_in_cart, total_items
 
 
     @staticmethod
@@ -281,15 +317,6 @@ class CartItems:
             user_id=user_id,
         )
         return order_id_row[0][0] if order_id_row else None
-    def _get_pending_cart_id(user_id):
-        order_id_row = current_app.db.execute(
-            """
-            SELECT order_id FROM Cart
-            WHERE user_id = :user_id AND purchase_status = 'Pending'
-            """,
-            user_id=user_id,
-        )
-        return order_id_row[0][0] if order_id_row else None
 
     @staticmethod
     def _delete_cart_item(order_id, product_id):
@@ -302,23 +329,7 @@ class CartItems:
             product_id=product_id,
         )
 
-    def _delete_cart_item(order_id, product_id):
-        current_app.db.execute(
-            """
-            DELETE FROM CartProducts
-            WHERE order_id = :order_id AND product_id = :product_id
-            """,
-            order_id=order_id,
-            product_id=product_id,
-        )
-
     @staticmethod
-    def _is_valid_quantity(product_id, requested_quantity):
-        available_quantity = CartItems._get_available_inventory(product_id)
-        return (
-            available_quantity is not None and requested_quantity <= available_quantity
-        )
-
     def _is_valid_quantity(product_id, requested_quantity):
         available_quantity = CartItems._get_available_inventory(product_id)
         return (
