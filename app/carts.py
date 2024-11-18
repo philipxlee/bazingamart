@@ -58,9 +58,11 @@ def update_quantity():
     user_id = current_user.id
     result = CartItems.update_item_quantity(user_id, product_id, new_quantity)
     if result == "success":
+        flash("Updated quantity successfully!", "success")
         return redirect(url_for('carts.view_cart'))
     else:
-        return result, 500  
+        flash("Update quantity failed: not enough inventory!", "error")
+        return redirect(url_for('carts.view_cart'))
 
 @bp.route('/remove_item', methods=['POST'])
 @login_required
