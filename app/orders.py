@@ -24,5 +24,16 @@ def order_details(order_id):
     if not order:
         flash("Order not found.", "error")
         return redirect(url_for('users.user_home'))
-    order_items = Order.get_order_details(order_id)
-    return render_template('order_details.html', order=order, order_items=order_items)
+
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
+    order_items, total_items = Order.get_order_details(order_id, page, per_page)
+    total_pages = (total_items + per_page - 1) // per_page
+
+    return render_template(
+        'order_details.html',
+        order=order,
+        order_items=order_items,
+        page=page,
+        total_pages=total_pages
+    )

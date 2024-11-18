@@ -75,19 +75,33 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def get_order_details(order_id) -> list:
+    def get_order_details(order_id, page=1, per_page=5) -> tuple:
         """
-        Retrieves the specific order details for a given order ID.
-        In other words, this method returns a submitted cart.
+        Retrieves paginated order details for a given order ID.
         @param order_id: The order ID to get the details for.
+        @param page: The current page number for pagination.
+        @param per_page: The number of items per page.
+        @return: A tuple of (rows, total_items).
         """
+        offset = (page - 1) * per_page
         rows = current_app.db.execute(
             """
             SELECT p.product_name, cp.quantity, cp.unit_price
             FROM CartProducts cp
             JOIN Products p ON cp.product_id = p.product_id
             WHERE cp.order_id = :order_id
+            LIMIT :per_page OFFSET :offset
             """,
-            order_id=order_id
+            order_id=order_id,
+            per_page=per_page,
+            offset=offset,
         )
-        return rows
+        total_items = current_app.db.execute(
+            """
+            SELECT COUNT(*)
+            FROM CartProducts
+            WHERE order_id = :order_id
+            """,
+            order_id=order_id,
+        )[0][0]
+        return rows, total_items
