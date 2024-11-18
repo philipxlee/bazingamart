@@ -21,7 +21,7 @@ class CartSubmission:
         @param user_id: The user ID submitting the order.
         """
         # 1. Fetch the user's cart items
-        cart_items = CartItems.get_all_items(user_id)
+        cart_items = CartItems.get_all_cart_items(user_id)
         if not cart_items:
             return "Your cart is empty."
 
