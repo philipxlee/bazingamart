@@ -20,10 +20,11 @@
         <div class="card-body">
           <h5 class="card-title">
             <a href="/product/{{ product.product_id }}">
-              {{ product.product_name }}</h5>
-            </a>
+              {{ product.product_name }}
+          </h5>
+          </a>
           <p class="card-text">Price: ${{ product.price }}</p>
-          
+
           <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
@@ -76,15 +77,6 @@
   </nav>
 </div>
 
-<!-- Pagination Navigation -->
-<div class="text-center mt-4">
-  {% if page > 1 %}
-  <a href="{{ url_for('index.index', page=page-1) }}" class="btn btn-secondary">Previous</a>
-  {% endif %}
-  {% if page < total_pages %}
-  <a href="{{ url_for('index.index', page=page+1) }}" class="btn btn-secondary">Next</a>
-  {% endif %}
-</div>
 
 <!-- Extra Padding at the Bottom -->
 <div style="padding-bottom: 50px;"></div>
