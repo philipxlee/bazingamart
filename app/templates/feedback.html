@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<h2>Search Recent Feedback by User ID:</h2>
+
+
+<!-- Input the user ID -->
+<form method="POST" action="{{ url_for('reviews.search_user_feedback') }}">
+ <label for="user_id">Enter User ID:</label>
+ <input type="number" name="user_id" id="user_id" min="0" required>
+ <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+
+<br><br>
+
+
+{% if recent_feedback %}
+<h2>5 Most Recent Feedback Entries for User ID: {{ user_id }}</h2>
+<table class='table table-hover table-bordered container'>
+ <thead class="thead-dark">
+   <tr>
+     <th scope="col">Review ID</th>
+     <th scope="col">Type</th>
+     <th scope="col">Stars</th>
+     <th scope="col">Review Text</th>
+     <th scope="col">Time Written</th>
+     <th scope="col">Actions</th>
+   </tr>
+ </thead>
+ <tbody>
+   {% for feedback in recent_feedback %}
+   <tr>
+     <th scope="row">{{ feedback.review_id }}</th>
+     <td>{{ feedback.reviewer_type }}</td>
+     <td>{{ feedback.stars if feedback.stars else 'N/A' }}</td>
+     <td>{{ feedback.review_text[:50] + '...' if feedback.review_text and feedback.review_text|length > 50 else feedback.review_text or 'N/A' }}</td>
+     <td>{{ feedback.time_written }}</td>
+     <td>
+       <!-- Upvote Form -->
+       <form method="POST" action="{{ url_for('reviews.upvote_review') }}" style="display:inline;">
+         <input type="hidden" name="review_id" value="{{ feedback.review_id }}">
+         <button type="submit" class="btn btn-success btn-sm">Upvote</button>
+       </form>
+
+
+       <!-- Update Form -->
+       <button class="btn btn-warning btn-sm" onclick="document.getElementById('updateForm{{ feedback.review_id }}').style.display='block'">Edit</button>
+      
+       <!-- Delete Form -->
+       <form method="POST" action="{{ url_for('reviews.delete_review') }}" style="display:inline;">
+         <input type="hidden" name="review_id" value="{{ feedback.review_id }}">
+         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+       </form>
+     </td>
+   </tr>
+   <!-- Update Form Modal -->
+   <tr id="updateForm{{ feedback.review_id }}" style="display:none;">
+     <td colspan="6">
+       <form method="POST" action="{{ url_for('reviews.update_review') }}">
+         <input type="hidden" name="review_id" value="{{ feedback.review_id }}">
+         <label for="stars">Stars:</label>
+         <input type="number" name="stars" id="stars" min="1" max="5" value="{{ feedback.stars }}" required>
+         <label for="review_text">Review Text:</label>
+         <textarea name="review_text" id="review_text" rows="2" required>{{ feedback.review_text }}</textarea>
+         <button type="submit" class="btn btn-primary">Update</button>
+         <button type="button" class="btn btn-secondary" onclick="document.getElementById('updateForm{{ feedback.review_id }}').style.display='none'">Cancel</button>
+       </form>
+     </td>
+   </tr>
+   {% endfor %}
+ </tbody>
+</table>
+{% else %}
+<p>No recent feedback found for this user ID.</p>
+{% endif %}
+
+
+<br><br>
+
+
+<!-- Add New Review -->
+<h2>Add a New Review</h2>
+<form method="POST" action="{{ url_for('reviews.add_review') }}">
+ <input type="hidden" name="user_id" value="{{ current_user.id }}">
+ <label for="reviewer_type">Reviewer Type:</label>
+ <input type="text" name="reviewer_type" id="reviewer_type" required>
+
+
+ <label for="product_id">Product ID:</label>
+ <input type="number" name="product_id" id="product_id" min="0" required>
+
+ <label for="stars">Stars:</label>
+ <input type="number" name="stars" id="stars" min="1" max="5" required>
+
+
+ <label for="review_text">Review Text:</label>
+ <textarea name="review_text" id="review_text" rows="3" required></textarea>
+
+
+ <label for="images">Images (optional):</label>
+ <input type="text" name="images" id="images">
+
+
+ <button type="submit" class="btn btn-primary">Submit Review</button>
+</form>
+
+
+{% endblock %}

@@ -3,16 +3,29 @@
 {% block content %}
 <br><br>
 
+
 <h2 class="text-center">Products for Sale</h2>
+
+<!-- Button for "Search By Price" and "Search User Feedback" -->
+<div class="text-center mb-4">
+  <a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
+  <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Product & Seller Feedback</a>
+</div>
 
 <div class="container">
   <div class="row">
-    {% for product in avail_products %}
+    {% for product in product_items %}
     <div class="col-md-4 mb-4">
       <div class="card h-100">
         <div class="card-body">
-          <h5 class="card-title">{{ product.product_name }}</h5>
+          <h5 class="card-title">
+            <a href="/product/{{ product.product_id }}">
+              {{ product.product_name }}
+          </h5>
+          </a>
           <p class="card-text">Price: ${{ product.price }}</p>
+
+          <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
             <label for="quantity_{{ product.product_id }}">Quantity:</label>
@@ -63,5 +76,9 @@
     </ul>
   </nav>
 </div>
+
+
+<!-- Extra Padding at the Bottom -->
+<div style="padding-bottom: 50px;"></div>
 
 {% endblock %}

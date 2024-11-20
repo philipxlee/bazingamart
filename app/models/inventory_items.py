@@ -16,6 +16,15 @@ class InventoryItems:
         ''', seller_id=seller_id)
         items_in_inventory = [InventoryItems(row[0], row[1], row[2]) for row in rows]
         return items_in_inventory
+    
+    @staticmethod
+    def get_all_by_product(product_id):
+        rows = app.db.execute('''
+        SELECT p.seller_id, p.product_quantity
+            FROM Products p
+            WHERE p.product_id = :product_id
+        ''', product_id=product_id)
+        return [{"seller_id": row[0], "product_quantity": row[1]} for row in rows]
 
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):
