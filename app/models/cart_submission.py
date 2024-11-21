@@ -42,7 +42,7 @@ class CartSubmission:
             return "Insufficient balance to complete the purchase."
         
         user_address = User.get_address(user_id)
-        if user_address == " ":
+        if user_address == " " or user_address == "":
             return "No address on file. Please add an address to your account to complete your order."
 
         # 4. Check product availability
