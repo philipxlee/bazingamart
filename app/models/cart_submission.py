@@ -43,7 +43,7 @@ class CartSubmission:
         
         user_address = User.get_address(user_id)
         if user_address == " ":
-            return "No address on file. Please add an address to your account for your order."
+            return "No address on file. Please add an address to your account to complete your order."
 
         # 4. Check product availability
         for item in cart_items:
