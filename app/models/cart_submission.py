@@ -36,10 +36,14 @@ class CartSubmission:
             discount_amount = total_cost * discount_rate
             total_cost -= discount_amount
 
-        # 3. Check user balance
+        # 3. Check user balance & address
         user_balance = User.get_balance(user_id)
         if user_balance < total_cost:
             return "Insufficient balance to complete the purchase."
+        
+        user_address = User.get_address(user_id)
+        if user_address == " ":
+            return "No address on file. Please add an address to your account for your order."
 
         # 4. Check product availability
         for item in cart_items:

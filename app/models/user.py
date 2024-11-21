@@ -91,6 +91,18 @@ RETURNING id
         return bal[0][0] if bal else 0
     
     @staticmethod
+    def get_address(uid):
+        addr = app.db.execute(
+            """
+            SELECT address
+            FROM Users
+            WHERE id = :uid
+            """,
+            uid=uid,
+        )
+        return addr[0][0] if addr else 0
+    
+    @staticmethod
     def update_balance(uid, amount):
         app.db.execute(
             """
