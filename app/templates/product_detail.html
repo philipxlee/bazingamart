@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <title>{{ product.product_name }} - Product Details</title>
@@ -64,4 +65,4 @@
         <p>No reviews for this product yet. Be the first to review!</p>
     {% endif %}
 </body>
-</html>
+{% endblock %}
