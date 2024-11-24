@@ -68,17 +68,17 @@ def update_inventory_item_price():
     flash("Item price updated successfully.", "success")
     return redirect(url_for('inventory.view_inventory_item', product_id=product_id))
 
-# Added route to delete an inventory item
+# Updated route to delete an inventory item
 @bp.route('/delete_inventory_item', methods=['POST'])
 @login_required
 def delete_inventory_item():
     """
-    Deletes a product from the seller's inventory.
+    Marks a product as unavailable in the seller's inventory instead of deleting it.
     """
     seller_id = current_user.id
     product_id = request.form.get('product_id', type=int)
 
-    InventoryItems.delete_inventory_item(seller_id, product_id)
+    InventoryItems.mark_inventory_item_unavailable(seller_id, product_id)
     flash("Item removed from inventory successfully.", "success")
     return redirect(url_for('inventory.view_inventory'))
 
@@ -92,3 +92,22 @@ def fulfillment_center():
     # Use the helper method to retrieve all orders associated with the seller's products
     orders = InventoryItems.get_seller_orders(seller_id)
     return render_template('view_fulfillment_center.html', orders=orders if isinstance(orders, list) else list(orders))
+
+# Added route to add a new inventory item
+@bp.route('/add_inventory_item', methods=['GET', 'POST'])
+@login_required
+def add_inventory_item():
+    """
+    Adds a new product to the seller's inventory.
+    """
+    if request.method == 'POST':
+        seller_id = current_user.id
+        product_name = request.form.get('product_name')
+        product_price = request.form.get('product_price', type=float)
+        product_quantity = request.form.get('product_quantity', type=int)
+
+        InventoryItems.add_inventory_item(seller_id, product_name, product_price, product_quantity)
+        flash("New product added to inventory successfully.", "success")
+        return redirect(url_for('inventory.view_inventory'))
+
+    return render_template('add_inventory_item.html')

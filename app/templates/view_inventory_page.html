@@ -4,6 +4,11 @@
 <h2>Your Inventory Items</h2>
 <p>Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
 
+<!-- Add New Inventory Item Button -->
+<div style="text-align: right; margin-bottom: 20px;">
+    <a href="{{ url_for('inventory.add_inventory_item') }}" class="btn btn-success">Add New Inventory Item</a>
+</div>
+
 {% if inventory_items %}
 <table border="1" cellpadding="5" cellspacing="0">
     <thead>
@@ -23,8 +28,8 @@
             <td>{{ item.product_quantity }}</td>
             <td>${{ item.product_price }}</td> <!-- Display product price -->
             <td>
-                <!-- Button to navigate to update product details -->
-                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a> <!-- New button -->
+                <!-- Update Product Details Button -->
+                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a>
             </td>
         </tr>
         {% endfor %}

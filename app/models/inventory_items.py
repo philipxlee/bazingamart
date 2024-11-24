@@ -57,7 +57,7 @@ class InventoryItems:
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id, new_price=new_price)
 
-    # Updated method to deactivate a specific product from the seller's inventory instead of deleting it
+    # Updated method to mark a specific product as unavailable in the seller's inventory instead of deleting it
     @staticmethod
     def delete_inventory_item(seller_id, product_id):
         app.db.execute('''
@@ -135,3 +135,11 @@ class InventoryItems:
             })
 
         return [order for order in orders.values()]
+
+    # New method to add a product to the seller's inventory
+    @staticmethod
+    def add_inventory_item(seller_id, product_name, product_price, product_quantity):
+        app.db.execute('''
+        INSERT INTO Products (product_name, price, available, seller_id, product_quantity)
+        VALUES (:product_name, :product_price, TRUE, :seller_id, :product_quantity)
+        ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
