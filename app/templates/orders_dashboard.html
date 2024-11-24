@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Orders Dashboard</h2>
+
+<h3>To Be Fulfilled</h3>
+{% if unfulfilled_orders %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Created At</th>
+            <th>Total Price</th>
+            <th>Fulfillment Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in unfulfilled_orders %}
+        <tr>
+            <td>{{ order['order_id'] }}</td>
+            <td>{{ order['created_at'] }}</td>
+            <td>${{ order['total_price'] }}</td>
+            <td>{{ order['fulfillment_status'] }}</td>
+            <td>
+                <a href="{{ url_for('inventory.order_dashboard_details', order_id=order['order_id']) }}" class="btn btn-info">View Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No orders to fulfill.</p>
+{% endif %}
+
+<h3>Fulfilled Orders</h3>
+{% if fulfilled_orders %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Created At</th>
+            <th>Total Price</th>
+            <th>Fulfillment Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in fulfilled_orders %}
+        <tr>
+            <td>{{ order['order_id'] }}</td>
+            <td>{{ order['created_at'] }}</td>
+            <td>${{ order['total_price'] }}</td>
+            <td>{{ order['fulfillment_status'] }}</td>
+            <td>
+                <a href="{{ url_for('inventory.order_dashboard_details', order_id=order['order_id']) }}" class="btn btn-info">View Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No fulfilled orders available.</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    {% if page > 1 %}
+        <a href="{{ url_for('inventory.orders_dashboard', page=page-1) }}" class="btn btn-secondary">Previous</a>
+    {% endif %}
+    {% if total_unfulfilled + total_fulfilled > page * per_page %}
+        <a href="{{ url_for('inventory.orders_dashboard', page=page+1) }}" class="btn btn-secondary">Next</a>
+    {% endif %}
+</div>
+
+{% endblock %}

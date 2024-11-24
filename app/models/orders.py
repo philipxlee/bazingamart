@@ -7,11 +7,12 @@ class Order:
     order summaries and detailed order information.
     """
 
-    def __init__(self, order_id, total_price, created_at, coupon_code=None):
+    def __init__(self, order_id, total_price, created_at, coupon_code=None, fulfillment_status='Incomplete'):
         self.order_id = order_id
         self.total_price = total_price
         self.created_at = created_at
         self.coupon_code = coupon_code
+        self.fulfillment_status = fulfillment_status
 
     @staticmethod
     @handle_db_exceptions
@@ -105,3 +106,93 @@ class Order:
             order_id=order_id,
         )[0][0]
         return rows, total_items
+    
+    @staticmethod
+    @handle_db_exceptions
+    def get_seller_orders(seller_id, page=1, per_page=5):
+        """
+        Retrieves paginated lists of orders involving products sold by the seller.
+        Returns two lists: unfulfilled_orders and fulfilled_orders.
+        """
+        offset = (page - 1) * per_page
+
+        # Retrieve unfulfilled orders
+        unfulfilled_rows = current_app.db.execute('''
+            SELECT 
+                o.order_id,
+                o.created_at,
+                SUM(cp.quantity * cp.unit_price) AS total_price,
+                o.fulfillment_status
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id 
+            AND o.fulfillment_status IN ('Incomplete')
+            GROUP BY o.order_id, o.created_at, o.fulfillment_status
+            ORDER BY o.created_at DESC
+            LIMIT :per_page OFFSET :offset
+        ''', seller_id=seller_id, per_page=per_page, offset=offset)
+
+        # Retrieve fulfilled orders
+        fulfilled_rows = current_app.db.execute('''
+            SELECT 
+                o.order_id,
+                o.created_at,
+                SUM(cp.quantity * cp.unit_price) AS total_price,
+                o.fulfillment_status
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id 
+            AND o.fulfillment_status IN ('Fulfilled', 'Shipped', 'Delivered')
+            GROUP BY o.order_id, o.created_at, o.fulfillment_status
+            ORDER BY o.created_at DESC
+            LIMIT :per_page OFFSET :offset
+        ''', seller_id=seller_id, per_page=per_page, offset=offset)
+
+        unfulfilled_orders = [{"order_id": row[0], "created_at": row[1], "total_price": row[2], "fulfillment_status": row[3]} for row in unfulfilled_rows]
+        fulfilled_orders = [{"order_id": row[0], "created_at": row[1], "total_price": row[2], "fulfillment_status": row[3]} for row in fulfilled_rows]
+
+        return unfulfilled_orders, fulfilled_orders
+
+    @staticmethod
+    @handle_db_exceptions
+    def get_order_by_seller(seller_id, order_id) -> 'Order':
+        """
+        Retrieves order metadata if the given seller has products in the order.
+        """
+        rows = current_app.db.execute('''
+            SELECT DISTINCT o.order_id, o.total_price, o.created_at, o.coupon_code, o.fulfillment_status
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id AND o.order_id = :order_id
+        ''', seller_id=seller_id, order_id=order_id)
+
+        if rows:
+            row = rows[0]
+            return Order(row[0], row[1], row[2], row[3], fulfillment_status=row[4])
+        else:
+            return None
+
+    @staticmethod
+    @handle_db_exceptions
+    def get_order_details_for_seller(seller_id, order_id, page, per_page):
+        """
+        Retrieves paginated order details for products sold by the given seller in a specific order.
+        """
+        offset = (page - 1) * per_page
+        rows = current_app.db.execute('''
+            SELECT p.product_name, cp.quantity, cp.unit_price
+            FROM CartProducts cp
+            JOIN Products p ON cp.product_id = p.product_id
+            WHERE cp.seller_id = :seller_id AND cp.order_id = :order_id
+            LIMIT :per_page OFFSET :offset
+        ''', seller_id=seller_id, order_id=order_id, per_page=per_page, offset=offset)
+        
+        total_items = current_app.db.execute('''
+            SELECT COUNT(*)
+            FROM CartProducts
+            WHERE seller_id = :seller_id AND order_id = :order_id
+        ''', seller_id=seller_id, order_id=order_id)[0][0]
+
+        return rows, total_items
+
+

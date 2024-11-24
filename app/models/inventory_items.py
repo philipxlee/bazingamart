@@ -1,5 +1,6 @@
 from flask import current_app as app
-
+from app.models.orders import Order
+from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 class InventoryItems:
     def __init__(self, product_id, product_name, product_quantity, product_price=None, available=True):
@@ -89,57 +90,31 @@ class InventoryItems:
         return row[0][0] if row else 0
 
     @staticmethod
-    def get_seller_orders(seller_id):
+    def get_seller_orders(seller_id, page, per_page):
+        """
+        Retrieves paginated orders for products sold by a given seller.
+        """
+        offset = (page - 1) * per_page
         rows = app.db.execute('''
-        SELECT 
-            o.order_id,
-            u.firstname || ' ' || u.lastname AS buyer_name,
-            u.address AS buyer_address,
-            o.created_at AS order_date,
-            SUM(cp.quantity * cp.unit_price) AS total_price,
-            SUM(cp.quantity) AS total_items,
-            cp.product_id,
-            p.product_name AS product_name,
-            cp.quantity AS item_quantity,
-            o.fulfillment_status
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        JOIN cartproducts cp ON o.order_id = cp.order_id
-        JOIN products p ON cp.product_id = p.product_id
-        WHERE p.seller_id = :seller_id
-        GROUP BY o.order_id, u.firstname, u.lastname, u.address, o.created_at, cp.product_id, p.product_name, cp.quantity, o.fulfillment_status
-        ORDER BY o.created_at DESC
-        ''', seller_id=seller_id)  
+            SELECT o.order_id, o.total_price, o.created_at, o.coupon_code
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id
+            GROUP BY o.order_id
+            ORDER BY o.created_at DESC
+            LIMIT :per_page OFFSET :offset
+        ''', seller_id=seller_id, per_page=per_page, offset=offset)
+        return [Order(row[0], row[1], row[2], row[3]) for row in rows]
 
-        # Organize rows by order and item details
-        orders = {}
-        for row in rows:
-            order_id = row[0]
-            if order_id not in orders:
-                orders[order_id] = {
-                    "order_id": order_id,
-                    "buyer_name": row[1],
-                    "buyer_address": row[2],
-                    "order_date": row[3],
-                    "total_price": row[4],
-                    "total_items": row[5],
-                    "items": []  # Ensure items is initialized as a list
-                }
-                
-            # Append each product in the order to the items list
-            orders[order_id]["items"].append({
-                "product_id": row[6],
-                "product_name": row[7],
-                "quantity": row[8],
-                "fulfillment_status": row[9]
-            })
-
-        return [order for order in orders.values()]
-
-    # New method to add a product to the seller's inventory
     @staticmethod
-    def add_inventory_item(seller_id, product_name, product_price, product_quantity):
-        app.db.execute('''
-        INSERT INTO Products (product_name, price, available, seller_id, product_quantity)
-        VALUES (:product_name, :product_price, TRUE, :seller_id, :product_quantity)
-        ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
+    def count_seller_orders(seller_id):
+        """
+        Counts the total number of orders for products sold by a given seller.
+        """
+        result = app.db.execute('''
+            SELECT COUNT(DISTINCT o.order_id)
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id
+        ''', seller_id=seller_id)
+        return result[0][0] if result else 0

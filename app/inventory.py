@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
+from app.models.orders import Order 
 from app.models.inventory_items import InventoryItems
-from app.models.orders import Order
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 bp = Blueprint('inventory', __name__)
@@ -23,7 +23,6 @@ def view_inventory():
 
     return render_template('view_inventory_page.html', inventory_items=inventory_items, page=page, total_pages=total_pages)
 
-# Updated route to view details of a specific inventory item
 @bp.route('/view_inventory_item/<int:product_id>', methods=['GET'])
 @login_required
 def view_inventory_item(product_id):
@@ -38,7 +37,6 @@ def view_inventory_item(product_id):
 
     return render_template('view_inventory_item.html', inventory_item=inventory_item)
 
-# Updated route to update the quantity of an inventory item
 @bp.route('/update_inventory_item', methods=['POST'])
 @login_required
 def update_inventory_item():
@@ -53,7 +51,6 @@ def update_inventory_item():
     flash("Item quantity updated successfully.", "success")
     return redirect(url_for('inventory.view_inventory_item', product_id=product_id))
 
-# Added route to update the price of an inventory item
 @bp.route('/update_inventory_item_price', methods=['POST'])
 @login_required
 def update_inventory_item_price():
@@ -68,7 +65,6 @@ def update_inventory_item_price():
     flash("Item price updated successfully.", "success")
     return redirect(url_for('inventory.view_inventory_item', product_id=product_id))
 
-# Updated route to delete an inventory item
 @bp.route('/delete_inventory_item', methods=['POST'])
 @login_required
 def delete_inventory_item():
@@ -82,18 +78,6 @@ def delete_inventory_item():
     flash("Item removed from inventory successfully.", "success")
     return redirect(url_for('inventory.view_inventory'))
 
-@bp.route('/fulfillment_center')
-@login_required
-def fulfillment_center():
-    """
-    Displays the seller's order history and fulfillment status for each item.
-    """
-    seller_id = current_user.id
-    # Use the helper method to retrieve all orders associated with the seller's products
-    orders = InventoryItems.get_seller_orders(seller_id)
-    return render_template('view_fulfillment_center.html', orders=orders if isinstance(orders, list) else list(orders))
-
-# Added route to add a new inventory item
 @bp.route('/add_inventory_item', methods=['GET', 'POST'])
 @login_required
 def add_inventory_item():
@@ -111,3 +95,53 @@ def add_inventory_item():
         return redirect(url_for('inventory.view_inventory'))
 
     return render_template('add_inventory_item.html')
+
+@bp.route('/orders_dashboard')
+@login_required
+def orders_dashboard():
+    seller_id = current_user.id
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
+
+    # Get all orders containing products from the logged-in seller
+    unfulfilled_orders, fulfilled_orders = Order.get_seller_orders(seller_id, page, per_page)
+
+    total_unfulfilled = len(unfulfilled_orders)
+    total_fulfilled = len(fulfilled_orders)
+
+    return render_template(
+        'orders_dashboard.html',
+        unfulfilled_orders=unfulfilled_orders,
+        fulfilled_orders=fulfilled_orders,
+        total_unfulfilled=total_unfulfilled,
+        total_fulfilled=total_fulfilled,
+        page=page,
+        per_page=per_page,
+    )
+
+
+@bp.route('/order_dashboard_details/<int:order_id>')
+@login_required
+def order_dashboard_details(order_id):
+    seller_id = current_user.id
+
+    # Get the order metadata
+    order = Order.get_order_by_seller(seller_id, order_id)
+    if not order:
+        flash("Order not found or you don't have products in this order.", "error")
+        return redirect(url_for('inventory.orders_dashboard'))
+
+    # Get the paginated details of items sold by the seller
+    page = request.args.get('page', default=1, type=int)
+    per_page = 5
+    order_items, total_items = Order.get_order_details_for_seller(seller_id, order_id, page, per_page)
+
+    return render_template(
+        'order_dashboard_details.html',
+        order=order,
+        order_items=order_items,
+        total_items=total_items,
+        buyer_address=order.buyer_address if hasattr(order, 'buyer_address') else None,
+        overall_fulfillment_status=order.fulfillment_status
+    )
+

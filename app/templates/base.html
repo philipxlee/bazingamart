@@ -74,8 +74,8 @@
       <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
       <div style="margin-top: 10px;">
         <a href="{{ url_for('inventory.view_inventory') }}" class="btn btn-black">View Inventory</a>
-        <a href="{{ url_for('inventory.fulfillment_center') }}" class="btn btn-black">Fulfillment Center</a>
-      </div>
+        <a href="{{ url_for('inventory.orders_dashboard') }}" class="btn btn-black">Orders Dashboard</a> <!-- Added Orders Dashboard Link -->
+    </div>    
       {% else %}
       <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
       {% endif %}

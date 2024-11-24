@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Order Dashboard Details for Order ID: {{ order.order_id }}</h2>
+<p><strong>Total Price (for your items):</strong> ${{ order.total_price }}</p>
+<p><strong>Created At:</strong> {{ order.created_at }}</p>
+<p><strong>Coupon Code:</strong> {{ order.coupon_code }}</p>
+<p><strong>Buyer Address:</strong> {{ buyer_address }}</p>
+<p><strong>Total # of Items Purchased:</strong> {{ total_items }}</p>
+<p><strong>Overall Fulfillment Status:</strong> {{ overall_fulfillment_status }}</p>
+
+<h3>Items in this Order from Your Inventory:</h3>
+{% if order_items %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Fulfillment Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order_items %}
+        <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.unit_price }}</td>
+            <td>{{ item.fulfillment_status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No items found for this order.</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('inventory.orders_dashboard') }}" class="btn btn-secondary">Back to Orders Dashboard</a>
+</div>
+
+{% endblock %}
