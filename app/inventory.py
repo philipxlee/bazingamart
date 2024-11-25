@@ -136,12 +136,15 @@ def order_dashboard_details(order_id):
     per_page = 5
     order_items, total_items = Order.get_order_details_for_seller(seller_id, order_id, page, per_page)
 
+    # Get the buyer address using the helper function
+    buyer_address = Order.get_user_address_by_order(order_id)  
+
     return render_template(
         'order_dashboard_details.html',
         order=order,
         order_items=order_items,
         total_items=total_items,
-        buyer_address=order.buyer_address if hasattr(order, 'buyer_address') else None,
+        buyer_address=buyer_address,
         overall_fulfillment_status=order.fulfillment_status
     )
 

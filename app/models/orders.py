@@ -1,5 +1,6 @@
 from flask import current_app
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
+from app.models.user import User 
 
 class Order:
     """
@@ -194,5 +195,25 @@ class Order:
         ''', seller_id=seller_id, order_id=order_id)[0][0]
 
         return rows, total_items
+    
+    @staticmethod
+    @handle_db_exceptions
+    def get_user_address_by_order(order_id):
+        """
+        Retrieves the user's address based on the given order ID.
+        """
+        # Fetch the user_id from the Orders table based on the order_id
+        rows = current_app.db.execute('''
+            SELECT user_id
+            FROM Orders
+            WHERE order_id = :order_id
+        ''', order_id=order_id)
+
+        if rows:
+            user_id = rows[0][0]
+            # Use User class method to fetch the address
+            return User.get_address(user_id)
+        return None
+
 
 
