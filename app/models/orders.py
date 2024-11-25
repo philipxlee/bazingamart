@@ -156,6 +156,55 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
+    def get_paginated_seller_orders(seller_id, status, page, per_page):
+        """
+        Retrieves paginated lists of orders for products sold by the seller.
+        If status is a list, it retrieves all orders matching any of the provided statuses.
+        """
+        offset = (page - 1) * per_page
+
+        if isinstance(status, list):
+            status_placeholder = ','.join(f"'{s}'" for s in status)
+        else:
+            status_placeholder = f"'{status}'"
+
+        sql = f'''
+            SELECT 
+                o.order_id,
+                o.created_at,
+                SUM(cp.quantity * cp.unit_price) AS total_price,
+                o.fulfillment_status
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id 
+            AND o.fulfillment_status IN ({status_placeholder})
+            GROUP BY o.order_id, o.created_at, o.fulfillment_status
+            ORDER BY o.created_at DESC
+            LIMIT :per_page OFFSET :offset
+        '''
+
+        rows = current_app.db.execute(
+            sql, seller_id=seller_id, per_page=per_page, offset=offset
+        )
+
+        total_items = current_app.db.execute(
+            f'''
+            SELECT COUNT(DISTINCT o.order_id)
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE cp.seller_id = :seller_id
+            AND o.fulfillment_status IN ({status_placeholder})
+            ''',
+            seller_id=seller_id
+        )[0][0]
+
+        orders = [{"order_id": row[0], "created_at": row[1], "total_price": row[2], "fulfillment_status": row[3]} for row in rows]
+        return orders, total_items
+
+
+
+    @staticmethod
+    @handle_db_exceptions
     def get_order_by_seller(seller_id, order_id) -> 'Order':
         """
         Retrieves order metadata if the given seller has products in the order.

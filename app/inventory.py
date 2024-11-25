@@ -100,24 +100,34 @@ def add_inventory_item():
 @login_required
 def orders_dashboard():
     seller_id = current_user.id
-    page = request.args.get('page', default=1, type=int)
+    
+    # Separate page numbers for unfulfilled and fulfilled orders
+    unfulfilled_page = request.args.get('unfulfilled_page', default=1, type=int)
+    fulfilled_page = request.args.get('fulfilled_page', default=1, type=int)
     per_page = 5
 
-    # Get all orders containing products from the logged-in seller
-    unfulfilled_orders, fulfilled_orders = Order.get_seller_orders(seller_id, page, per_page)
+    # Get paginated unfulfilled and fulfilled orders separately
+    unfulfilled_orders, total_unfulfilled = Order.get_paginated_seller_orders(
+        seller_id, 'Incomplete', unfulfilled_page, per_page
+    )
+    fulfilled_orders, total_fulfilled = Order.get_paginated_seller_orders(
+        seller_id, ['Fulfilled', 'Delivered', 'Shipped'], fulfilled_page, per_page
+    )
 
-    total_unfulfilled = len(unfulfilled_orders)
-    total_fulfilled = len(fulfilled_orders)
+    total_unfulfilled_pages = (total_unfulfilled + per_page - 1) // per_page
+    total_fulfilled_pages = (total_fulfilled + per_page - 1) // per_page
 
     return render_template(
         'orders_dashboard.html',
         unfulfilled_orders=unfulfilled_orders,
         fulfilled_orders=fulfilled_orders,
-        total_unfulfilled=total_unfulfilled,
-        total_fulfilled=total_fulfilled,
-        page=page,
-        per_page=per_page,
+        unfulfilled_page=unfulfilled_page,
+        total_unfulfilled_pages=total_unfulfilled_pages,
+        fulfilled_page=fulfilled_page,
+        total_fulfilled_pages=total_fulfilled_pages,
     )
+
+
 
 
 @bp.route('/order_dashboard_details/<int:order_id>')
