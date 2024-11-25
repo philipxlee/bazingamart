@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Your Inventory Items</h2>
-<p>Below is a list of all items in your inventory. Use this page to manage your stock levels.</p>
+<p>Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
 
 {% if inventory_items %}
 <table border="1" cellpadding="5" cellspacing="0">
@@ -11,6 +11,8 @@
             <th>Product ID</th>
             <th>Product Name</th>
             <th>Product Quantity</th>
+            <th>Product Price</th> <!-- Added Product Price column -->
+            <th>Actions</th> <!-- Added Actions column -->
         </tr>
     </thead>
     <tbody>
@@ -19,6 +21,11 @@
             <td>{{ item.product_id }}</td>
             <td>{{ item.product_name }}</td>
             <td>{{ item.product_quantity }}</td>
+            <td>${{ item.product_price }}</td> <!-- Display product price -->
+            <td>
+                <!-- Button to navigate to update product details -->
+                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a> <!-- New button -->
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -35,9 +42,5 @@
 {% else %}
 <p>Your inventory is empty.</p>
 {% endif %}
-<div style="margin-top: 20px;">
-    <a href="{{ url_for('inventory.fulfillment_center') }}" class="btn btn-primary">Go to Fulfillment Center</a>
-</div>
 
 {% endblock %}
-

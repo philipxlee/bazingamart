@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Orders Dashboard</h2>
+
+<h3>To be Fulfilled</h3>
+{% if unfulfilled_orders %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Total Price</th>
+            <th>Created At</th>
+            <th>Fulfillment Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in unfulfilled_orders %}
+        <tr>
+            <td>{{ order.order_id }}</td>
+            <td>${{ order.total_price }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>{{ order.fulfillment_status }}</td>
+            <td><a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}">View Details</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+    {% if unfulfilled_page > 1 %}
+    <a href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page-1, fulfilled_page=fulfilled_page) }}">Previous</a>
+    {% endif %}
+    <span>Page {{ unfulfilled_page }} of {{ total_unfulfilled_pages }}</span>
+    {% if unfulfilled_page < total_unfulfilled_pages %}
+    <a href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page+1, fulfilled_page=fulfilled_page) }}">Next</a>
+    {% endif %}
+</div>
+{% else %}
+<p>No unfulfilled orders found.</p>
+{% endif %}
+
+<h3>Fulfilled Orders</h3>
+{% if fulfilled_orders %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Total Price</th>
+            <th>Created At</th>
+            <th>Fulfillment Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in fulfilled_orders %}
+        <tr>
+            <td>{{ order.order_id }}</td>
+            <td>${{ order.total_price }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>{{ order.fulfillment_status }}</td>
+            <td><a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}">View Details</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+    {% if fulfilled_page > 1 %}
+    <a href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page-1) }}">Previous</a>
+    {% endif %}
+    <span>Page {{ fulfilled_page }} of {{ total_fulfilled_pages }}</span>
+    {% if fulfilled_page < total_fulfilled_pages %}
+    <a href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page+1) }}">Next</a>
+    {% endif %}
+</div>
+{% else %}
+<p>No fulfilled orders found.</p>
+{% endif %}
+{% endblock %}
