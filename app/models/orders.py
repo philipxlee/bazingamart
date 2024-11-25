@@ -216,4 +216,17 @@ class Order:
         return None
 
 
+    @staticmethod
+    @handle_db_exceptions
+    def update_fulfillment_status(order_id, new_status):
+        """
+        Updates the fulfillment status of an order.
+        :param order_id: ID of the order.
+        :param new_status: New fulfillment status to set.
+        """
+        current_app.db.execute('''
+            UPDATE Orders
+            SET fulfillment_status = :new_status
+            WHERE order_id = :order_id
+        ''', order_id=order_id, new_status=new_status)
 

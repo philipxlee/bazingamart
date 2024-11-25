@@ -9,6 +9,20 @@
 <p><strong>Total # of Items Purchased:</strong> {{ total_items }}</p>
 <p><strong>Overall Fulfillment Status:</strong> {{ overall_fulfillment_status }}</p>
 
+<!-- Form to Update Fulfillment Status -->
+<h3>Update Fulfillment Status</h3>
+<form action="{{ url_for('inventory.update_fulfillment_status') }}" method="POST">
+    <input type="hidden" name="order_id" value="{{ order.order_id }}">
+    <label for="new_status">Update Fulfillment Status:</label>
+    <select name="new_status" id="new_status">
+        <option value="Incomplete" {% if overall_fulfillment_status == 'Incomplete' %}selected{% endif %}>Incomplete</option>
+        <option value="Fulfilled" {% if overall_fulfillment_status == 'Fulfilled' %}selected{% endif %}>Fulfilled</option>
+        <option value="Delivered" {% if overall_fulfillment_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+        <option value="Shipped" {% if overall_fulfillment_status == 'Shipped' %}selected{% endif %}>Shipped</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Update Status</button>
+</form>
+
 <h3>Items in this Order from Your Inventory:</h3>
 {% if order_items %}
 <table border="1" cellpadding="5" cellspacing="0">
