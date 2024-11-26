@@ -7,6 +7,7 @@ class Order:
     This class represents a user's completed order. It provides methods to retrieve
     order summaries and detailed order information.
     """
+    item_fulfillment_status_overrides = {}
 
     def __init__(self, order_id, total_price, created_at, coupon_code=None, fulfillment_status='Incomplete'):
         self.order_id = order_id
@@ -230,20 +231,37 @@ class Order:
         """
         offset = (page - 1) * per_page
         rows = current_app.db.execute('''
-            SELECT p.product_name, cp.quantity, cp.unit_price
+            SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id
             FROM CartProducts cp
             JOIN Products p ON cp.product_id = p.product_id
             WHERE cp.seller_id = :seller_id AND cp.order_id = :order_id
             LIMIT :per_page OFFSET :offset
         ''', seller_id=seller_id, order_id=order_id, per_page=per_page, offset=offset)
-        
+
         total_items = current_app.db.execute('''
             SELECT COUNT(*)
             FROM CartProducts
             WHERE seller_id = :seller_id AND order_id = :order_id
         ''', seller_id=seller_id, order_id=order_id)[0][0]
 
-        return rows, total_items
+        # Get the overall fulfillment status from the order
+        order = Order.get_order_by_seller(seller_id, order_id)
+        overall_status = order.fulfillment_status if order else 'Incomplete'
+
+        order_items = []
+        for row in rows:
+            product_name, quantity, unit_price, product_id = row
+            fulfillment_status = Order.item_fulfillment_status_overrides.get((order_id, product_id), overall_status)
+            order_items.append({
+                'product_name': product_name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'product_id': product_id,
+                'fulfillment_status': fulfillment_status
+            })
+
+        return order_items, total_items
+
     
     @staticmethod
     @handle_db_exceptions
@@ -279,3 +297,35 @@ class Order:
             WHERE order_id = :order_id
         ''', order_id=order_id, new_status=new_status)
 
+
+    @staticmethod
+    @handle_db_exceptions
+    def add_fulfillment_status_to_items(order_id, fulfillment_status):
+        """
+        Updates the fulfillment status of each item in the CartProducts table to match the given fulfillment status.
+        :param order_id: ID of the order.
+        :param fulfillment_status: Status to apply to all items in the order.
+        """
+        current_app.db.execute('''
+            UPDATE CartProducts
+            SET fulfillment_status = :fulfillment_status
+            WHERE order_id = :order_id
+        ''', order_id=order_id, fulfillment_status=fulfillment_status)
+
+
+    @staticmethod
+    @handle_db_exceptions
+    def update_item_fulfillment_status(order_id, product_id, new_status):
+        """
+        Updates the fulfillment status of an individual item in the order.
+        :param order_id: ID of the order.
+        :param product_id: ID of the product in the order.
+        :param new_status: New fulfillment status to set for the item.
+        """
+        # Update the in-memory dictionary to simulate item status override
+        Order.item_fulfillment_status_overrides[(order_id, product_id)] = new_status
+
+        # Recalculate the overall fulfillment status of the order after updating an item
+        Order.recalculate_order_fulfillment_status(order_id)
+    
+    

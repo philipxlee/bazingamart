@@ -9,8 +9,8 @@
 <p><strong>Total # of Items Purchased:</strong> {{ total_items }}</p>
 <p><strong>Overall Fulfillment Status:</strong> {{ overall_fulfillment_status }}</p>
 
-<!-- Form to Update Fulfillment Status -->
-<h3>Update Fulfillment Status</h3>
+<!-- Form to Update Overall Fulfillment Status -->
+<h3>Update Overall Fulfillment Status</h3>
 <form action="{{ url_for('inventory.update_fulfillment_status') }}" method="POST">
     <input type="hidden" name="order_id" value="{{ order.order_id }}">
     <label for="new_status">Update Fulfillment Status:</label>
@@ -31,6 +31,8 @@
             <th>Product Name</th>
             <th>Quantity</th>
             <th>Unit Price</th>
+            <th>Item Fulfillment Status</th>
+            <th>Update Status</th>
         </tr>
     </thead>
     <tbody>
@@ -39,6 +41,20 @@
             <td>{{ item.product_name }}</td>
             <td>{{ item.quantity }}</td>
             <td>${{ item.unit_price }}</td>
+            <td>{{ item.fulfillment_status }}</td>
+            <td>
+                <form action="{{ url_for('inventory.update_item_fulfillment_status') }}" method="POST">
+                    <input type="hidden" name="order_id" value="{{ order.order_id }}">
+                    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                    <select name="new_status">
+                        <option value="Incomplete" {% if item.fulfillment_status == 'Incomplete' %}selected{% endif %}>Incomplete</option>
+                        <option value="Shipped" {% if item.fulfillment_status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="Delivered" {% if item.fulfillment_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="Fulfilled" {% if item.fulfillment_status == 'Fulfilled' %}selected{% endif %}>Fulfilled</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
