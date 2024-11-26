@@ -133,7 +133,7 @@ def orders_dashboard():
 def order_dashboard_details(order_id):
     seller_id = current_user.id
 
-    # Get the order metadata
+    # Get the updated order metadata
     order = Order.get_order_by_seller(seller_id, order_id)
     if not order:
         flash("Order not found or you don't have products in this order.", "error")
@@ -145,7 +145,7 @@ def order_dashboard_details(order_id):
     order_items, total_items = Order.get_order_details_for_seller(seller_id, order_id, page, per_page)
 
     # Get the buyer address using the helper function
-    buyer_address = Order.get_user_address_by_order(order_id)  
+    buyer_address = Order.get_user_address_by_order(order_id)
 
     return render_template(
         'order_dashboard_details.html',
@@ -153,7 +153,7 @@ def order_dashboard_details(order_id):
         order_items=order_items,
         total_items=total_items,
         buyer_address=buyer_address,
-        overall_fulfillment_status=order.fulfillment_status
+        overall_fulfillment_status=order.fulfillment_status  # Ensure it's the updated status
     )
 
 
@@ -179,9 +179,6 @@ def update_fulfillment_status():
 @bp.route('/update_item_fulfillment_status', methods=['POST'])
 @login_required
 def update_item_fulfillment_status():
-    """
-    Updates the fulfillment status of an individual item in the order.
-    """
     order_id = request.form.get('order_id', type=int)
     product_id = request.form.get('product_id', type=int)
     new_status = request.form.get('new_status')
@@ -192,11 +189,10 @@ def update_item_fulfillment_status():
         flash("Invalid fulfillment status.", "error")
         return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
-    # Update the fulfillment status of the individual item using the helper function
+    # Update the item fulfillment status
     Order.update_item_fulfillment_status(order_id, product_id, new_status)
-    flash(f"Item fulfillment status updated to {new_status}.", "success")
-
-    # Redirect back to the order details page
+    
+    flash(f"Item status updated successfully to {new_status}.", "success")
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
 

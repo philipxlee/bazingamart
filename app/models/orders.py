@@ -325,42 +325,7 @@ class Order:
         # Update the in-memory dictionary to simulate item status override
         Order.item_fulfillment_status_overrides[(order_id, product_id)] = new_status
 
-        # Recalculate the overall fulfillment status of the order
+        # Recalculate the overall fulfillment status of the order after updating an item
         Order.recalculate_order_fulfillment_status(order_id)
-
-    @staticmethod
-    @handle_db_exceptions
-    def recalculate_order_fulfillment_status(order_id):
-        """
-        Recalculates and updates the overall fulfillment status of an order
-        based on the statuses of individual items.
-        :param order_id: ID of the order.
-        """
-        rows = current_app.db.execute('''
-            SELECT product_id
-            FROM CartProducts
-            WHERE order_id = :order_id
-        ''', order_id=order_id)
-
-        statuses = []
-        for row in rows:
-            product_id = row[0]
-            status = Order.item_fulfillment_status_overrides.get((order_id, product_id), 'Incomplete')
-            statuses.append(status)
-
-        # Determine the most inferior status
-        if all(status == 'Fulfilled' for status in statuses):
-            overall_status = 'Fulfilled'
-        elif all(status in ['Delivered', 'Fulfilled'] for status in statuses):
-            overall_status = 'Delivered'
-        elif all(status in ['Shipped', 'Delivered', 'Fulfilled'] for status in statuses):
-            overall_status = 'Shipped'
-        else:
-            overall_status = 'Incomplete'
-
-        # Update the overall fulfillment status of the order
-        current_app.db.execute('''
-            UPDATE Orders
-            SET fulfillment_status = :overall_status
-            WHERE order_id = :order_id
-        ''', order_id=order_id, overall_status=overall_status)
+    
+    
