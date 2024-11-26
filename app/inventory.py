@@ -175,3 +175,5 @@ def update_fulfillment_status():
     Order.update_fulfillment_status(order_id, new_status)
     flash(f"Order #{order_id} fulfillment status updated to {new_status}.", "success")
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
+
+

@@ -31,6 +31,7 @@
             <th>Product Name</th>
             <th>Quantity</th>
             <th>Unit Price</th>
+            <th>Item Fulfillment Status</th>
         </tr>
     </thead>
     <tbody>
@@ -39,6 +40,7 @@
             <td>{{ item.product_name }}</td>
             <td>{{ item.quantity }}</td>
             <td>${{ item.unit_price }}</td>
+            <td>{{ overall_fulfillment_status }}</td>
         </tr>
         {% endfor %}
     </tbody>

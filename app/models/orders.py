@@ -279,3 +279,17 @@ class Order:
             WHERE order_id = :order_id
         ''', order_id=order_id, new_status=new_status)
 
+
+    @staticmethod
+    @handle_db_exceptions
+    def add_fulfillment_status_to_items(order_id, fulfillment_status):
+        """
+        Updates the fulfillment status of each item in the CartProducts table to match the given fulfillment status.
+        :param order_id: ID of the order.
+        :param fulfillment_status: Status to apply to all items in the order.
+        """
+        current_app.db.execute('''
+            UPDATE CartProducts
+            SET fulfillment_status = :fulfillment_status
+            WHERE order_id = :order_id
+        ''', order_id=order_id, fulfillment_status=fulfillment_status)
