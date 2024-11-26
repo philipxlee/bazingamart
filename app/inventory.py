@@ -128,8 +128,6 @@ def orders_dashboard():
     )
 
 
-
-
 @bp.route('/order_dashboard_details/<int:order_id>')
 @login_required
 def order_dashboard_details(order_id):
@@ -159,6 +157,7 @@ def order_dashboard_details(order_id):
     )
 
 
+
 @bp.route('/update_fulfillment_status', methods=['POST'])
 @login_required
 def update_fulfillment_status():
@@ -174,6 +173,30 @@ def update_fulfillment_status():
     # Update the fulfillment status using the helper function
     Order.update_fulfillment_status(order_id, new_status)
     flash(f"Order #{order_id} fulfillment status updated to {new_status}.", "success")
+    return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
+
+
+@bp.route('/update_item_fulfillment_status', methods=['POST'])
+@login_required
+def update_item_fulfillment_status():
+    """
+    Updates the fulfillment status of an individual item in the order.
+    """
+    order_id = request.form.get('order_id', type=int)
+    product_id = request.form.get('product_id', type=int)
+    new_status = request.form.get('new_status')
+
+    # Validate that the new status is acceptable
+    allowed_statuses = ['Incomplete', 'Shipped', 'Delivered', 'Fulfilled']
+    if new_status not in allowed_statuses:
+        flash("Invalid fulfillment status.", "error")
+        return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
+
+    # Update the fulfillment status of the individual item using the helper function
+    Order.update_item_fulfillment_status(order_id, product_id, new_status)
+    flash(f"Item fulfillment status updated to {new_status}.", "success")
+
+    # Redirect back to the order details page
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
 
