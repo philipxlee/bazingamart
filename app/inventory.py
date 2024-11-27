@@ -142,7 +142,7 @@ def order_dashboard_details(order_id):
     # Get the paginated details of items sold by the seller
     page = request.args.get('page', default=1, type=int)
     per_page = 100
-    order_items, total_items = Order.get_order_details(order_id, page, per_page)
+    order_items, total_items = Order.get_order_details_for_seller(seller_id, order_id, page, per_page)
 
     # Get the buyer address using the helper function
     buyer_address = Order.get_user_address_by_order(order_id)

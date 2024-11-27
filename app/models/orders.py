@@ -63,9 +63,7 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def count_orders(user_id) -> int:
-        """
-        Counts the total number of orders for a given user.
-        """
+        """Counts the total number of orders for a given user."""
         result = current_app.db.execute(
             """
             SELECT COUNT(*) FROM Orders WHERE user_id = :user_id
@@ -350,9 +348,7 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_user_address_by_order(order_id):
-        """
-        Retrieves the user's address based on the given order ID.
-        """
+        """Retrieves the user's address based on the given order ID."""
         # Fetch the user_id from the Orders table based on the order_id
         rows = current_app.db.execute(
             """
