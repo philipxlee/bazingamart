@@ -7,7 +7,6 @@ class Order:
     This class represents a user's completed order. It provides methods to retrieve
     order summaries and detailed order information.
     """
-    item_fulfillment_status_overrides = {}
 
     def __init__(self, order_id, total_price, created_at, coupon_code=None, fulfillment_status='Incomplete'):
         self.order_id = order_id
@@ -78,36 +77,40 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def get_order_details(order_id, page=1, per_page=5) -> tuple:
-        """
-        Retrieves paginated order details for a given order ID.
-        @param order_id: The order ID to get the details for.
-        @param page: The current page number for pagination.
-        @param per_page: The number of items per page.
-        @return: A tuple of (rows, total_items).
-        """
+    def get_order_details(order_id, page=1, per_page=100):
         offset = (page - 1) * per_page
         rows = current_app.db.execute(
-            """
-            SELECT p.product_name, cp.quantity, cp.unit_price
+            '''
+            SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id, cp.fulfillment_status, cp.seller_id
             FROM CartProducts cp
             JOIN Products p ON cp.product_id = p.product_id
             WHERE cp.order_id = :order_id
             LIMIT :per_page OFFSET :offset
-            """,
-            order_id=order_id,
-            per_page=per_page,
-            offset=offset,
+            ''', order_id=order_id, per_page=per_page, offset=offset
         )
+
         total_items = current_app.db.execute(
-            """
+            '''
             SELECT COUNT(*)
             FROM CartProducts
             WHERE order_id = :order_id
-            """,
-            order_id=order_id,
+            ''', order_id=order_id
         )[0][0]
-        return rows, total_items
+
+        order_items = []
+        for row in rows:
+            product_name, quantity, unit_price, product_id, fulfillment_status, seller_id = row
+            order_items.append({
+                'product_name': product_name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'product_id': product_id,
+                'fulfillment_status': fulfillment_status,
+                'seller_id': seller_id
+            })
+
+        return order_items, total_items
+        
     
     @staticmethod
     @handle_db_exceptions
@@ -157,17 +160,17 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def get_paginated_seller_orders(seller_id, status, page, per_page):
+    def get_paginated_seller_orders(seller_id, statuses, page, per_page):
         """
         Retrieves paginated lists of orders for products sold by the seller.
-        If status is a list, it retrieves all orders matching any of the provided statuses.
+        If statuses is a list, it retrieves all orders matching any of the provided statuses.
         """
         offset = (page - 1) * per_page
 
-        if isinstance(status, list):
-            status_placeholder = ','.join(f"'{s}'" for s in status)
+        if isinstance(statuses, list):
+            status_placeholder = ','.join(f"'{s}'" for s in statuses)
         else:
-            status_placeholder = f"'{status}'"
+            status_placeholder = f"'{statuses}'"
 
         sql = f'''
             SELECT 
@@ -204,6 +207,7 @@ class Order:
 
 
 
+
     @staticmethod
     @handle_db_exceptions
     def get_order_by_seller(seller_id, order_id) -> 'Order':
@@ -226,32 +230,28 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_order_details_for_seller(seller_id, order_id, page, per_page):
-        """
-        Retrieves paginated order details for products sold by the given seller in a specific order.
-        """
         offset = (page - 1) * per_page
-        rows = current_app.db.execute('''
-            SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id
+        rows = current_app.db.execute(
+            '''
+            SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id, cp.fulfillment_status
             FROM CartProducts cp
             JOIN Products p ON cp.product_id = p.product_id
             WHERE cp.seller_id = :seller_id AND cp.order_id = :order_id
             LIMIT :per_page OFFSET :offset
-        ''', seller_id=seller_id, order_id=order_id, per_page=per_page, offset=offset)
+            ''', seller_id=seller_id, order_id=order_id, per_page=per_page, offset=offset
+        )
 
-        total_items = current_app.db.execute('''
+        total_items = current_app.db.execute(
+            '''
             SELECT COUNT(*)
             FROM CartProducts
             WHERE seller_id = :seller_id AND order_id = :order_id
-        ''', seller_id=seller_id, order_id=order_id)[0][0]
-
-        # Get the overall fulfillment status from the order
-        order = Order.get_order_by_seller(seller_id, order_id)
-        overall_status = order.fulfillment_status if order else 'Incomplete'
+            ''', seller_id=seller_id, order_id=order_id
+        )[0][0]
 
         order_items = []
         for row in rows:
-            product_name, quantity, unit_price, product_id = row
-            fulfillment_status = Order.item_fulfillment_status_overrides.get((order_id, product_id), overall_status)
+            product_name, quantity, unit_price, product_id, fulfillment_status = row
             order_items.append({
                 'product_name': product_name,
                 'quantity': quantity,
@@ -285,17 +285,24 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def update_fulfillment_status(order_id, new_status):
-        """
-        Updates the fulfillment status of an order.
-        :param order_id: ID of the order.
-        :param new_status: New fulfillment status to set.
-        """
-        current_app.db.execute('''
-            UPDATE Orders
+    def update_item_fulfillment_status(order_id, product_id, new_status):
+        """Updates the fulfillment status of an individual item in the order."""
+        allowed_statuses = ['Incomplete', 'Fulfilled']
+        if new_status not in allowed_statuses:
+            raise ValueError("Invalid fulfillment status.")
+
+        print("Changing fulfillment status for order_id:", order_id, "product_id:", product_id, "to:", new_status)
+        current_app.db.execute(
+            '''
+            UPDATE CartProducts
             SET fulfillment_status = :new_status
-            WHERE order_id = :order_id
-        ''', order_id=order_id, new_status=new_status)
+            WHERE order_id = :order_id AND product_id = :product_id
+            ''', 
+            order_id=order_id, product_id=product_id, new_status=new_status
+        )
+
+        Order.recalculate_order_fulfillment_status(order_id)
+
 
 
     @staticmethod
@@ -315,17 +322,29 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def update_item_fulfillment_status(order_id, product_id, new_status):
-        """
-        Updates the fulfillment status of an individual item in the order.
-        :param order_id: ID of the order.
-        :param product_id: ID of the product in the order.
-        :param new_status: New fulfillment status to set for the item.
-        """
-        # Update the in-memory dictionary to simulate item status override
-        Order.item_fulfillment_status_overrides[(order_id, product_id)] = new_status
+    def recalculate_order_fulfillment_status(order_id):
+        """Recalculates and updates the order's overall fulfillment status based on all item statuses."""
+        statuses = current_app.db.execute(
+            '''
+            SELECT fulfillment_status
+            FROM CartProducts
+            WHERE order_id = :order_id
+            ''', order_id=order_id
+        )
+        statuses = [row[0] for row in statuses]
 
-        # Recalculate the overall fulfillment status of the order after updating an item
-        Order.recalculate_order_fulfillment_status(order_id)
+        if all(status == 'Fulfilled' for status in statuses):
+            new_status = 'Fulfilled'
+        else:
+            new_status = 'Incomplete'
+
+        current_app.db.execute(
+            '''
+            UPDATE Orders
+            SET fulfillment_status = :new_status
+            WHERE order_id = :order_id
+            ''', order_id=order_id, new_status=new_status
+        )
+
     
     
