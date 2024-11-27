@@ -15,6 +15,7 @@
                 <th>Quantity</th>
                 <th>Unit Price</th>
                 <th>Subtotal</th>
+                <th>Seller ID</th>
                 <th>Fulfilled by Seller</th>
             </tr>
         </thead>
@@ -25,6 +26,7 @@
                 <td>{{ item.quantity }}</td>
                 <td>${{ "%.2f"|format(item.unit_price) }}</td>
                 <td>${{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+                <td>{{ item.seller_id }}</td>
                 <td>
                     {% if item.fulfillment_status == 'Fulfilled' %}
                     <span class="text-success">Yes</span>
@@ -35,6 +37,7 @@
             </tr>
             {% endfor %}
         </tbody>
+
     </table>
 
     <!-- Pagination Controls -->

@@ -98,9 +98,31 @@ class CartSubmission:
                 total_price=total_cost,
                 coupon_code=coupon_code
             )
-
-
-        # 9. Mark cart as purchased (change purchase_status to 'Completed')       
+        
+        # 9. Delete existing entries in CartProducts for this order_id
+        current_app.db.execute(
+            """
+            DELETE FROM CartProducts WHERE order_id = :order_id
+            """,
+            order_id=order_id
+        )
+        
+        # 10. Insert items into CartProducts
+        for item in cart_items:
+            seller_id = CartSubmission._get_seller_id(item.product_id)
+            current_app.db.execute(
+                """
+                INSERT INTO CartProducts (order_id, product_id, quantity, unit_price, seller_id, fulfillment_status)
+                VALUES (:order_id, :product_id, :quantity, :unit_price, :seller_id, 'Incomplete')
+                """,
+                order_id=order_id,
+                product_id=item.product_id,
+                quantity=item.quantity,
+                unit_price=item.unit_price,
+                seller_id=seller_id
+            )
+        
+        # 11. Mark cart as purchased (change purchase_status to 'Completed')       
         CartSubmission._mark_cart_as_completed(user_id)
         return "Purchase successful!"
 

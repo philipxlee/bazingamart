@@ -27,20 +27,38 @@ class Order:
     @handle_db_exceptions
     def get_all_orders(user_id, page=1, per_page=5) -> list:
         """
-        Retrieves paginated orders for a given user.
+        Retrieves paginated orders for a given user, including seller IDs.
         """
         offset = (page - 1) * per_page
         sql = """
-            SELECT order_id, total_price, created_at, coupon_code, fulfillment_status
-            FROM Orders
-            WHERE user_id = :user_id
-            ORDER BY created_at DESC
+            SELECT 
+                o.order_id, 
+                o.total_price, 
+                o.created_at, 
+                o.coupon_code, 
+                o.fulfillment_status,
+                STRING_AGG(DISTINCT CAST(cp.seller_id AS TEXT), ', ') AS seller_ids
+            FROM Orders o
+            JOIN CartProducts cp ON o.order_id = cp.order_id
+            WHERE o.user_id = :user_id
+            GROUP BY o.order_id, o.total_price, o.created_at, o.coupon_code, o.fulfillment_status
+            ORDER BY o.created_at DESC
             LIMIT :per_page OFFSET :offset
-            """
+        """
         rows = current_app.db.execute(
             sql, user_id=user_id, per_page=per_page, offset=offset
         )
-        return [Order(row[0], row[1], row[2], row[3], row[4]) for row in rows]
+        return [
+            {
+                "order_id": row[0],
+                "total_price": row[1],
+                "created_at": row[2],
+                "coupon_code": row[3],
+                "fulfillment_status": row[4],
+                "seller_ids": row[5]  # List of seller IDs
+            }
+            for row in rows
+        ]
 
     @staticmethod
     @handle_db_exceptions
@@ -128,6 +146,7 @@ class Order:
             )
 
         return order_items, total_items
+
 
     @staticmethod
     @handle_db_exceptions
