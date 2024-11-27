@@ -3,7 +3,7 @@
 {% block content %}
 <h2>Order Dashboard Details for Order ID: {{ order.order_id }}</h2>
 <p><strong>Total Price (for your items):</strong> ${{ order.total_price }}</p>
-<p><strong>Created At:</strong> {{ order.created_at }}</p>
+<p><strong>Created At:</strong> {{ order.created_at.strftime('%b %d, %Y') }}</p>
 <p><strong>Coupon Code:</strong> {{ order.coupon_code }}</p>
 <p><strong>Buyer Address:</strong> {{ buyer_address }}</p>
 <p><strong>Total # of Items Purchased:</strong> {{ total_items }}</p>
