@@ -35,6 +35,7 @@ CREATE TABLE CartProducts (
     seller_id INT NOT NULL REFERENCES Users(id),
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(12,2) NOT NULL,
+    fulfillment_status VARCHAR(50) NOT NULL DEFAULT 'Incomplete',
     PRIMARY KEY (order_id, product_id, seller_id)
 );
 
