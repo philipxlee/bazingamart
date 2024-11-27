@@ -23,12 +23,13 @@
               {{ product.product_name }}
           </h5>
           </a>
-          <p class="card-text">Price: ${{ product.price }}</p>
+          <p class="card-text"><strong>Price: </strong>${{ product.price }}</p>
+          <p class="card-text"><strong>Seller ID:</strong> {{ product.seller_id }}</p>
 
           <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
-            <label for="quantity_{{ product.product_id }}">Quantity:</label>
+            <label for="quantity_{{ product.product_id }}"><strong>Quantity: </strong></label>
             <input type="number" name="quantity" id="quantity_{{ product.product_id }}" value="1" min="1" required
               class="form-control mb-2">
             <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>

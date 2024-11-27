@@ -28,7 +28,7 @@
             <td>{{ item.product_name }}</td>
             <td>{{ item.product_id }}</td>
             <td>{{ item.quantity }}</td>
-            <td>${{ item.unit_price }}</td>
+            <td>${{ "%.2f"|format(item.unit_price) }}</td>
             <td>{{ item.fulfillment_status }}</td>
             <td>
                 <form action="{{ url_for('inventory.update_item_fulfillment_status') }}" method="POST">

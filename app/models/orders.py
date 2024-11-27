@@ -278,15 +278,19 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_order_by_seller(seller_id, order_id) -> "Order":
-        """
-        Retrieves order metadata if the given seller has products in the order.
-        """
+        """Retrieves order metadata for the given seller's portion of the order."""
         rows = current_app.db.execute(
             """
-            SELECT DISTINCT o.order_id, o.total_price, o.created_at, o.coupon_code, o.fulfillment_status
+            SELECT 
+                o.order_id, 
+                SUM(cp.quantity * cp.unit_price) AS total_price, 
+                o.created_at, 
+                o.coupon_code, 
+                o.fulfillment_status
             FROM Orders o
             JOIN CartProducts cp ON o.order_id = cp.order_id
             WHERE cp.seller_id = :seller_id AND o.order_id = :order_id
+            GROUP BY o.order_id, o.created_at, o.coupon_code, o.fulfillment_status
             """,
             seller_id=seller_id,
             order_id=order_id,
@@ -297,6 +301,7 @@ class Order:
             return Order(row[0], row[1], row[2], row[3], fulfillment_status=row[4])
         else:
             return None
+
 
     @staticmethod
     @handle_db_exceptions
@@ -340,6 +345,7 @@ class Order:
             )
 
         return order_items, total_items
+
 
     @staticmethod
     @handle_db_exceptions
