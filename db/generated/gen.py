@@ -91,12 +91,27 @@ def gen_carts(num_carts, num_users):
         print(f'{num_carts} generated')
     return
 
-# Generate cart products
+
 def gen_cart_products(num_carts, max_products_per_cart, products):
+    cart_products_data = {}
+    order_ids = list(range(1, num_carts + 1))
+    random.shuffle(order_ids)
+
+    # FULFILLED_PERCENTAGE below is the percentage of carts that are fulfilled
+    # The rest are incomplete (i.e. 1 - FULFILLED_PERCENTAGE)
+    # Remember to keep this number high otherwise you will end up with a lot of orders that 
+    # are unfulfilled, and each order may have a lot of other items to go one by one to fulfill
+    # which will make be a pain to do manually
+
+    FULFILLED_PERCENTAGE = 0.995
+    num_carts_with_all_fulfilled = int(num_carts * FULFILLED_PERCENTAGE)
+    carts_with_all_fulfilled = set(order_ids[:num_carts_with_all_fulfilled])
+
     with open('db/generated/CartProducts.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('CartProducts...', end=' ', flush=True)
         for order_id in range(1, num_carts + 1):
+            cart_products_data[order_id] = []
             num_products_in_cart = fake.random_int(min=1, max=max_products_per_cart)
             selected_products = random.sample(products, min(num_products_in_cart, len(products)))
             for product in selected_products:
@@ -105,12 +120,21 @@ def gen_cart_products(num_carts, max_products_per_cart, products):
                     quantity = fake.random_int(min=1, max=min(5, product_quantity))
                     seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
                     unit_price = round(random.uniform(5, 500), 2)
-                    writer.writerow([order_id, pid, seller_id, quantity, unit_price])
+
+                    # Set fulfillment_status based on whether the order is selected
+                    if order_id in carts_with_all_fulfilled:
+                        fulfillment_status = 'Fulfilled'
+                    else:
+                        fulfillment_status = random.choice(['Incomplete', 'Fulfilled'])
+
+                    writer.writerow([order_id, pid, seller_id, quantity, unit_price, fulfillment_status])
+                    cart_products_data[order_id].append(fulfillment_status)
         print(f'CartProducts for {num_carts} carts generated')
-    return
+    return cart_products_data
+
 
 # Generate orders
-def gen_orders(num_carts, num_users):
+def gen_orders(num_carts, num_users, cart_products_data):
     with open('db/generated/Orders.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('Orders...', end=' ', flush=True)
@@ -120,11 +144,16 @@ def gen_orders(num_carts, num_users):
             user_id = fake.random_int(min=0, max=num_users)  
             created_at = fake.date_time_this_year(before_now=True, after_now=False)             
             total_price = round(random.uniform(10, 1000), 2)
-            fulfillment_status = random.choice(['Incomplete', 'Shipped', 'Delivered'])
+            item_statuses = cart_products_data.get(order_id, [])
+            if all(status == 'Fulfilled' for status in item_statuses):
+                fulfillment_status = 'Fulfilled'
+            else:
+                fulfillment_status = 'Incomplete'
             coupon_code = fake.bothify(text='???-##', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ') if fake.boolean(chance_of_getting_true=20) else None
             writer.writerow([order_id, user_id, created_at, total_price, fulfillment_status, coupon_code])
         print(f'{num_carts} generated')
     return
+
 
 # Generate coupons
 def gen_coupons(num_coupons=50):
@@ -162,7 +191,7 @@ def gen_reviews(num_reviews=500, num_users=num_users, num_products=num_products)
 gen_users(num_users)
 products = gen_products(num_products, num_users)
 gen_carts(num_carts, num_users)
-gen_cart_products(num_carts, max_products_per_cart, products)
-gen_orders(num_carts, num_users)
+cart_products_data = gen_cart_products(num_carts, max_products_per_cart, products)
+gen_orders(num_carts, num_users, cart_products_data)
 gen_coupons()
 gen_reviews()
