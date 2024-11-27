@@ -100,7 +100,7 @@ def add_inventory_item():
 @login_required
 def orders_dashboard():
     seller_id = current_user.id
-    
+
     # Separate page numbers for unfulfilled and fulfilled orders
     unfulfilled_page = request.args.get('unfulfilled_page', default=1, type=int)
     fulfilled_page = request.args.get('fulfilled_page', default=1, type=int)
@@ -108,10 +108,10 @@ def orders_dashboard():
 
     # Get paginated unfulfilled and fulfilled orders separately
     unfulfilled_orders, total_unfulfilled = Order.get_paginated_seller_orders(
-        seller_id, 'Incomplete', unfulfilled_page, per_page
+        seller_id, ['Incomplete'], unfulfilled_page, per_page
     )
     fulfilled_orders, total_fulfilled = Order.get_paginated_seller_orders(
-        seller_id, ['Fulfilled', 'Delivered', 'Shipped'], fulfilled_page, per_page
+        seller_id, 'Fulfilled', fulfilled_page, per_page
     )
 
     total_unfulfilled_pages = (total_unfulfilled + per_page - 1) // per_page
@@ -141,8 +141,8 @@ def order_dashboard_details(order_id):
 
     # Get the paginated details of items sold by the seller
     page = request.args.get('page', default=1, type=int)
-    per_page = 5
-    order_items, total_items = Order.get_order_details_for_seller(seller_id, order_id, page, per_page)
+    per_page = 100
+    order_items, total_items = Order.get_order_details(order_id, page, per_page)
 
     # Get the buyer address using the helper function
     buyer_address = Order.get_user_address_by_order(order_id)
@@ -157,25 +157,6 @@ def order_dashboard_details(order_id):
     )
 
 
-
-@bp.route('/update_fulfillment_status', methods=['POST'])
-@login_required
-def update_fulfillment_status():
-    order_id = request.form.get('order_id', type=int)
-    new_status = request.form.get('new_status')
-
-    # Validate that the new status is acceptable
-    allowed_statuses = ['Incomplete', 'Shipped', 'Delivered', 'Fulfilled']
-    if new_status not in allowed_statuses:
-        flash("Invalid fulfillment status.", "error")
-        return redirect(url_for('inventory.orders_dashboard'))
-
-    # Update the fulfillment status using the helper function
-    Order.update_fulfillment_status(order_id, new_status)
-    flash(f"Order #{order_id} fulfillment status updated to {new_status}.", "success")
-    return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
-
-
 @bp.route('/update_item_fulfillment_status', methods=['POST'])
 @login_required
 def update_item_fulfillment_status():
@@ -184,15 +165,13 @@ def update_item_fulfillment_status():
     new_status = request.form.get('new_status')
 
     # Validate that the new status is acceptable
-    allowed_statuses = ['Incomplete', 'Shipped', 'Delivered', 'Fulfilled']
+    allowed_statuses = ['Incomplete', 'Fulfilled']
     if new_status not in allowed_statuses:
         flash("Invalid fulfillment status.", "error")
         return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
-    # Update the item fulfillment status
     Order.update_item_fulfillment_status(order_id, product_id, new_status)
     
     flash(f"Item status updated successfully to {new_status}.", "success")
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
-
 
