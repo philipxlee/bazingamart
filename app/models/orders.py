@@ -31,7 +31,7 @@ class Order:
         """
         offset = (page - 1) * per_page
         sql = """
-            SELECT order_id, total_price, created_at, coupon_code
+            SELECT order_id, total_price, created_at, coupon_code, fulfillment_status
             FROM Orders
             WHERE user_id = :user_id
             ORDER BY created_at DESC
@@ -40,7 +40,7 @@ class Order:
         rows = current_app.db.execute(
             sql, user_id=user_id, per_page=per_page, offset=offset
         )
-        return [Order(row[0], row[1], row[2], row[3]) for row in rows]
+        return [Order(row[0], row[1], row[2], row[3], row[4]) for row in rows]
 
     @staticmethod
     @handle_db_exceptions
@@ -67,7 +67,7 @@ class Order:
         """
         rows = current_app.db.execute(
             """
-            SELECT order_id, total_price, created_at, coupon_code
+            SELECT order_id, total_price, created_at, coupon_code, fulfillment_status
             FROM Orders
             WHERE user_id = :user_id AND order_id = :order_id
             """,
@@ -76,7 +76,7 @@ class Order:
         )
         if rows:
             row = rows[0]
-            return Order(row[0], row[1], row[2], row[3])
+            return Order(row[0], row[1], row[2], row[3], row[4])
         else:
             return None
 
@@ -410,6 +410,7 @@ class Order:
         else:
             new_status = "Incomplete"
 
+        print(f"Updating order fulfillment status for {order_id} to: {new_status}")
         current_app.db.execute(
             """
             UPDATE Orders
@@ -419,3 +420,4 @@ class Order:
             order_id=order_id,
             new_status=new_status,
         )
+        current_app.db.commit()
