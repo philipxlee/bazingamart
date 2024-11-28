@@ -21,14 +21,16 @@
         <table>
             <tr>
                 <th>Seller</th>
-                <th>Quantity in Stock</th>
-                <th>Action</th>
+                <th style="padding-left: 40px; padding-right:25px">Quantity in Stock</th>
+                <th style="padding-left: 25px; padding-right:25px">Action</th>
             </tr>
             {% for seller in sellers %}
             <tr>
-                <td>Seller {{ seller.seller_id }}</td>
-                <td>{{ seller.product_quantity }}</td>
-                <td>
+                <td><u><a href="{{ url_for('users.user_public_view', id=seller.seller_id) }}" 
+                    style="color: #0000FF; padding-right: 20px">
+                    Seller {{ seller.seller_id }}</a></u></td>
+                <td style="padding-left: 90px; padding-right:50px">{{ seller.product_quantity }}</td>
+                <td style="padding-left: 25px; padding-right:25px">
                     <form action="{{ url_for('carts.add_to_cart') }}" method="post">
                         <input type="hidden" name="product_id" value="{{ product.product_id }}">
                         <input type="hidden" name="seller_id" value="{{ seller.seller_id }}">
