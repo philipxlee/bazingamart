@@ -70,11 +70,11 @@
 </table>
 <div class="pagination">
     {% if fulfilled_page > 1 %}
-    <a
+    <a style="padding-right: 10px"
         href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page-1) }}">Previous</a>
     {% endif %}
     <span>Page {{ fulfilled_page }} of {{ total_fulfilled_pages }}</span>
-    {% if fulfilled_page < total_fulfilled_pages %} <a
+    {% if fulfilled_page < total_fulfilled_pages %} <a style="padding-left: 10px"
         href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page+1) }}">
         Next</a>
         {% endif %}
