@@ -221,12 +221,9 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_paginated_seller_orders(seller_id, statuses, page, per_page):
-        """
-        Retrieves paginated lists of orders for products sold by the seller.
-        If statuses is a list, it retrieves all orders matching any of the provided statuses.
-        """
         offset = (page - 1) * per_page
 
+        # Prepare statuses for SQL query
         if isinstance(statuses, list):
             status_placeholder = ",".join(f"'{s}'" for s in statuses)
         else:
@@ -237,15 +234,21 @@ class Order:
                 o.order_id,
                 o.created_at,
                 SUM(cp.quantity * cp.unit_price) AS total_price,
-                o.fulfillment_status
+                CASE 
+                    WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                    ELSE 'Incomplete' 
+                END AS seller_fulfillment_status
             FROM Orders o
             JOIN CartProducts cp ON o.order_id = cp.order_id
-            WHERE cp.seller_id = :seller_id 
-            AND o.fulfillment_status IN ({status_placeholder})
-            GROUP BY o.order_id, o.created_at, o.fulfillment_status
+            WHERE cp.seller_id = :seller_id
+            GROUP BY o.order_id, o.created_at
+            HAVING CASE 
+                        WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                        ELSE 'Incomplete' 
+                END IN ({status_placeholder})
             ORDER BY o.created_at DESC
             LIMIT :per_page OFFSET :offset
-            """
+        """
 
         rows = current_app.db.execute(
             sql, seller_id=seller_id, per_page=per_page, offset=offset
@@ -253,11 +256,19 @@ class Order:
 
         total_items = current_app.db.execute(
             f"""
-            SELECT COUNT(DISTINCT o.order_id)
-            FROM Orders o
-            JOIN CartProducts cp ON o.order_id = cp.order_id
-            WHERE cp.seller_id = :seller_id
-            AND o.fulfillment_status IN ({status_placeholder})
+            SELECT COUNT(*)
+            FROM (
+                SELECT 
+                    o.order_id
+                FROM Orders o
+                JOIN CartProducts cp ON o.order_id = cp.order_id
+                WHERE cp.seller_id = :seller_id
+                GROUP BY o.order_id
+                HAVING CASE 
+                            WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                            ELSE 'Incomplete' 
+                    END IN ({status_placeholder})
+            ) AS subquery
             """,
             seller_id=seller_id,
         )[0][0]
@@ -267,16 +278,16 @@ class Order:
                 "order_id": row[0],
                 "created_at": row[1],
                 "total_price": row[2],
-                "fulfillment_status": row[3],
+                "fulfillment_status": row[3], 
             }
             for row in rows
         ]
         return orders, total_items
 
+
     @staticmethod
     @handle_db_exceptions
     def get_order_by_seller(seller_id, order_id) -> "Order":
-        """Retrieves order metadata for the given seller's portion of the order."""
         rows = current_app.db.execute(
             """
             SELECT 
@@ -284,11 +295,14 @@ class Order:
                 SUM(cp.quantity * cp.unit_price) AS total_price, 
                 o.created_at, 
                 o.coupon_code, 
-                o.fulfillment_status
+                CASE 
+                    WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                    ELSE 'Incomplete' 
+                END AS seller_fulfillment_status
             FROM Orders o
             JOIN CartProducts cp ON o.order_id = cp.order_id
             WHERE cp.seller_id = :seller_id AND o.order_id = :order_id
-            GROUP BY o.order_id, o.created_at, o.coupon_code, o.fulfillment_status
+            GROUP BY o.order_id, o.created_at, o.coupon_code
             """,
             seller_id=seller_id,
             order_id=order_id,
