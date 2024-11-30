@@ -7,13 +7,14 @@
 <strong>Last Name:</strong> {{ user.lastname }}<br />
 <br />
 
-<h4>Reviews Given:</h4>
-
 {% if current_user.seller %}
     <strong>Email:</strong> {{ user.email }}<br />
     <strong>Address:</strong> {{ user.address }}<br />
-    
+    <br />
     <h4>Reviews Recieved:</h4>
+    <br />
 {% endif %}
+
+<h4>Reviews Given:</h4>
 
 {% endblock %}

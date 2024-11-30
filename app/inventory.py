@@ -106,12 +106,12 @@ def orders_dashboard():
     fulfilled_page = request.args.get('fulfilled_page', default=1, type=int)
     per_page = 5
 
-    # Get paginated unfulfilled and fulfilled orders separately
+    # Get paginated unfulfilled and fulfilled orders separately BASED on seller-specific status
     unfulfilled_orders, total_unfulfilled = Order.get_paginated_seller_orders(
         seller_id, ['Incomplete'], unfulfilled_page, per_page
     )
     fulfilled_orders, total_fulfilled = Order.get_paginated_seller_orders(
-        seller_id, 'Fulfilled', fulfilled_page, per_page
+        seller_id, ['Fulfilled'], fulfilled_page, per_page
     )
 
     total_unfulfilled_pages = (total_unfulfilled + per_page - 1) // per_page
