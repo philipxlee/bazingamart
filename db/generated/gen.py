@@ -60,6 +60,13 @@ def gen_products(num_products, num_users):
     with open('db/generated/Products.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('Products...', end=' ', flush=True)
+
+        categories = [
+            'Electronics', 'Home & Kitchen', 'Books', 'Clothing',
+            'Beauty & Personal Care', 'Sports & Outdoors', 'Toys & Games',
+            'Food & Beverages', 'Automotive', 'Health & Wellness'
+        ]
+        
         for pid in range(1, num_products + 1):
             if pid % 100 == 0:
                 print(f'{pid}', end=' ', flush=True)
@@ -68,8 +75,11 @@ def gen_products(num_products, num_users):
             available = fake.boolean()
             seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
             product_quantity = fake.random_int(min=1, max=100)
-            products.append((pid, name, price, available, seller_id, product_quantity))
-            writer.writerow([pid, name, price, available, seller_id, product_quantity])
+            description = fake.paragraph(nb_sentences=3)  
+            image = f"https://via.placeholder.com/150?text=Product+{pid}"  
+            category = random.choice(categories) 
+            products.append((pid, name, price, available, seller_id, product_quantity, description, image, category))
+            writer.writerow([pid, name, price, available, seller_id, product_quantity, description, image, category])
             product_ids.append(pid)
         print(f'{num_products} generated')
     return products
@@ -115,7 +125,7 @@ def gen_cart_products(num_carts, max_products_per_cart, products):
             num_products_in_cart = fake.random_int(min=1, max=max_products_per_cart)
             selected_products = random.sample(products, min(num_products_in_cart, len(products)))
             for product in selected_products:
-                pid, _, _, available, _, product_quantity = product
+                pid, _, _, available, _, product_quantity, *_ = product
                 if available and product_quantity > 0:
                     quantity = fake.random_int(min=1, max=min(5, product_quantity))
                     seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
