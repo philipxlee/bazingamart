@@ -1,96 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Your Inventory Items</h2>
+<div class="container mt-4">
+    <h2 class="text-center">Your Inventory Items</h2>
 
-<!-- Add New Product Button -->
-<div style="margin-bottom: 20px;">
-    <a href="{{ url_for('inventory.add_new_product') }}" class="btn btn-primary">Add New Product</a>
-</div>
+    <p class="text-center">Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
 
-<p>Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
+    <!-- Add New Product Button -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('inventory.add_new_product') }}" class="btn btn-primary">Add New Product</a>
+    </div>
 
-{% if inventory_items %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Product Name</th>
-            <th>Product Quantity</th>
-            <th>Product Price</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in inventory_items %}
-        <tr>
-            <td>{{ item.product_id }}</td>
-            <td>{{ item.product_name }}</td>
-            <td>{{ item.product_quantity }}</td>
-            <td>${{ item.product_price }}</td>
-            <td>
-                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    {% if inventory_items %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Product Quantity</th>
+                    <th>Product Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory_items %}
+                <tr>
+                    <td>{{ item.product_id }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.product_quantity }}</td>
+                    <td>${{ item.product_price }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info btn-sm">Update Product Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<div style="margin-top: 20px;">
-    {% if page > 1 %}
-    <a href="{{ url_for('inventory.view_inventory', page=page-1) }}" class="btn btn-secondary">Previous</a>
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-3">
+        <nav aria-label="Inventory Pagination">
+            <ul class="pagination">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.view_inventory', page=page-1) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Previous</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo; Previous</span>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page }} of {{ total_pages }}</span>
+                </li>
+
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.view_inventory', page=page+1) }}" aria-label="Next">
+                        <span aria-hidden="true">Next &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">Next &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Jump to Page Feature -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.view_inventory') }}">
+            <div class="form-inline">
+                <label for="jump_to_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="jump_to_page" name="page" min="1" max="{{ total_pages }}" class="form-control" value="{{ page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
+    </div>
+
+    {% else %}
+    <p class="text-center">Your inventory is empty.</p>
     {% endif %}
-    {% if page < total_pages %}
-    <a href="{{ url_for('inventory.view_inventory', page=page+1) }}" class="btn btn-secondary">Next</a>
-    {% endif %}
-</div>
-{% else %}
-<p>Your inventory is empty.</p>
-{% endif %}
-
-<!-- Add spacing before Seller Analytics section -->
-<div style="margin-top: 40px;"> 
-    <h3>Seller Analytics: Most and Least Popular Products</h3>
 </div>
 
-{% if product_analytics %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Product Name</th>
-            <th>Quantity Ordered</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Most Popular -->
-        <tr>
-            <td colspan="3"><strong>Most Popular Product</strong></td>
-        </tr>
-        {% set most_popular = product_analytics[0] %}
-        <tr>
-            <td>{{ most_popular[0] }}</td>
-            <td>{{ most_popular[1] }}</td>
-            <td>{{ most_popular[2] }}</td>
-        </tr>
-
-        <!-- Least Popular -->
-        <tr>
-            <td colspan="3"><strong>Least Popular Product</strong></td>
-        </tr>
-        {% set least_popular = product_analytics[-1] %}
-        <tr>
-            <td>{{ least_popular[0] }}</td>
-            <td>{{ least_popular[1] }}</td>
-            <td>{{ least_popular[2] }}</td>
-        </tr>
-    </tbody>
-</table>
-{% else %}
-<p>No analytics data available yet.</p>
-{% endif %}
-
-<!-- Add blank space at the bottom of the page -->
-<div style="margin-top: 60px;"></div>
-
+<div style="padding-bottom: 50px;"></div>
 {% endblock %}

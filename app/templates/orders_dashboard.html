@@ -1,85 +1,169 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Orders Dashboard</h2>
+<div class="container mt-4">
+    <h2 class="text-center">Orders Dashboard</h2>
 
-<h3>To be Fulfilled</h3>
-{% if unfulfilled_orders %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Total Price</th>
-            <th>Created At</th>
-            <th>Fulfillment Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in unfulfilled_orders %}
-        <tr>
-            <td>{{ order.order_id }}</td>
-            <td>${{ order.total_price }}</td>
-            <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
-            <td>{{ order.fulfillment_status }}</td>
-            <td><a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}">View Details</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<div class="pagination">
-    {% if unfulfilled_page > 1 %}
-    <a
-        href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page-1, fulfilled_page=fulfilled_page) }}">Previous</a>
-    {% endif %}
-    <span>Page {{ unfulfilled_page }} of {{ total_unfulfilled_pages }}</span>
-    {% if unfulfilled_page < total_unfulfilled_pages %} <a
-        href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page+1, fulfilled_page=fulfilled_page) }}">
-        Next</a>
-        {% endif %}
-</div>
-{% else %}
-<p>No unfulfilled orders found.</p>
-{% endif %}
+    <!-- To be Fulfilled Section -->
+    <h3 class="mt-4">To Be Fulfilled</h3>
+    {% if unfulfilled_orders %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Price</th>
+                    <th>Created At</th>
+                    <th>Fulfillment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in unfulfilled_orders %}
+                <tr>
+                    <td>{{ order.order_id }}</td>
+                    <td>${{ order.total_price }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>{{ order.fulfillment_status }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}" class="btn btn-info btn-sm">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<h3>Fulfilled Orders</h3>
-{% if fulfilled_orders %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Total Price</th>
-            <th>Created At</th>
-            <th>Fulfillment Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in fulfilled_orders %}
-        <tr>
-            <td>{{ order.order_id }}</td>
-            <td>${{ order.total_price }}</td>
-            <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
-            <td>{{ order.fulfillment_status }}</td>
-            <td><a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}">View Details</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<div class="pagination">
-    {% if fulfilled_page > 1 %}
-    <a style="padding-right: 10px"
-        href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page-1) }}">Previous</a>
+    <!-- Pagination Controls for Unfulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <nav aria-label="Unfulfilled Orders Pagination">
+            <ul class="pagination">
+                {% if unfulfilled_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page-1, fulfilled_page=fulfilled_page) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Previous</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo; Previous</span>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ unfulfilled_page }} of {{ total_unfulfilled_pages }}</span>
+                </li>
+
+                {% if unfulfilled_page < total_unfulfilled_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page+1, fulfilled_page=fulfilled_page) }}" aria-label="Next">
+                        <span aria-hidden="true">Next &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">Next &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Jump to Page for Unfulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.orders_dashboard') }}">
+            <input type="hidden" name="fulfilled_page" value="{{ fulfilled_page }}">
+            <div class="form-inline">
+                <label for="unfulfilled_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="unfulfilled_page" name="unfulfilled_page" min="1" max="{{ total_unfulfilled_pages }}" class="form-control" value="{{ unfulfilled_page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <p class="text-center">No unfulfilled orders found.</p>
     {% endif %}
-    <span>Page {{ fulfilled_page }} of {{ total_fulfilled_pages }}</span>
-    {% if fulfilled_page < total_fulfilled_pages %} <a style="padding-left: 10px"
-        href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page+1) }}">
-        Next</a>
-        {% endif %}
+
+    <!-- Fulfilled Orders Section -->
+    <h3 class="mt-5">Fulfilled Orders</h3>
+    {% if fulfilled_orders %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Price</th>
+                    <th>Created At</th>
+                    <th>Fulfillment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in fulfilled_orders %}
+                <tr>
+                    <td>{{ order.order_id }}</td>
+                    <td>${{ order.total_price }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>{{ order.fulfillment_status }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory.order_dashboard_details', order_id=order.order_id) }}" class="btn btn-info btn-sm">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls for Fulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <nav aria-label="Fulfilled Orders Pagination">
+            <ul class="pagination">
+                {% if fulfilled_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page-1) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Previous</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo; Previous</span>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ fulfilled_page }} of {{ total_fulfilled_pages }}</span>
+                </li>
+
+                {% if fulfilled_page < total_fulfilled_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.orders_dashboard', unfulfilled_page=unfulfilled_page, fulfilled_page=fulfilled_page+1) }}" aria-label="Next">
+                        <span aria-hidden="true">Next &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">Next &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Jump to Page for Fulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.orders_dashboard') }}">
+            <input type="hidden" name="unfulfilled_page" value="{{ unfulfilled_page }}">
+            <div class="form-inline">
+                <label for="fulfilled_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="fulfilled_page" name="fulfilled_page" min="1" max="{{ total_fulfilled_pages }}" class="form-control" value="{{ fulfilled_page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <p class="text-center">No fulfilled orders found.</p>
+    {% endif %}
 </div>
-{% else %}
-<p>No fulfilled orders found.</p>
-{% endif %}
+
+<div style="padding-bottom: 50px;"></div>
 {% endblock %}
