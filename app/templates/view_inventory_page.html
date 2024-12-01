@@ -17,8 +17,8 @@
             <th>Product ID</th>
             <th>Product Name</th>
             <th>Product Quantity</th>
-            <th>Product Price</th> <!-- Added Product Price column -->
-            <th>Actions</th> <!-- Added Actions column -->
+            <th>Product Price</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -27,10 +27,9 @@
             <td>{{ item.product_id }}</td>
             <td>{{ item.product_name }}</td>
             <td>{{ item.product_quantity }}</td>
-            <td>${{ item.product_price }}</td> <!-- Display product price -->
+            <td>${{ item.product_price }}</td>
             <td>
-                <!-- Button to navigate to update product details -->
-                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a> <!-- New button -->
+                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a>
             </td>
         </tr>
         {% endfor %}
@@ -39,14 +38,59 @@
 
 <div style="margin-top: 20px;">
     {% if page > 1 %}
-        <a href="{{ url_for('inventory.view_inventory', page=page-1) }}" class="btn btn-secondary">Previous</a>
+    <a href="{{ url_for('inventory.view_inventory', page=page-1) }}" class="btn btn-secondary">Previous</a>
     {% endif %}
     {% if page < total_pages %}
-        <a href="{{ url_for('inventory.view_inventory', page=page+1) }}" class="btn btn-secondary">Next</a>
+    <a href="{{ url_for('inventory.view_inventory', page=page+1) }}" class="btn btn-secondary">Next</a>
     {% endif %}
 </div>
 {% else %}
 <p>Your inventory is empty.</p>
 {% endif %}
+
+<!-- Add spacing before Seller Analytics section -->
+<div style="margin-top: 40px;"> 
+    <h3>Seller Analytics: Most and Least Popular Products</h3>
+</div>
+
+{% if product_analytics %}
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Quantity Ordered</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Most Popular -->
+        <tr>
+            <td colspan="3"><strong>Most Popular Product</strong></td>
+        </tr>
+        {% set most_popular = product_analytics[0] %}
+        <tr>
+            <td>{{ most_popular[0] }}</td>
+            <td>{{ most_popular[1] }}</td>
+            <td>{{ most_popular[2] }}</td>
+        </tr>
+
+        <!-- Least Popular -->
+        <tr>
+            <td colspan="3"><strong>Least Popular Product</strong></td>
+        </tr>
+        {% set least_popular = product_analytics[-1] %}
+        <tr>
+            <td>{{ least_popular[0] }}</td>
+            <td>{{ least_popular[1] }}</td>
+            <td>{{ least_popular[2] }}</td>
+        </tr>
+    </tbody>
+</table>
+{% else %}
+<p>No analytics data available yet.</p>
+{% endif %}
+
+<!-- Add blank space at the bottom of the page -->
+<div style="margin-top: 60px;"></div>
 
 {% endblock %}

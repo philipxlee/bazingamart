@@ -10,18 +10,28 @@ bp = Blueprint('inventory', __name__)
 @login_required
 def view_inventory():
     """
-    Displays the seller's inventory items with pagination.
+    Displays the seller's inventory items with pagination and analytics for most/least popular products.
     """
     seller_id = current_user.id
     page = request.args.get('page', 1, type=int)
     items_per_page = 15
 
-    # Use the helper method to retrieve paginated inventory items for the seller
+    # Fetch paginated inventory items
     inventory_items = InventoryItems.get_paginated_by_user(seller_id, page, items_per_page)
     total_items = InventoryItems.get_count_by_user(seller_id)
     total_pages = (total_items + items_per_page - 1) // items_per_page
 
-    return render_template('view_inventory_page.html', inventory_items=inventory_items, page=page, total_pages=total_pages)
+    # Fetch seller analytics for most/least popular products
+    product_analytics = InventoryItems.get_seller_product_analytics(seller_id)
+
+    return render_template(
+        'view_inventory_page.html',
+        inventory_items=inventory_items,
+        page=page,
+        total_pages=total_pages,
+        product_analytics=product_analytics
+    )
+
 
 @bp.route('/view_inventory_item/<int:product_id>', methods=['GET'])
 @login_required

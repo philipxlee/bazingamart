@@ -130,3 +130,22 @@ class InventoryItems:
             WHERE cp.seller_id = :seller_id
         ''', seller_id=seller_id)
         return result[0][0] if result else 0
+    
+    @staticmethod
+    def get_seller_product_analytics(seller_id):
+        """
+        Fetches analytics for the seller's most and least popular products based on quantity ordered.
+        """
+        rows = app.db.execute('''
+            SELECT 
+                p.product_id, 
+                p.product_name, 
+                SUM(cp.quantity) AS total_quantity
+            FROM CartProducts cp
+            JOIN Products p ON cp.product_id = p.product_id
+            WHERE p.seller_id = :seller_id
+            GROUP BY p.product_id, p.product_name
+            ORDER BY total_quantity DESC
+        ''', seller_id=seller_id)
+
+        return rows
