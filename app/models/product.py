@@ -2,18 +2,22 @@ from flask import current_app as app
 from math import ceil
 
 class Product:
-    def __init__(self, product_id, product_name, price, available, seller_id=None):
+    def __init__(self, product_id, product_name, price, available, seller_id=None, product_quantity=1, description=None, image=None, category=None):
         self.product_id = product_id
         self.product_name = product_name
         self.price = price
         self.available = available
         self.seller_id = seller_id
+        self.product_quantity = product_quantity
+        self.description = description
+        self.image = image
+        self.category = category
         
 
     @staticmethod
     def get(product_id):
         rows = app.db.execute('''
-        SELECT product_id, product_name, price, available, seller_id
+        SELECT product_id, product_name, price, available, seller_id, product_quantity, description, image, category
         FROM Products
         WHERE product_id = :product_id
         ''',
@@ -25,7 +29,7 @@ class Product:
         offset = (page - 1) * per_page
         rows = app.db.execute(
             '''
-            SELECT product_id, product_name, price, available, seller_id
+            SELECT product_id, product_name, price, available, seller_id, product_quantity, description, image, category
             FROM Products
             WHERE available = :available
             LIMIT :per_page OFFSET :offset
@@ -49,7 +53,7 @@ class Product:
     def get_all_paginated(page, items_per_page, available=True):
         offset = (page - 1) * items_per_page
         rows = app.db.execute('''
-        SELECT product_id, product_name, price, available, seller_id
+        SELECT product_id, product_name, price, available, seller_id, product_quantity, description, image, category
             FROM Products
             WHERE available = :available
             LIMIT :items_per_page OFFSET :offset
@@ -70,7 +74,7 @@ class Product:
     @staticmethod
     def get_top_k_expensive(k):
         rows = app.db.execute('''
-            SELECT product_id, product_name, price, available, seller_id
+        SELECT product_id, product_name, price, available, seller_id, product_quantity, description, image, category
             FROM Products
             ORDER BY price DESC
             LIMIT :k

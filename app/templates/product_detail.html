@@ -1,72 +1,92 @@
 {% extends "base.html" %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <title>{{ product.product_name }} - Product Details</title>
-</head>
-<body>
-    <!-- Product Details Section -->
-    <h1>{{ product.product_name }}</h1>
-    <p><strong>Price:</strong> ${{ product.price }}</p>
-    <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
-    <!-- Include a description if available -->
-    {% if product.description %}
-        <p><strong>Description:</strong> {{ product.description }}</p>
-    {% endif %}
-    
-    <!-- Sellers Section -->
-    <h2>Sellers</h2>
-    {% if sellers %}
-        <table>
-            <tr>
-                <th>Seller</th>
-                <th style="padding-left: 40px; padding-right:25px">Quantity in Stock</th>
-                <th style="padding-left: 25px; padding-right:25px">Action</th>
-            </tr>
-            {% for seller in sellers %}
-            <tr>
-                <td><u><a href="{{ url_for('users.user_public_view', id=seller.seller_id) }}" 
-                    style="color: #0000FF; padding-right: 20px">
-                    Seller {{ seller.seller_id }}</a></u></td>
-                <td style="padding-left: 90px; padding-right:50px">{{ seller.product_quantity }}</td>
-                <td style="padding-left: 25px; padding-right:25px">
-                    <form action="{{ url_for('carts.add_to_cart') }}" method="post">
-                        <input type="hidden" name="product_id" value="{{ product.product_id }}">
-                        <input type="hidden" name="seller_id" value="{{ seller.seller_id }}">
-                        <input type="number" name="quantity" min="1" max="{{ seller.product_quantity }}" placeholder="Qty">
-                        <button type="submit">Add to Cart</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>No sellers available for this product at the moment.</p>
-    {% endif %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Column: Product Image -->
+        <div class="col-md-4">
+            <div class="product-images">
+                <img src="{{ product.image }}" alt="{{ product.product_name }}" style="width: 100%; height: auto;" class="img-fluid main-product-image">
+            </div>
+        </div>
 
-    <br />
+
+        <!-- Middle Column: Product Information -->
+        <div class="col-md-5">
+            <h1>{{ product.product_name }}</h1>
+            <p><strong>Price:</strong> ${{ product.price }}</p>
+            <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
+
+            <!-- Include a description if available -->
+            {% if product.description %}
+            <p><strong>Description:</strong> {{ product.description }}</p>
+            {% endif %}
+
+            <!-- Additional Information, such as product category -->
+            <p><strong>Category:</strong> {{ product.category }}</p>
+        </div>
+
+<!-- Right Column: Purchase Options -->
+<div class="col-md-3">
+    <div class="purchase-info card p-3">
+        <h4 class="text-success">{% if product.available %}In Stock{% else %}Out of Stock{% endif %}</h4>
+        <p><strong>Price: </strong>${{ product.price }}</p>
+
+        <!-- Seller Selection -->
+        {% if sellers %}
+        <form action="{{ url_for('carts.add_to_cart') }}" method="post">
+            <input type="hidden" name="product_id" value="{{ product.product_id }}">
+
+            <!-- Seller Dropdown -->
+            <div class="form-group mb-3">
+                <label for="seller_select"><strong>Select Seller:</strong></label>
+                <select id="seller_select" name="seller_id" class="form-control">
+                    {% for seller in sellers %}
+                    <option value="{{ seller.seller_id }}">
+                        Seller {{ seller.seller_id }}: {{ seller.product_quantity }} in stock
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Quantity Input -->
+            <div class="form-group mb-3">
+                <label for="quantity_{{ product.product_id }}"><strong>Quantity:</strong></label>
+                <input type="number" name="quantity" id="quantity_{{ product.product_id }}" value="1" min="1" max="{{ sellers[0].product_quantity }}" required class="form-control mb-2">
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button type="submit" class="btn btn-warning btn-lg btn-block mt-2">Add to Cart</button>
+        </form>
+        {% else %}
+        <p>No sellers available for this product at the moment.</p>
+        {% endif %}
+    </div>
+</div>
+
 
     <!-- Reviews Section -->
-    <h2>Reviews</h2>
-    {% if reviews %}
+    <div class="mt-5">
+        <h2>Reviews</h2>
+        {% if reviews %}
         {% for review in reviews %}
-            <div class="review">
-                <p><strong>Rating:</strong> {{ review.stars }}/5</p>
-                <p><strong>Review:</strong> {{ review.review_text }}</p>
-                <p><small>Written by User {{ review.user_id }} on {{ review.time_written }}</small></p>
-                {% if review.images %}
-                    <div class="review-images">
-                        {% for image in review.images %}
-                            <img src="{{ image }}" alt="Review Image">
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <p><strong>Upvotes:</strong> {{ review.upvotes }}</p>
+        <div class="card mb-3 p-3">
+            <p><strong>Rating:</strong> {{ review.stars }}/5</p>
+            <p><strong>Review:</strong> {{ review.review_text }}</p>
+            <p><small>Written by User {{ review.user_id }} on {{ review.time_written }}</small></p>
+            {% if review.images %}
+            <div class="review-images">
+                {% for image in review.images %}
+                <img src="{{ image }}" alt="Review Image" class="img-thumbnail">
+                {% endfor %}
             </div>
+            {% endif %}
+            <p><strong>Upvotes:</strong> {{ review.upvotes }}</p>
+        </div>
         {% endfor %}
-    {% else %}
+        {% else %}
         <p>No reviews for this product yet. Be the first to review!</p>
-    {% endif %}
-</body>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

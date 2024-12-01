@@ -66,21 +66,29 @@ def gen_products(num_products, num_users):
             'Beauty & Personal Care', 'Sports & Outdoors', 'Toys & Games',
             'Food & Beverages', 'Automotive', 'Health & Wellness'
         ]
-        
+
         for pid in range(1, num_products + 1):
             if pid % 100 == 0:
                 print(f'{pid}', end=' ', flush=True)
             name = fake.sentence(nb_words=4)[:-1]
-            price = round(random.uniform(5, 500), 2)
-            available = fake.boolean()
-            seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
-            product_quantity = fake.random_int(min=1, max=100)
-            description = fake.paragraph(nb_sentences=3)  
-            image = f"https://via.placeholder.com/150?text=Product+{pid}"  
-            category = random.choice(categories) 
-            products.append((pid, name, price, available, seller_id, product_quantity, description, image, category))
-            writer.writerow([pid, name, price, available, seller_id, product_quantity, description, image, category])
-            product_ids.append(pid)
+            category = random.choice(categories)
+            description = fake.paragraph(nb_sentences=3)
+            image = f"https://via.placeholder.com/150?text=Product+{pid}"
+
+            # Simulate multiple sellers for each product
+            num_sellers = random.randint(1, 5)  # Each product can have 1-5 sellers
+            for _ in range(num_sellers):
+                price = round(random.uniform(5, 500), 2)
+                seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
+                product_quantity = fake.random_int(min=0, max=100)  # Allow some sellers to have zero quantity
+                available = product_quantity > 0
+
+                products.append((pid, name, price, available, seller_id, product_quantity, description, image, category))
+                writer.writerow([pid, name, price, available, seller_id, product_quantity, description, image, category])
+                
+                if product_quantity > 0:
+                    product_ids.append(pid)  # Track available products
+
         print(f'{num_products} generated')
     return products
 
