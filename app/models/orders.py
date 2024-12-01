@@ -235,7 +235,8 @@ class Order:
                 o.created_at,
                 SUM(cp.quantity * cp.unit_price) AS total_price,
                 CASE 
-                    WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                    WHEN COUNT(*) = SUM(CASE WHEN cp.fulfillment_status = 'Fulfilled' THEN 1 ELSE 0 END) 
+                    THEN 'Fulfilled' 
                     ELSE 'Incomplete' 
                 END AS seller_fulfillment_status
             FROM Orders o
@@ -243,7 +244,8 @@ class Order:
             WHERE cp.seller_id = :seller_id
             GROUP BY o.order_id, o.created_at
             HAVING CASE 
-                        WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                        WHEN COUNT(*) = SUM(CASE WHEN cp.fulfillment_status = 'Fulfilled' THEN 1 ELSE 0 END) 
+                        THEN 'Fulfilled' 
                         ELSE 'Incomplete' 
                 END IN ({status_placeholder})
             ORDER BY o.created_at DESC
@@ -265,7 +267,8 @@ class Order:
                 WHERE cp.seller_id = :seller_id
                 GROUP BY o.order_id
                 HAVING CASE 
-                            WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                            WHEN COUNT(*) = SUM(CASE WHEN cp.fulfillment_status = 'Fulfilled' THEN 1 ELSE 0 END) 
+                            THEN 'Fulfilled' 
                             ELSE 'Incomplete' 
                     END IN ({status_placeholder})
             ) AS subquery
@@ -296,7 +299,8 @@ class Order:
                 o.created_at, 
                 o.coupon_code, 
                 CASE 
-                    WHEN MIN(cp.fulfillment_status) = 'Fulfilled' THEN 'Fulfilled' 
+                    WHEN COUNT(*) = SUM(CASE WHEN cp.fulfillment_status = 'Fulfilled' THEN 1 ELSE 0 END) 
+                    THEN 'Fulfilled' 
                     ELSE 'Incomplete' 
                 END AS seller_fulfillment_status
             FROM Orders o
