@@ -6,9 +6,9 @@ SELECT pg_catalog.setval('public.users_id_seq',
 
 \COPY Products FROM 'Products.csv' WITH DELIMITER ',' NULL '' CSV;
 -- Adjusting the sequence for Products' auto-generated primary key:
-SELECT pg_catalog.setval('public.products_product_id_seq',
-                         (SELECT MAX(product_id) + 1 FROM Products),
-                         false);
+-- SELECT pg_catalog.setval('public.products_product_id_seq',
+                         --(SELECT MAX(product_id) + 1 FROM Products),
+                         --false);
 
 \COPY Reviews FROM 'Reviews.csv' WITH DELIMITER ',' NULL '' CSV
 SELECT pg_catalog.setval('public.reviews_review_id_seq',

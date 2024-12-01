@@ -57,6 +57,7 @@ def gen_users(num_users):
 # Generate products
 def gen_products(num_products, num_users):
     products = []
+    used_combinations = set()  # Set to track unique (product_id, seller_id) combinations
     with open('db/generated/Products.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('Products...', end=' ', flush=True)
@@ -78,19 +79,25 @@ def gen_products(num_products, num_users):
             # Simulate multiple sellers for each product
             num_sellers = random.randint(1, 5)  # Each product can have 1-5 sellers
             for _ in range(num_sellers):
+                while True:  # Keep generating until a unique combination is found
+                    seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
+                    combination = (pid, seller_id)
+                    if combination not in used_combinations:
+                        used_combinations.add(combination)  # Mark this combination as used
+                        break
+
                 price = round(random.uniform(5, 500), 2)
-                seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
                 product_quantity = fake.random_int(min=0, max=100)  # Allow some sellers to have zero quantity
                 available = product_quantity > 0
 
                 products.append((pid, name, price, available, seller_id, product_quantity, description, image, category))
                 writer.writerow([pid, name, price, available, seller_id, product_quantity, description, image, category])
                 
-                if product_quantity > 0:
-                    product_ids.append(pid)  # Track available products
+                product_ids.append(combination)  # Track available products by (product_id, seller_id)
 
         print(f'{num_products} generated')
     return products
+
 
 # Generate carts
 def gen_carts(num_carts, num_users):
@@ -115,6 +122,8 @@ def gen_cart_products(num_carts, max_products_per_cart, products):
     order_ids = list(range(1, num_carts + 1))
     random.shuffle(order_ids)
 
+    used_combinations = set()  # Set to track unique (order_id, product_id, seller_id) combinations
+
     # FULFILLED_PERCENTAGE below is the percentage of carts that are fulfilled
     # The rest are incomplete (i.e. 1 - FULFILLED_PERCENTAGE)
     # Remember to keep this number high otherwise you will end up with a lot of orders that 
@@ -128,15 +137,24 @@ def gen_cart_products(num_carts, max_products_per_cart, products):
     with open('db/generated/CartProducts.csv', 'w', newline='') as f:
         writer = get_csv_writer(f)
         print('CartProducts...', end=' ', flush=True)
+        
         for order_id in range(1, num_carts + 1):
             cart_products_data[order_id] = []
             num_products_in_cart = fake.random_int(min=1, max=max_products_per_cart)
             selected_products = random.sample(products, min(num_products_in_cart, len(products)))
+            
             for product in selected_products:
-                pid, _, _, available, _, product_quantity, *_ = product
+                pid, _, _, available, seller_id, product_quantity, *_ = product
+                
                 if available and product_quantity > 0:
+                    # Ensure combination is unique for (order_id, product_id, seller_id)
+                    while (order_id, pid, seller_id) in used_combinations:
+                        seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
+
+                    # Once a unique combination is found, add it to used_combinations
+                    used_combinations.add((order_id, pid, seller_id))
+
                     quantity = fake.random_int(min=1, max=min(5, product_quantity))
-                    seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
                     unit_price = round(random.uniform(5, 500), 2)
 
                     # Set fulfillment_status based on whether the order is selected
@@ -147,8 +165,11 @@ def gen_cart_products(num_carts, max_products_per_cart, products):
 
                     writer.writerow([order_id, pid, seller_id, quantity, unit_price, fulfillment_status])
                     cart_products_data[order_id].append(fulfillment_status)
+                    
         print(f'CartProducts for {num_carts} carts generated')
+        
     return cart_products_data
+
 
 
 # Generate orders
@@ -196,7 +217,7 @@ def gen_reviews(num_reviews=500, num_users=num_users, num_products=num_products)
             user_id = fake.random_int(min=0, max=num_users)  
             seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
             reviewer_type = random.choice(['buyer', 'seller'])
-            product_id = random.choice(product_ids)
+            product_id, seller_id = random.choice(product_ids)  # Get the combination
             stars = fake.random_int(min=1, max=5)
             review_text = fake.text(max_nb_chars=200)
             time_written = fake.date_time_this_year(before_now=True, after_now=False)   
