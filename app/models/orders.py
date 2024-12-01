@@ -382,20 +382,18 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def update_item_fulfillment_status(order_id, product_id, new_status):
-        """Updates the fulfillment status of an individual item in the order."""
+        """
+        Updates the fulfillment status of an individual item in the order and 
+        recalculates the overall order fulfillment status.
+        Ensures the database is updated and changes are committed.
+        """
+        # Define allowed statuses
         allowed_statuses = ["Incomplete", "Fulfilled"]
         if new_status not in allowed_statuses:
-            raise ValueError("Invalid fulfillment status.")
+            raise ValueError("Invalid fulfillment status. Must be 'Incomplete' or 'Fulfilled'.")
 
-        print(
-            "Changing fulfillment status for order_id:",
-            order_id,
-            "product_id:",
-            product_id,
-            "to:",
-            new_status,
-        )
-        current_app.db.execute(
+        # Update the fulfillment status of the specific item
+        rows_affected = current_app.db.execute(
             """
             UPDATE CartProducts
             SET fulfillment_status = :new_status
@@ -406,31 +404,27 @@ class Order:
             new_status=new_status,
         )
 
+        # Check if any row was updated
+        if rows_affected == 0:
+            raise ValueError(f"No matching item found for Order ID: {order_id}, Product ID: {product_id}.")
+
+        # Commit the changes to ensure persistence
+        current_app.db.commit()
+
+        # Recalculate the overall order fulfillment status
         Order.recalculate_order_fulfillment_status(order_id)
 
-    @staticmethod
-    @handle_db_exceptions
-    def add_fulfillment_status_to_items(order_id, fulfillment_status):
-        """
-        Updates the fulfillment status of each item in the CartProducts table to match the given fulfillment status.
-        :param order_id: ID of the order.
-        :param fulfillment_status: Status to apply to all items in the order.
-        """
-        current_app.db.execute(
-            """
-            UPDATE CartProducts
-            SET fulfillment_status = :fulfillment_status
-            WHERE order_id = :order_id
-            """,
-            order_id=order_id,
-            fulfillment_status=fulfillment_status,
-        )
+
 
     @staticmethod
     @handle_db_exceptions
     def recalculate_order_fulfillment_status(order_id):
-        """Recalculates and updates the order's overall fulfillment status based on all item statuses."""
-        statuses = current_app.db.execute(
+        """
+        Recalculates the overall fulfillment status of an order by checking the statuses
+        of all items in the order and updating the database accordingly.
+        """
+        # Fetch all item statuses for the order
+        item_statuses = current_app.db.execute(
             """
             SELECT fulfillment_status
             FROM CartProducts
@@ -438,21 +432,26 @@ class Order:
             """,
             order_id=order_id,
         )
-        statuses = [row[0] for row in statuses]
 
-        if all(status == "Fulfilled" for status in statuses):
-            new_status = "Fulfilled"
-        else:
-            new_status = "Incomplete"
+        # Extract the statuses into a list
+        item_statuses = [row[0] for row in item_statuses]
 
-        print(f"Updating order fulfillment status for {order_id} to: {new_status}")
+        # Determine the overall status:
+        # - 'Fulfilled' if all items are fulfilled
+        # - 'Incomplete' otherwise
+        overall_status = "Fulfilled" if all(status == "Fulfilled" for status in item_statuses) else "Incomplete"
+
+        # Update the overall order status in the database
         current_app.db.execute(
             """
             UPDATE Orders
-            SET fulfillment_status = :new_status
+            SET fulfillment_status = :overall_status
             WHERE order_id = :order_id
             """,
             order_id=order_id,
-            new_status=new_status,
+            overall_status=overall_status,
         )
+
+        # Commit the changes to ensure the update is persisted
         current_app.db.commit()
+
