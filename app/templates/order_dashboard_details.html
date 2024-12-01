@@ -35,10 +35,10 @@
                     <input type="hidden" name="order_id" value="{{ order.order_id }}">
                     <input type="hidden" name="product_id" value="{{ item.product_id }}">
                     <select name="new_status">
-                        <option value="Incomplete" {% if item.fulfillment_status=='Incomplete' %}selected{% endif %}>
+                        <option value="Incomplete" {% if item.fulfillment_status == 'Incomplete' %}selected{% endif %}>
                             Incomplete
                         </option>
-                        <option value="Fulfilled" {% if item.fulfillment_status=='Fulfilled' %}selected{% endif %}>
+                        <option value="Fulfilled" {% if item.fulfillment_status == 'Fulfilled' %}selected{% endif %}>
                             Fulfilled
                         </option>
                     </select>

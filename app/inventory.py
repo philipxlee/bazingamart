@@ -10,18 +10,28 @@ bp = Blueprint('inventory', __name__)
 @login_required
 def view_inventory():
     """
-    Displays the seller's inventory items with pagination.
+    Displays the seller's inventory items with pagination and analytics for most/least popular products.
     """
     seller_id = current_user.id
     page = request.args.get('page', 1, type=int)
     items_per_page = 15
 
-    # Use the helper method to retrieve paginated inventory items for the seller
+    # Fetch paginated inventory items
     inventory_items = InventoryItems.get_paginated_by_user(seller_id, page, items_per_page)
     total_items = InventoryItems.get_count_by_user(seller_id)
     total_pages = (total_items + items_per_page - 1) // items_per_page
 
-    return render_template('view_inventory_page.html', inventory_items=inventory_items, page=page, total_pages=total_pages)
+    # Fetch seller analytics for most/least popular products
+    product_analytics = InventoryItems.get_seller_product_analytics(seller_id)
+
+    return render_template(
+        'view_inventory_page.html',
+        inventory_items=inventory_items,
+        page=page,
+        total_pages=total_pages,
+        product_analytics=product_analytics
+    )
+
 
 @bp.route('/view_inventory_item/<int:product_id>', methods=['GET'])
 @login_required
@@ -78,12 +88,10 @@ def delete_inventory_item():
     flash("Item removed from inventory successfully.", "success")
     return redirect(url_for('inventory.view_inventory'))
 
-@bp.route('/add_inventory_item', methods=['GET', 'POST'])
+""" @bp.route('/add_inventory_item', methods=['GET', 'POST'])
 @login_required
 def add_inventory_item():
-    """
-    Adds a new product to the seller's inventory.
-    """
+
     if request.method == 'POST':
         seller_id = current_user.id
         product_name = request.form.get('product_name')
@@ -94,7 +102,28 @@ def add_inventory_item():
         flash("New product added to inventory successfully.", "success")
         return redirect(url_for('inventory.view_inventory'))
 
-    return render_template('add_inventory_item.html')
+    return render_template('add_inventory_item.html') """
+
+@bp.route('/add_new_product', methods=['GET', 'POST'])
+@login_required
+def add_new_product():
+    """
+    Adds a new product to the seller's inventory.
+    """
+    if request.method == 'POST':
+        seller_id = current_user.id
+        product_name = request.form.get('product_name')
+        product_price = request.form.get('product_price', type=float)
+        product_quantity = request.form.get('product_quantity', type=int)
+
+        # Add the new product to the Products table using the helper function
+        InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
+
+        flash("New product added successfully.", "success")
+        return redirect(url_for('inventory.view_inventory'))
+
+    return render_template('add_new_product.html')
+
 
 @bp.route('/orders_dashboard')
 @login_required

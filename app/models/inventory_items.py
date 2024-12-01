@@ -66,6 +66,18 @@ class InventoryItems:
         SET available = FALSE
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
+    
+    @staticmethod
+    @handle_db_exceptions
+    def add_new_product(seller_id, product_name, product_price, product_quantity):
+        """
+        Adds a new product to the seller's inventory in the Products table.
+        """
+        app.db.execute('''
+        INSERT INTO Products (product_name, price, available, seller_id, product_quantity)
+        VALUES (:product_name, :product_price, TRUE, :seller_id, :product_quantity)
+        ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
+
 
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):
@@ -118,3 +130,22 @@ class InventoryItems:
             WHERE cp.seller_id = :seller_id
         ''', seller_id=seller_id)
         return result[0][0] if result else 0
+    
+    @staticmethod
+    def get_seller_product_analytics(seller_id):
+        """
+        Fetches analytics for the seller's most and least popular products based on quantity ordered.
+        """
+        rows = app.db.execute('''
+            SELECT 
+                p.product_id, 
+                p.product_name, 
+                SUM(cp.quantity) AS total_quantity
+            FROM CartProducts cp
+            JOIN Products p ON cp.product_id = p.product_id
+            WHERE p.seller_id = :seller_id
+            GROUP BY p.product_id, p.product_name
+            ORDER BY total_quantity DESC
+        ''', seller_id=seller_id)
+
+        return rows
