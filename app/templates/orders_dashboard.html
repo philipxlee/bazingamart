@@ -5,7 +5,7 @@
     <h2 class="text-center">Orders Dashboard</h2>
 
     <!-- To be Fulfilled Section -->
-    <h3 class="mt-4">To be Fulfilled</h3>
+    <h3 class="mt-4">To Be Fulfilled</h3>
     {% if unfulfilled_orders %}
     <div class="table-responsive">
         <table class="table table-striped">
@@ -67,6 +67,18 @@
                 {% endif %}
             </ul>
         </nav>
+    </div>
+
+    <!-- Jump to Page for Unfulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.orders_dashboard') }}">
+            <input type="hidden" name="fulfilled_page" value="{{ fulfilled_page }}">
+            <div class="form-inline">
+                <label for="unfulfilled_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="unfulfilled_page" name="unfulfilled_page" min="1" max="{{ total_unfulfilled_pages }}" class="form-control" value="{{ unfulfilled_page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
     </div>
     {% else %}
     <p class="text-center">No unfulfilled orders found.</p>
@@ -135,6 +147,18 @@
                 {% endif %}
             </ul>
         </nav>
+    </div>
+
+    <!-- Jump to Page for Fulfilled Orders -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.orders_dashboard') }}">
+            <input type="hidden" name="unfulfilled_page" value="{{ unfulfilled_page }}">
+            <div class="form-inline">
+                <label for="fulfilled_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="fulfilled_page" name="fulfilled_page" min="1" max="{{ total_fulfilled_pages }}" class="form-control" value="{{ fulfilled_page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
     </div>
     {% else %}
     <p class="text-center">No fulfilled orders found.</p>
