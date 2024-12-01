@@ -2,6 +2,12 @@
 
 {% block content %}
 <h2>Your Inventory Items</h2>
+
+<!-- Add New Product Button -->
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('inventory.add_new_product') }}" class="btn btn-primary">Add New Product</a>
+</div>
+
 <p>Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
 
 {% if inventory_items %}

@@ -66,6 +66,18 @@ class InventoryItems:
         SET available = FALSE
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
+    
+    @staticmethod
+    @handle_db_exceptions
+    def add_new_product(seller_id, product_name, product_price, product_quantity):
+        """
+        Adds a new product to the seller's inventory in the Products table.
+        """
+        app.db.execute('''
+        INSERT INTO Products (product_name, price, available, seller_id, product_quantity)
+        VALUES (:product_name, :product_price, TRUE, :seller_id, :product_quantity)
+        ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
+
 
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):
