@@ -18,8 +18,8 @@ def index():
     # Start with base query for products that are available
     query = """
         SELECT * FROM Products
-        WHERE available = TRUE
-    """
+        WHERE available = TRUE 
+    """ 
     params = {}
 
     # Apply search filter
@@ -39,6 +39,9 @@ def index():
         query += " ORDER BY price ASC"
     elif sort == 'desc':
         query += " ORDER BY price DESC"
+
+    # Temporarily applied limit to the number of products retrieved
+    query += " LIMIT 50"
 
     # Execute the query
     filtered_products = current_app.db.execute(query, **params)
