@@ -6,12 +6,49 @@
 
 <h2 class="text-center">Products for Sale</h2>
 
-<!-- Button for "Search By Price" and "Search User Feedback" -->
+<!-- Button for "Search By Price" and "Search User Feedback" 
 <div class="text-center mb-4">
   <a href="{{ url_for('products.search_by_price') }}" class="btn btn-primary">Search by Price</a>
   <a href="{{ url_for('reviews.search_user_feedback') }}" class="btn btn-secondary">Product & Seller Feedback</a>
+</div> -->
+
+<!-- Search, Filter, and Sort Form -->
+<div class="container mb-4">
+  <form method="GET" action="{{ url_for('index.index') }}" class="row g-3">
+    <!-- Keyword Search -->
+    <div class="col-md-4">
+      <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search products..."
+        class="form-control">
+    </div>
+
+    <!-- Category Filter -->
+    <div class="col-md-4">
+      <select name="category" class="form-select">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+        <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
+          {{ category }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Sort by Price -->
+    <div class="col-md-4">
+      <select name="sort" class="form-select">
+        <option value="">Sort by Price</option>
+        <option value="asc" {% if request.args.get('sort') == 'asc' %}selected{% endif %}>Price: Low to High</option>
+        <option value="desc" {% if request.args.get('sort') == 'desc' %}selected{% endif %}>Price: High to Low</option>
+      </select>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="col-md-12">
+      <button type="submit" class="btn btn-primary">Apply Filters</button>
+    </div>
+  </form>
 </div>
 
+<!-- Display Products -->
 <div class="container">
   <div class="row">
     {% for product in product_items %}
@@ -24,6 +61,7 @@
           </h5>
           </a>
           <p class="card-text"><strong>Price: </strong>${{ product.price }}</p>
+          <p class="card-text"><strong>Average Rating: </strong>{{ product.average_rating }}/5</p>
           <p class="card-text"><strong>Seller ID:</strong> {{ product.seller_id }}</p>
 
           <!-- Add to Cart form -->
