@@ -130,18 +130,18 @@ def add_new_product():
         try:
             # Attempt to add the product
             InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
-            flash("New product added successfully.", "success")
             return redirect(url_for('inventory.view_inventory'))
         except ValueError as ve:
-            # Handle duplicate product name
+            # Flash a custom error message for duplicates
             flash(str(ve), "danger")
+            return redirect(url_for('inventory.view_inventory'))  # Redirect with error
         except Exception as e:
             # Handle unexpected errors
             flash("An unexpected error occurred. Please try again.", "danger")
+            return redirect(url_for('inventory.view_inventory'))
 
     # Render the form again with any errors
     return render_template('add_new_product.html')
-
 
 
 
