@@ -87,9 +87,17 @@ def delete_inventory_item():
     seller_id = current_user.id
     product_id = request.form.get('product_id', type=int)
 
-    InventoryItems.mark_inventory_item_unavailable(seller_id, product_id)
-    flash("Item removed from inventory successfully.", "success")
+    try:
+        InventoryItems.delete_inventory_item(seller_id, product_id)
+        flash("Item removed from inventory successfully.", "success")
+    except ValueError as ve:
+        flash(str(ve), "danger")
+    except Exception as e:
+        flash("An unexpected error occurred while removing the item. Please try again.", "danger")
+        print(f"Error deleting inventory item: {e}")
+
     return redirect(url_for('inventory.view_inventory'))
+
 
 """ @bp.route('/add_inventory_item', methods=['GET', 'POST'])
 @login_required
@@ -119,13 +127,22 @@ def add_new_product():
         product_price = request.form.get('product_price', type=float)
         product_quantity = request.form.get('product_quantity', type=int)
 
-        # Add the new product to the Products table using the helper function
-        InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
+        try:
+            # Attempt to add the product
+            InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
+            flash("New product added successfully.", "success")
+            return redirect(url_for('inventory.view_inventory'))
+        except ValueError as ve:
+            # Handle duplicate product name
+            flash(str(ve), "danger")
+        except Exception as e:
+            # Handle unexpected errors
+            flash("An unexpected error occurred. Please try again.", "danger")
 
-        flash("New product added successfully.", "success")
-        return redirect(url_for('inventory.view_inventory'))
-
+    # Render the form again with any errors
     return render_template('add_new_product.html')
+
+
 
 
 @bp.route('/orders_dashboard')
