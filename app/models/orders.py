@@ -99,6 +99,9 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_order_details(order_id, page=1, per_page=100):
+        """
+        Retrieves details of an order given the order ID
+        """
         offset = (page - 1) * per_page
         rows = current_app.db.execute(
             """
@@ -221,6 +224,9 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_paginated_seller_orders(seller_id, statuses, page, per_page):
+        """
+        Retrieves paginated lists of orders involving products sold by the seller.
+        """
         offset = (page - 1) * per_page
 
         # Prepare statuses for SQL query
@@ -291,6 +297,9 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_order_by_seller(seller_id, order_id) -> "Order":
+        """
+        Retrieves orders involving products sold by the seller.
+        """
         rows = current_app.db.execute(
             """
             SELECT 
@@ -322,6 +331,9 @@ class Order:
     @staticmethod
     @handle_db_exceptions
     def get_order_details_for_seller(seller_id, order_id, page, per_page):
+        """
+        Retrieves order details given a seller ID and order ID
+        """
         offset = (page - 1) * per_page
         rows = current_app.db.execute(
             """
