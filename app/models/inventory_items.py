@@ -132,20 +132,35 @@ class InventoryItems:
         return result[0][0] if result else 0
     
     @staticmethod
-    def get_seller_product_analytics(seller_id):
+    def get_top_most_popular_products(seller_id, limit=3):
         """
-        Fetches analytics for the seller's most and least popular products based on quantity ordered.
+        Retrieves the top N most popular products for a seller.
         """
         rows = app.db.execute('''
-            SELECT 
-                p.product_id, 
-                p.product_name, 
-                SUM(cp.quantity) AS total_quantity
-            FROM CartProducts cp
-            JOIN Products p ON cp.product_id = p.product_id
-            WHERE p.seller_id = :seller_id
-            GROUP BY p.product_id, p.product_name
-            ORDER BY total_quantity DESC
-        ''', seller_id=seller_id)
+        SELECT p.product_id, p.product_name, SUM(cp.quantity) AS total_quantity
+        FROM CartProducts cp
+        JOIN Products p ON cp.product_id = p.product_id
+        WHERE p.seller_id = :seller_id
+        GROUP BY p.product_id, p.product_name
+        ORDER BY total_quantity DESC
+        LIMIT :limit
+        ''', seller_id=seller_id, limit=limit)
+        
+        return [{"product_id": row[0], "product_name": row[1], "quantity_ordered": row[2]} for row in rows]
 
-        return rows
+    @staticmethod
+    def get_top_least_popular_products(seller_id, limit=3):
+        """
+        Retrieves the top N least popular products for a seller.
+        """
+        rows = app.db.execute('''
+        SELECT p.product_id, p.product_name, SUM(cp.quantity) AS total_quantity
+        FROM CartProducts cp
+        JOIN Products p ON cp.product_id = p.product_id
+        WHERE p.seller_id = :seller_id
+        GROUP BY p.product_id, p.product_name
+        ORDER BY total_quantity ASC
+        LIMIT :limit
+        ''', seller_id=seller_id, limit=limit)
+        
+        return [{"product_id": row[0], "product_name": row[1], "quantity_ordered": row[2]} for row in rows]
