@@ -24,6 +24,7 @@
                 <tr>
                     <th scope="col">Product Name</th>
                     <th scope="col">Product ID</th>
+                    <th scope="col">Seller ID</th>
                     <th scope="col">Order ID</th>
                     <th scope="col">Quantity</th>
                     <th scope="col">Unit Price</th>
@@ -36,10 +37,12 @@
                 <tr>
                     <td>{{ item.product_name }}</td>
                     <td>{{ item.product_id }}</td>
+                    <td>{{ item.seller_id }}</td>
                     <td>{{ item.order_id }}</td>
                     <td>
                         <form action="{{ url_for('carts.update_quantity') }}" method="post" class="form-inline">
                             <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <input type="hidden" name="seller_id" value="{{ item.seller_id }}">
                             <input type="number" name="quantity" value="{{ item.quantity }}" min="0"
                                 class="form-control form-control-sm mr-2">
                             <button type="submit" class="btn btn-primary btn-sm">Update</button>
@@ -50,6 +53,7 @@
                     <td>
                         <form action="{{ url_for('carts.remove_item') }}" method="post">
                             <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <input type="hidden" name="seller_id" value="{{ item.seller_id }}">
                             <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                         </form>
                     </td>

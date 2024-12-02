@@ -29,6 +29,7 @@
           <!-- Add to Cart form -->
           <form action="{{ url_for('carts.add_to_cart') }}" method="post">
             <input type="hidden" name="product_id" value="{{ product.product_id }}">
+            <input type="hidden" name="seller_id" value="{{ product.seller_id }}">
             <label for="quantity_{{ product.product_id }}"><strong>Quantity: </strong></label>
             <input type="number" name="quantity" id="quantity_{{ product.product_id }}" value="1" min="1" required
               class="form-control mb-2">

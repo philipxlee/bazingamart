@@ -46,9 +46,10 @@ def view_cart():
 @login_required
 def add_to_cart():
     product_id = request.form.get('product_id', type=int)
+    seller_id = request.form.get('seller_id', type=int)
     quantity = request.form.get('quantity', 1, type=int)
     user_id = current_user.id
-    result = CartItems.add_item(user_id, product_id, quantity)
+    result = CartItems.add_item(user_id, product_id, quantity, seller_id)
     if result == "success":
         flash("Item successfully added to cart!", "success")
     else:
@@ -74,8 +75,9 @@ def update_quantity():
 @login_required
 def remove_item():
     product_id = request.form.get('product_id', type=int)
+    seller_id = request.form.get('seller_id', type=int)
     user_id = current_user.id
-    result = CartItems.remove_item(user_id, product_id)
+    result = CartItems.remove_item(user_id, product_id, seller_id)
     if result == "success":
         return redirect(url_for('carts.view_cart'))
     else:

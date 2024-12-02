@@ -16,13 +16,14 @@ class CartItems:
     methods to view the items and calculate the total cost of all items in the cart.
     """
 
-    def __init__(self, product_id, order_id, quantity, unit_price, product_name):
+    def __init__(self, product_id, seller_id, order_id, quantity, unit_price, product_name):
         self.product_id = product_id
-        self.product_name = product_name
-        self.product_name = product_name
+        self.seller_id = seller_id
         self.order_id = order_id
         self.quantity = quantity
         self.unit_price = unit_price
+        self.product_name = product_name
+        self.product_name = product_name
 
     @staticmethod
     def get_all_cart_items(user_id) -> list:
@@ -32,16 +33,15 @@ class CartItems:
         """
         rows = current_app.db.execute(
             """
-            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
+            SELECT cp.product_id, cp.seller_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
             FROM CartProducts cp
             JOIN Cart c ON cp.order_id = c.order_id
-            JOIN Products p ON cp.product_id = p.product_id
+            JOIN Products p ON cp.product_id = p.product_id AND cp.seller_id = p.seller_id
             WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
             """,
             user_id=user_id,
         )
-
-        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
+        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4], row[5]) for row in rows]
         return items_in_cart
 
     @staticmethod
@@ -56,10 +56,10 @@ class CartItems:
         offset = (page - 1) * per_page
         rows = current_app.db.execute(
             """
-            SELECT cp.product_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
+            SELECT cp.product_id, cp.seller_id, cp.order_id, cp.quantity, cp.unit_price, p.product_name
             FROM CartProducts cp
             JOIN Cart c ON cp.order_id = c.order_id
-            JOIN Products p ON cp.product_id = p.product_id
+            JOIN Products p ON cp.product_id = p.product_id AND cp.seller_id = p.seller_id
             WHERE c.user_id = :user_id AND c.purchase_status = 'Pending'
             LIMIT :per_page OFFSET :offset
             """,
@@ -77,19 +77,21 @@ class CartItems:
             user_id=user_id,
         )[0][0]
 
-        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
+        items_in_cart = [CartItems(row[0], row[1], row[2], row[3], row[4], row[5]) for row in rows]
         return items_in_cart, total_items
 
 
     @staticmethod
     @handle_db_exceptions
     @handle_db_exceptions
-    def add_item(user_id, product_id, quantity):
+    def add_item(user_id, product_id, quantity, seller_id):
         """
         Adds an item to the cart after checking inventory.
         @param user_id: The user ID to add the item for.
         @param product_id: The product ID to add to the cart.
         @param quantity: The quantity of the product to add.
+        @param seller_id: The seller ID associated with the product.
+
         """
 
         # 1. Check inventory
@@ -100,13 +102,13 @@ class CartItems:
             return "Not enough inventory available."
 
         # 2. Get unit price of the product
-        unit_price = CartItems._get_product_price(product_id)
+        unit_price = CartItems._get_product_price(product_id, seller_id)
         if unit_price is None:
             return "Product not found."
 
         # 3. Validation for if the product is already in the cart
         order_id = CartItems._get_or_create_pending_cart(user_id)
-        existing_item = CartItems._get_existing_cart_item(order_id, product_id)
+        existing_item = CartItems._get_existing_cart_item(order_id, product_id, seller_id)
         
         if existing_item:
             new_quantity = existing_item[0][0] + quantity
@@ -114,7 +116,6 @@ class CartItems:
                 return "Not enough inventory available for the requested quantity."
             CartItems._update_cart_item(order_id, product_id, new_quantity)
         else:
-            seller_id = user_id
             CartItems._insert_cart_item(order_id, product_id, seller_id, quantity, unit_price)
 
         return "success"
@@ -138,17 +139,18 @@ class CartItems:
 
     @staticmethod
     @handle_db_exceptions
-    def remove_item(user_id, product_id):
+    def remove_item(user_id, product_id, seller_id):
         """
         Removes an item from the cart.
         @param user_id: The user ID to remove the item for.
         @param product_id: The product ID to remove from the cart.
+
         """
         order_id = CartItems._get_pending_cart_id(user_id)
         if order_id is None:
             return "No pending cart found."
 
-        CartItems._delete_cart_item(order_id, product_id)
+        CartItems._delete_cart_item(order_id, product_id, seller_id)
         return "success"
 
     @staticmethod
@@ -259,24 +261,27 @@ class CartItems:
             return new_cart[0][0]
 
     @staticmethod
-    def _get_product_price(product_id):
+    def _get_product_price(product_id, seller_id):
         price_row = current_app.db.execute(
             """
-            SELECT price FROM Products WHERE product_id = :product_id
+            SELECT price FROM Products WHERE product_id = :product_id AND seller_id =:seller_id
             """,
             product_id=product_id,
+            seller_id=seller_id,
         )
         return price_row[0][0] if price_row else None
 
     @staticmethod
-    def _get_existing_cart_item(order_id, product_id):
+    def _get_existing_cart_item(order_id, product_id, seller_id):
         existing_item = current_app.db.execute(
             """
             SELECT quantity FROM CartProducts
-            WHERE order_id = :order_id AND product_id = :product_id
+            WHERE order_id = :order_id AND product_id = :product_id AND seller_id = :seller_id
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
+
         )
         return existing_item
 
@@ -319,16 +324,16 @@ class CartItems:
         return order_id_row[0][0] if order_id_row else None
 
     @staticmethod
-    def _delete_cart_item(order_id, product_id):
+    def _delete_cart_item(order_id, product_id, seller_id):
         current_app.db.execute(
             """
             DELETE FROM CartProducts
-            WHERE order_id = :order_id AND product_id = :product_id
+            WHERE order_id = :order_id AND product_id = :product_id AND seller_id = :seller_id
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
         )
-
     @staticmethod
     def _is_valid_quantity(product_id, requested_quantity):
         available_quantity = CartItems._get_available_inventory(product_id)
