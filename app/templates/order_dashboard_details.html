@@ -11,12 +11,7 @@
             <p><strong>Total # of Items Purchased:</strong> {{ total_items }}</p>
             <p><strong>Total Price (for your items):</strong> ${{ order.total_price }}</p>
             <p><strong>Coupon Code:</strong> {{ order.coupon_code }}</p>
-            <p>
-                <strong>Overall Fulfillment Status:</strong>
-                <span style="font-weight: bold; color: {% if order.fulfillment_status == 'Incomplete' %}red{% else %}green{% endif %};">
-                    {{ order.fulfillment_status }}
-                </span>
-            </p>
+            <p><strong>Overall Fulfillment Status:</strong> {{ order.fulfillment_status }}</p>
         </div>
         
         <!-- Right Column -->
