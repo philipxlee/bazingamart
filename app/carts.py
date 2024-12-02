@@ -61,9 +61,10 @@ def add_to_cart():
 @login_required
 def update_quantity():
     product_id = request.form.get('product_id', type=int)
+    seller_id = request.form.get('seller_id', type=int)
     new_quantity = request.form.get('quantity', type=int)
     user_id = current_user.id
-    result = CartItems.update_item_quantity(user_id, product_id, new_quantity)
+    result = CartItems.update_item_quantity(user_id, product_id, seller_id, new_quantity)
     if result == "success":
         flash("Updated quantity successfully!", "success")
         return redirect(url_for('carts.view_cart'))

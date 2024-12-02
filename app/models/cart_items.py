@@ -23,7 +23,6 @@ class CartItems:
         self.quantity = quantity
         self.unit_price = unit_price
         self.product_name = product_name
-        self.product_name = product_name
 
     @staticmethod
     def get_all_cart_items(user_id) -> list:
@@ -83,7 +82,6 @@ class CartItems:
 
     @staticmethod
     @handle_db_exceptions
-    @handle_db_exceptions
     def add_item(user_id, product_id, quantity, seller_id):
         """
         Adds an item to the cart after checking inventory.
@@ -91,11 +89,10 @@ class CartItems:
         @param product_id: The product ID to add to the cart.
         @param quantity: The quantity of the product to add.
         @param seller_id: The seller ID associated with the product.
-
         """
 
         # 1. Check inventory
-        available_quantity = CartItems._get_available_inventory(product_id)
+        available_quantity = CartItems._get_available_inventory(product_id, seller_id)
         if available_quantity is None:
             return "Product not found in inventory."
         if quantity > available_quantity:
@@ -114,7 +111,7 @@ class CartItems:
             new_quantity = existing_item[0][0] + quantity
             if new_quantity > available_quantity:
                 return "Not enough inventory available for the requested quantity."
-            CartItems._update_cart_item(order_id, product_id, new_quantity)
+            CartItems._update_cart_item(order_id, product_id, seller_id, new_quantity)
         else:
             CartItems._insert_cart_item(order_id, product_id, seller_id, quantity, unit_price)
 
@@ -155,11 +152,12 @@ class CartItems:
 
     @staticmethod
     @handle_db_exceptions
-    def update_item_quantity(user_id, product_id, new_quantity):
+    def update_item_quantity(user_id, product_id, seller_id, new_quantity):
         """
         Updates the quantity of an item in the cart.
         @param user_id: The user ID to update the item for.
         @param product_id: The product ID to update the quantity for.
+        @param seller_id: The seller ID associated with the product.
         @param new_quantity: The new quantity of the product.
         """
         order_id = CartItems._get_pending_cart_id(user_id)
@@ -167,12 +165,12 @@ class CartItems:
             return "No pending cart found."
 
         if new_quantity <= 0:
-            return CartItems.remove_item(user_id, product_id)
+            return CartItems.remove_item(user_id, product_id, seller_id)
 
-        if not CartItems._is_valid_quantity(product_id, new_quantity):
+        if not CartItems._is_valid_quantity(product_id, seller_id, new_quantity):
             return "Not enough inventory available."
 
-        CartItems._update_cart_item(order_id, product_id, new_quantity)
+        CartItems._update_cart_item(order_id, product_id, seller_id, new_quantity)
         return "success"
     
     @staticmethod
@@ -228,13 +226,14 @@ class CartItems:
         return "success"
 
     @staticmethod
-    def _get_available_inventory(product_id):
+    def _get_available_inventory(product_id, seller_id):
         inventory_row = current_app.db.execute(
             """
             SELECT product_quantity FROM Products
-            WHERE product_id = :product_id
+            WHERE product_id = :product_id AND seller_id = :seller_id
             """,
             product_id=product_id,
+            seller_id=seller_id,
         )
         return inventory_row[0][0] if inventory_row else None
 
@@ -286,17 +285,19 @@ class CartItems:
         return existing_item
 
     @staticmethod
-    def _update_cart_item(order_id, product_id, new_quantity):
+    def _update_cart_item(order_id, product_id, seller_id, new_quantity):
         current_app.db.execute(
             """
             UPDATE CartProducts
             SET quantity = :new_quantity
-            WHERE order_id = :order_id AND product_id = :product_id
+            WHERE order_id = :order_id AND product_id = :product_id AND seller_id = :seller_id
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
             new_quantity=new_quantity,
         )
+
 
     @staticmethod
     def _insert_cart_item(order_id, product_id, seller_id, quantity, unit_price):
@@ -335,8 +336,8 @@ class CartItems:
             seller_id=seller_id,
         )
     @staticmethod
-    def _is_valid_quantity(product_id, requested_quantity):
-        available_quantity = CartItems._get_available_inventory(product_id)
+    def _is_valid_quantity(product_id, seller_id, requested_quantity):
+        available_quantity = CartItems._get_available_inventory(product_id, seller_id)
         return (
             available_quantity is not None and requested_quantity <= available_quantity
         )
