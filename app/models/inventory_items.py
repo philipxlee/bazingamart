@@ -24,11 +24,13 @@ class InventoryItems:
     @staticmethod
     def get_all_by_product(product_id):
         rows = app.db.execute('''
-        SELECT p.seller_id, p.product_quantity
+        SELECT p.seller_id, p.product_quantity, p.price
             FROM Products p
             WHERE p.product_id = :product_id
         ''', product_id=product_id)
-        return [{"seller_id": row[0], "product_quantity": row[1]} for row in rows]
+        return [{"seller_id": row[0], "product_quantity": row[1], "price": row[2]} for row in rows]
+
+
 
     # Updated method to fetch detailed information for a specific product in the seller's inventory
     @staticmethod
@@ -38,6 +40,7 @@ class InventoryItems:
             FROM Products p
             WHERE p.seller_id = :seller_id AND p.product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
+
         return InventoryItems(*row[0]) if row else None
 
     # Added method to update the quantity of a specific product in the seller's inventory

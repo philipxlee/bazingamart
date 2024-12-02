@@ -14,8 +14,8 @@
         <!-- Middle Column: Product Information -->
         <div class="col-md-5">
             <h1>{{ product.product_name }}</h1>
-            <p><strong>Price:</strong> ${{ product.price }}</p>
-            <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
+            <p><strong>Price:</strong> ${{ seller.product_price }}</p> <!-- Display seller-specific price -->
+            <p><strong>Availability:</strong> {% if seller.available %}{{ seller.product_quantity }} In Stock{% else %}Out of Stock{% endif %}</p>
 
             <!-- Include a description if available -->
             {% if product.description %}
@@ -29,8 +29,8 @@
 <!-- Right Column: Purchase Options -->
 <div class="col-md-3">
     <div class="purchase-info card p-3">
-        <h4 class="text-success">{% if product.available %}In Stock{% else %}Out of Stock{% endif %}</h4>
-        <p><strong>Price: </strong>${{ product.price }}</p>
+        <h4 class="text-success">{% if seller.available %}In Stock{% else %}Out of Stock{% endif %}</h4>
+        <p><strong>Price: </strong>${{ seller.product_price }}</p>
 
         <!-- Seller Selection -->
         {% if sellers %}
@@ -41,9 +41,9 @@
             <div class="form-group mb-3">
                 <label for="seller_select"><strong>Select Seller:</strong></label>
                 <select id="seller_select" name="seller_id" class="form-control">
-                    {% for seller in sellers %}
-                    <option value="{{ seller.seller_id }}">
-                        Seller {{ seller.seller_id }}: {{ seller.product_quantity }} in stock
+                    {% for seller_option in sellers %}
+                    <option value="{{ seller_option.seller_id }}" {% if seller.seller_id == seller_option.seller_id %} selected {% endif %}>
+                        Seller {{ seller_option.seller_id }}: {{ seller_option.product_quantity }} in stock for ${{ seller_option.price }}
                     </option>
                     {% endfor %}
                 </select>
