@@ -10,18 +10,31 @@ bp = Blueprint('inventory', __name__)
 @login_required
 def view_inventory():
     """
-    Displays the seller's inventory items with pagination.
+    Displays the seller's inventory items with pagination and seller analytics.
     """
     seller_id = current_user.id
     page = request.args.get('page', 1, type=int)
     items_per_page = 15
 
-    # Use the helper method to retrieve paginated inventory items for the seller
+    # Retrieve paginated inventory items for the seller
     inventory_items = InventoryItems.get_paginated_by_user(seller_id, page, items_per_page)
     total_items = InventoryItems.get_count_by_user(seller_id)
     total_pages = (total_items + items_per_page - 1) // items_per_page
 
-    return render_template('view_inventory_page.html', inventory_items=inventory_items, page=page, total_pages=total_pages)
+    # Fetch top 3 most and least popular products
+    most_popular_products = InventoryItems.get_top_most_popular_products(seller_id)
+    least_popular_products = InventoryItems.get_top_least_popular_products(seller_id)
+
+    return render_template(
+        'view_inventory_page.html',
+        inventory_items=inventory_items,
+        page=page,
+        total_pages=total_pages,
+        most_popular_products=most_popular_products,
+        least_popular_products=least_popular_products
+    )
+
+
 
 @bp.route('/view_inventory_item/<int:product_id>', methods=['GET'])
 @login_required
@@ -74,16 +87,22 @@ def delete_inventory_item():
     seller_id = current_user.id
     product_id = request.form.get('product_id', type=int)
 
-    InventoryItems.mark_inventory_item_unavailable(seller_id, product_id)
-    flash("Item removed from inventory successfully.", "success")
+    try:
+        InventoryItems.delete_inventory_item(seller_id, product_id)
+        flash("Item removed from inventory successfully.", "success")
+    except ValueError as ve:
+        flash(str(ve), "danger")
+    except Exception as e:
+        flash("An unexpected error occurred while removing the item. Please try again.", "danger")
+        print(f"Error deleting inventory item: {e}")
+
     return redirect(url_for('inventory.view_inventory'))
 
-@bp.route('/add_inventory_item', methods=['GET', 'POST'])
+
+""" @bp.route('/add_inventory_item', methods=['GET', 'POST'])
 @login_required
 def add_inventory_item():
-    """
-    Adds a new product to the seller's inventory.
-    """
+
     if request.method == 'POST':
         seller_id = current_user.id
         product_name = request.form.get('product_name')
@@ -94,7 +113,37 @@ def add_inventory_item():
         flash("New product added to inventory successfully.", "success")
         return redirect(url_for('inventory.view_inventory'))
 
-    return render_template('add_inventory_item.html')
+    return render_template('add_inventory_item.html') """
+
+@bp.route('/add_new_product', methods=['GET', 'POST'])
+@login_required
+def add_new_product():
+    """
+    Adds a new product to the seller's inventory.
+    """
+    if request.method == 'POST':
+        seller_id = current_user.id
+        product_name = request.form.get('product_name')
+        product_price = request.form.get('product_price', type=float)
+        product_quantity = request.form.get('product_quantity', type=int)
+
+        try:
+            # Attempt to add the product
+            InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
+            return redirect(url_for('inventory.view_inventory'))
+        except ValueError as ve:
+            # Flash a custom error message for duplicates
+            flash(str(ve), "danger")
+            return redirect(url_for('inventory.view_inventory'))  # Redirect with error
+        except Exception as e:
+            # Handle unexpected errors
+            flash("An unexpected error occurred. Please try again.", "danger")
+            return redirect(url_for('inventory.view_inventory'))
+
+    # Render the form again with any errors
+    return render_template('add_new_product.html')
+
+
 
 @bp.route('/orders_dashboard')
 @login_required

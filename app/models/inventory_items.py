@@ -58,14 +58,56 @@ class InventoryItems:
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id, new_price=new_price)
 
-    # Updated method to mark a specific product as unavailable in the seller's inventory instead of deleting it
     @staticmethod
     def delete_inventory_item(seller_id, product_id):
+        """
+        Marks a specific product as unavailable in the seller's inventory instead of deleting it.
+        Adds error handling and ensures the product exists before updating.
+        """
+        # Check if the product exists for the given seller
+        product = app.db.execute('''
+        SELECT product_id
+        FROM Products
+        WHERE seller_id = :seller_id AND product_id = :product_id
+        ''', seller_id=seller_id, product_id=product_id)
+
+        if not product:
+            # If the product does not exist, raise an exception
+            raise ValueError(f"No product found with ID {product_id} for seller {seller_id}.")
+
+        # Update the product to set available = FALSE
         app.db.execute('''
         UPDATE Products
         SET available = FALSE
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
+
+    
+    @staticmethod
+    @handle_db_exceptions
+    def add_new_product(seller_id, product_name, product_price, product_quantity):
+        """
+        Adds a new product to the seller's inventory in the Products table.
+        Checks if a product with the same name already exists for the seller.
+        """
+        # Check for an existing product with the same name for the seller
+        existing_product = app.db.execute('''
+        SELECT product_id
+        FROM Products
+        WHERE product_name = :product_name AND seller_id = :seller_id
+        ''', product_name=product_name, seller_id=seller_id)
+
+        if existing_product:
+            # Raise a ValueError if a duplicate is found
+            raise ValueError(f"A product with the name '{product_name}' already exists in your inventory.")
+
+        # If no duplicate, proceed to add the product
+        app.db.execute('''
+        INSERT INTO Products (product_name, price, available, seller_id, product_quantity)
+        VALUES (:product_name, :product_price, TRUE, :seller_id, :product_quantity)
+        ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
+
+
 
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):
@@ -118,3 +160,37 @@ class InventoryItems:
             WHERE cp.seller_id = :seller_id
         ''', seller_id=seller_id)
         return result[0][0] if result else 0
+    
+    @staticmethod
+    def get_top_most_popular_products(seller_id, limit=3):
+        """
+        Retrieves the top N most popular products for a seller.
+        """
+        rows = app.db.execute('''
+        SELECT p.product_id, p.product_name, SUM(cp.quantity) AS total_quantity
+        FROM CartProducts cp
+        JOIN Products p ON cp.product_id = p.product_id
+        WHERE p.seller_id = :seller_id
+        GROUP BY p.product_id, p.product_name
+        ORDER BY total_quantity DESC
+        LIMIT :limit
+        ''', seller_id=seller_id, limit=limit)
+        
+        return [{"product_id": row[0], "product_name": row[1], "quantity_ordered": row[2]} for row in rows]
+
+    @staticmethod
+    def get_top_least_popular_products(seller_id, limit=3):
+        """
+        Retrieves the top N least popular products for a seller.
+        """
+        rows = app.db.execute('''
+        SELECT p.product_id, p.product_name, SUM(cp.quantity) AS total_quantity
+        FROM CartProducts cp
+        JOIN Products p ON cp.product_id = p.product_id
+        WHERE p.seller_id = :seller_id
+        GROUP BY p.product_id, p.product_name
+        ORDER BY total_quantity ASC
+        LIMIT :limit
+        ''', seller_id=seller_id, limit=limit)
+        
+        return [{"product_id": row[0], "product_name": row[1], "quantity_ordered": row[2]} for row in rows]

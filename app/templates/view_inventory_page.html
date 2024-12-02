@@ -1,46 +1,154 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Your Inventory Items</h2>
-<p>Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
+<div class="container mt-4">
+    <h2 class="text-center">Your Inventory Items</h2>
 
-{% if inventory_items %}
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Product Name</th>
-            <th>Product Quantity</th>
-            <th>Product Price</th> <!-- Added Product Price column -->
-            <th>Actions</th> <!-- Added Actions column -->
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in inventory_items %}
-        <tr>
-            <td>{{ item.product_id }}</td>
-            <td>{{ item.product_name }}</td>
-            <td>{{ item.product_quantity }}</td>
-            <td>${{ item.product_price }}</td> <!-- Display product price -->
-            <td>
-                <!-- Button to navigate to update product details -->
-                <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info">Update Product Details</a> <!-- New button -->
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <p class="text-center">Below is a list of all items in your inventory. Use this page to manage your stock levels and prices.</p>
 
-<div style="margin-top: 20px;">
-    {% if page > 1 %}
-        <a href="{{ url_for('inventory.view_inventory', page=page-1) }}" class="btn btn-secondary">Previous</a>
+    <!-- Add New Product Button -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('inventory.add_new_product') }}" class="btn btn-primary">Add New Product</a>
+    </div>
+
+    {% if inventory_items %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Product Quantity</th>
+                    <th>Product Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory_items %}
+                <tr>
+                    <td>{{ item.product_id }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.product_quantity }}</td>
+                    <td>${{ item.product_price }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory.view_inventory_item', product_id=item.product_id) }}" class="btn btn-info btn-sm">Update Product Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-3">
+        <nav aria-label="Inventory Pagination">
+            <ul class="pagination">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.view_inventory', page=page-1) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Previous</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo; Previous</span>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page }} of {{ total_pages }}</span>
+                </li>
+
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('inventory.view_inventory', page=page+1) }}" aria-label="Next">
+                        <span aria-hidden="true">Next &raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">Next &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Jump to Page Feature -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="get" action="{{ url_for('inventory.view_inventory') }}">
+            <div class="form-inline">
+                <label for="jump_to_page" class="mr-2">Jump to Page:</label>
+                <input type="number" id="jump_to_page" name="page" min="1" max="{{ total_pages }}" class="form-control" value="{{ page }}" required>
+                <button type="submit" class="btn btn-primary ml-2">Go</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <p class="text-center">Your inventory is empty.</p>
     {% endif %}
-    {% if page < total_pages %}
-        <a href="{{ url_for('inventory.view_inventory', page=page+1) }}" class="btn btn-secondary">Next</a>
-    {% endif %}
+
+<!-- Dividing Line -->
+<hr class="mt-5 mb-5">
+
+<!-- Seller Analytics Section -->
+<h3 class="mt-5 text-center">Seller Analytics: Inventory Popularity</h3>
+
+<!-- Most Popular Products -->
+<h4 class="mt-4">Most Popular Products</h4>
+{% if most_popular_products %}
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Product ID</th>
+                <th>Quantity Ordered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in most_popular_products %}
+            <tr>
+                <td>{{ product.product_name }}</td>
+                <td>{{ product.product_id }}</td>
+                <td>{{ product.quantity_ordered }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% else %}
-<p>Your inventory is empty.</p>
+<p class="text-center">No popular products data available.</p>
 {% endif %}
 
+<!-- Least Popular Products -->
+<h4 class="mt-4">Least Popular Products</h4>
+{% if least_popular_products %}
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Product ID</th>
+                <th>Quantity Ordered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in least_popular_products %}
+            <tr>
+                <td>{{ product.product_name }}</td>
+                <td>{{ product.product_id }}</td>
+                <td>{{ product.quantity_ordered }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-center">No least popular products data available.</p>
+{% endif %}
+
+</div>
+
+<div style="padding-bottom: 50px;"></div>
 {% endblock %}
