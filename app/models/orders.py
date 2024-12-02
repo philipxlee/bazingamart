@@ -104,7 +104,7 @@ class Order:
             """
             SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id, cp.fulfillment_status, cp.seller_id
             FROM CartProducts cp
-            JOIN Products p ON cp.product_id = p.product_id
+            JOIN Products p ON cp.product_id = p.product_id AND cp.seller_id = p.seller_id
             WHERE cp.order_id = :order_id
             LIMIT :per_page OFFSET :offset
             """,
@@ -327,7 +327,7 @@ class Order:
             """
             SELECT p.product_name, cp.quantity, cp.unit_price, cp.product_id, cp.fulfillment_status
             FROM CartProducts cp
-            JOIN Products p ON cp.product_id = p.product_id
+            JOIN Products p ON cp.product_id = p.product_id AND cp.seller_id = p.seller_id
             WHERE cp.seller_id = :seller_id AND cp.order_id = :order_id
             LIMIT :per_page OFFSET :offset
             """,
@@ -385,7 +385,7 @@ class Order:
 
     @staticmethod
     @handle_db_exceptions
-    def update_item_fulfillment_status(order_id, product_id, new_status):
+    def update_item_fulfillment_status(order_id, product_id, seller_id, new_status):
         """
         Updates the fulfillment status of an individual item in the order and 
         recalculates the overall order fulfillment status.
@@ -401,22 +401,24 @@ class Order:
             """
             UPDATE CartProducts
             SET fulfillment_status = :new_status
-            WHERE order_id = :order_id AND product_id = :product_id
+            WHERE order_id = :order_id AND product_id = :product_id AND seller_id = :seller_id
             """,
             order_id=order_id,
             product_id=product_id,
+            seller_id=seller_id,
             new_status=new_status,
         )
 
         # Check if any row was updated
         if rows_affected == 0:
-            raise ValueError(f"No matching item found for Order ID: {order_id}, Product ID: {product_id}.")
+            raise ValueError(f"No matching item found for Order ID: {order_id}, Product ID: {product_id}, Seller ID: {seller_id}.")
 
         # Commit the changes to ensure persistence
         current_app.db.commit()
 
         # Recalculate the overall order fulfillment status
         Order.recalculate_order_fulfillment_status(order_id)
+
 
 
 

@@ -212,6 +212,7 @@ def update_item_fulfillment_status():
     order_id = request.form.get('order_id', type=int)
     product_id = request.form.get('product_id', type=int)
     new_status = request.form.get('new_status')
+    seller_id = current_user.id  # Assuming the current user is the seller
 
     # Validate that the new status is acceptable
     allowed_statuses = ['Incomplete', 'Fulfilled']
@@ -219,7 +220,7 @@ def update_item_fulfillment_status():
         flash("Invalid fulfillment status.", "error")
         return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
-    Order.update_item_fulfillment_status(order_id, product_id, new_status)
+    Order.update_item_fulfillment_status(order_id, product_id, seller_id, new_status)
     
     flash(f"Item status updated successfully to {new_status}.", "success")
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
