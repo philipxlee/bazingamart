@@ -4,12 +4,14 @@ import datetime
 from .models.product import Product
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
-
 bp = Blueprint('index', __name__)
-
 
 @bp.route('/')
 def index():
+    # Get the current page and items per page for pagination
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 9
+
     # Get the filter and sort parameters from the request
     search = request.args.get('search', '').strip()
     category = request.args.get('category', '').strip()
@@ -18,7 +20,7 @@ def index():
     # Start with base query for products that are available
     query = """
         SELECT * FROM Products
-        WHERE available = TRUE 
+        WHERE available = TRUE
     """ 
     params = {}
 
@@ -39,12 +41,34 @@ def index():
         query += " ORDER BY price ASC"
     elif sort == 'desc':
         query += " ORDER BY price DESC"
+    
+    # Calculate the offset for pagination
+    offset = (page - 1) * items_per_page
+    query += " LIMIT :limit OFFSET :offset"
+    params['limit'] = items_per_page
+    params['offset'] = offset
 
-    # Temporarily applied limit to the number of products retrieved
-    query += " LIMIT 50"
-
-    # Execute the query
+    # Execute the query to get filtered products
     filtered_products = current_app.db.execute(query, **params)
+
+    # Get the total count of products for calculating total pages
+    count_query = """
+        SELECT COUNT(*) FROM Products
+        WHERE available = TRUE
+    """
+    count_params = {}  # Use a separate params dictionary for count query
+    if search:
+        count_query += """
+            AND (product_name ILIKE :search OR description ILIKE :search)
+        """
+        count_params['search'] = f"%{search}%"
+    if category:
+        count_query += " AND category = :category"
+        count_params['category'] = category
+
+    total_items_result = current_app.db.execute(count_query, **count_params)
+    total_items = total_items_result[0][0]  # Extract count from the result
+    total_pages = (total_items + items_per_page - 1) // items_per_page
 
     # Get distinct categories for the dropdown in the UI
     categories = current_app.db.execute(
@@ -56,23 +80,6 @@ def index():
         'index.html',
         product_items=filtered_products,
         categories=[c[0] for c in categories],
-        page=1,  # Temporary placeholder value
-        total_pages=1  # Temporary placeholder value
+        page=page,
+        total_pages=total_pages
     )
-
-
-# @bp.route('/')
-# def index():
-#     page = request.args.get('page', 1, type=int)
-#     items_per_page = 9
-
-#     # Use the helper method to retrieve paginated product items
-#     product_items = Product.get_all_paginated(page, items_per_page, True)
-#     total_items = Product.get_count_products(True)
-#     total_pages = (total_items + items_per_page - 1) // items_per_page
-
-#     # Render the page by adding information to the index.html file
-#     return render_template('index.html',
-#                            product_items=product_items,
-#                            page=page,
-#                            total_pages=total_pages)
