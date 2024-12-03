@@ -17,6 +17,7 @@
                 <th>Subtotal</th>
                 <th>Seller ID</th>
                 <th>Fulfilled by Seller</th>
+                <th>Review Seller</th>  <!-- Add this column for the review button -->
             </tr>
         </thead>
         <tbody>
@@ -34,10 +35,15 @@
                     <span class="text-danger">No</span>
                     {% endif %}
                 </td>
+                <td>
+                    <!-- Add the Review Seller button for each product row -->
+                    <a href="{{ url_for('reviews.review_seller', seller_id=item.seller_id, order_id=order.order_id) }}" class="btn btn-primary">
+                        Review Seller
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
-
     </table>
 
     <!-- Pagination Controls -->
