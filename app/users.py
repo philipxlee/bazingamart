@@ -155,6 +155,12 @@ def user_public_view(id):
         return "User not found", 404
     return render_template('user_public_view.html', user=user)
 
+@bp.route("/user_purchase_analytics/<int:uid>")
+def user_purchase_analytics(uid):
+    average = User.average_spent(uid)
+    num_orders = Order.count_orders(uid)
+    return render_template('user_purchase_analytics.html', uid=uid, average=average, num_orders=num_orders)
+
 @bp.route('/logout')
 def logout():
     logout_user()
