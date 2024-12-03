@@ -47,7 +47,7 @@ class CartSubmission:
 
         # 4. Check product availability
         for item in cart_items:
-            available_quantity = CartItems._get_available_inventory(item.product_id)
+            available_quantity = CartItems._get_available_inventory(item.product_id, item.seller_id)
             if available_quantity is None or available_quantity < item.quantity:
                 return f"Not enough inventory for {item.product_name}."
 
@@ -57,10 +57,9 @@ class CartSubmission:
 
         # 6. Update seller balances and inventory
         for item in cart_items:
-            CartSubmission._decrease_inventory(item.product_id, item.quantity)
-            seller_id = CartSubmission._get_seller_id(item.product_id)
+            CartSubmission._decrease_inventory(item.product_id, item.seller_id, item.quantity)
             CartSubmission._increase_seller_balance(
-                seller_id, item.quantity * item.unit_price
+                item.seller_id, item.quantity * item.unit_price
             )
 
         # 7. Check if an order already exists
@@ -109,7 +108,6 @@ class CartSubmission:
         
         # 10. Insert items into CartProducts
         for item in cart_items:
-            seller_id = CartSubmission._get_seller_id(item.product_id)
             current_app.db.execute(
                 """
                 INSERT INTO CartProducts (order_id, product_id, quantity, unit_price, seller_id, fulfillment_status)
@@ -119,8 +117,9 @@ class CartSubmission:
                 product_id=item.product_id,
                 quantity=item.quantity,
                 unit_price=item.unit_price,
-                seller_id=seller_id
+                seller_id=item.seller_id
             )
+
         
         # 11. Mark cart as purchased (change purchase_status to 'Completed')       
         CartSubmission._mark_cart_as_completed(user_id)
@@ -137,30 +136,20 @@ class CartSubmission:
             seller_id=seller_id,
             amount=amount,
         )
-    
+
     @staticmethod
-    def _decrease_inventory(product_id, quantity):
+    def _decrease_inventory(product_id, seller_id, quantity):
         current_app.db.execute(
             """
             UPDATE Products
             SET product_quantity = product_quantity - :quantity
-            WHERE product_id = :product_id
+            WHERE product_id = :product_id AND seller_id = :seller_id
             """,
             product_id=product_id,
+            seller_id=seller_id,
             quantity=quantity
         )
-    
-    @staticmethod
-    def _get_seller_id(product_id):
-        seller_row = current_app.db.execute(
-            """
-            SELECT seller_id
-            FROM Products
-            WHERE product_id = :product_id
-            """,
-            product_id=product_id
-        )
-        return seller_row[0][0] if seller_row else None
+
     
     @staticmethod
     def _mark_cart_as_completed(user_id):

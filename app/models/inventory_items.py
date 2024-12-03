@@ -9,7 +9,8 @@ class InventoryItems:
         self.product_quantity = product_quantity
         self.product_price = product_price
         self.available = available
-
+    
+    # Fetch all products given a seller ID
     @staticmethod
     def get_all_by_user(seller_id):
         rows = app.db.execute('''
@@ -21,6 +22,7 @@ class InventoryItems:
         items_in_inventory = [InventoryItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_inventory
     
+    # Fetch the seller ID and quantity given a product ID    
     @staticmethod
     def get_all_by_product(product_id):
         rows = app.db.execute('''
@@ -32,7 +34,7 @@ class InventoryItems:
 
 
 
-    # Updated method to fetch detailed information for a specific product in the seller's inventory
+    # Fetch detailed information for a specific product in the seller's inventory
     @staticmethod
     def get_detailed_inventory_item(seller_id, product_id):
         row = app.db.execute('''
@@ -43,7 +45,7 @@ class InventoryItems:
 
         return InventoryItems(*row[0]) if row else None
 
-    # Added method to update the quantity of a specific product in the seller's inventory
+    # Update the quantity of a specific product in the seller's inventory
     @staticmethod
     def update_inventory_item_quantity(seller_id, product_id, new_quantity):
         app.db.execute('''
@@ -52,7 +54,7 @@ class InventoryItems:
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id, new_quantity=new_quantity)
 
-    # Added method to update the price of a specific product in the seller's inventory
+    # Update the price of a specific product in the seller's inventory
     @staticmethod
     def update_inventory_item_price(seller_id, product_id, new_price):
         app.db.execute('''
@@ -61,6 +63,7 @@ class InventoryItems:
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id, new_price=new_price)
 
+    #Delete a product from a seller's inventory
     @staticmethod
     def delete_inventory_item(seller_id, product_id):
         """
@@ -85,7 +88,7 @@ class InventoryItems:
         WHERE seller_id = :seller_id AND product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
 
-    
+    #Add a new product to a specific seller's inventory
     @staticmethod
     @handle_db_exceptions
     def add_new_product(seller_id, product_name, product_price, product_quantity):
@@ -111,7 +114,7 @@ class InventoryItems:
         ''', product_name=product_name, product_price=product_price, seller_id=seller_id, product_quantity=product_quantity)
 
 
-
+    #Helper function to show products in a paginated format
     @staticmethod
     def get_paginated_by_user(seller_id, page, items_per_page):
         offset = (page - 1) * items_per_page
@@ -124,7 +127,8 @@ class InventoryItems:
         ''', seller_id=seller_id, items_per_page=items_per_page, offset=offset)
         items_in_inventory = [InventoryItems(row[0], row[1], row[2], row[3], row[4]) for row in rows]
         return items_in_inventory
-
+    
+    #Helper method to count how many products a seller has to help with pagination
     @staticmethod
     def get_count_by_user(seller_id):
         row = app.db.execute('''
@@ -134,6 +138,7 @@ class InventoryItems:
         ''', seller_id=seller_id)
         return row[0][0] if row else 0
 
+    #Fetch all orders given a seller ID
     @staticmethod
     def get_seller_orders(seller_id, page, per_page):
         """
@@ -151,6 +156,7 @@ class InventoryItems:
         ''', seller_id=seller_id, per_page=per_page, offset=offset)
         return [Order(row[0], row[1], row[2], row[3]) for row in rows]
 
+    #Helper method to count how many orders a seller has to help with pagination
     @staticmethod
     def count_seller_orders(seller_id):
         """
@@ -164,6 +170,7 @@ class InventoryItems:
         ''', seller_id=seller_id)
         return result[0][0] if result else 0
     
+    #Fetch top 3 popular products for a given seller ID
     @staticmethod
     def get_top_most_popular_products(seller_id, limit=3):
         """
@@ -181,6 +188,7 @@ class InventoryItems:
         
         return [{"product_id": row[0], "product_name": row[1], "quantity_ordered": row[2]} for row in rows]
 
+    #Fetch 3 least popular products for a given seller ID
     @staticmethod
     def get_top_least_popular_products(seller_id, limit=3):
         """

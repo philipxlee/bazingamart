@@ -6,6 +6,7 @@ from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 bp = Blueprint('inventory', __name__)
 
+
 @bp.route('/view_inventory')
 @login_required
 def view_inventory():
@@ -99,22 +100,6 @@ def delete_inventory_item():
     return redirect(url_for('inventory.view_inventory'))
 
 
-""" @bp.route('/add_inventory_item', methods=['GET', 'POST'])
-@login_required
-def add_inventory_item():
-
-    if request.method == 'POST':
-        seller_id = current_user.id
-        product_name = request.form.get('product_name')
-        product_price = request.form.get('product_price', type=float)
-        product_quantity = request.form.get('product_quantity', type=int)
-
-        InventoryItems.add_inventory_item(seller_id, product_name, product_price, product_quantity)
-        flash("New product added to inventory successfully.", "success")
-        return redirect(url_for('inventory.view_inventory'))
-
-    return render_template('add_inventory_item.html') """
-
 @bp.route('/add_new_product', methods=['GET', 'POST'])
 @login_required
 def add_new_product():
@@ -160,6 +145,9 @@ def add_new_product():
 @bp.route('/orders_dashboard')
 @login_required
 def orders_dashboard():
+    """
+    Displays the seller's orders with pagination.
+    """
     seller_id = current_user.id
 
     # Separate page numbers for unfulfilled and fulfilled orders
@@ -192,6 +180,9 @@ def orders_dashboard():
 @bp.route('/order_dashboard_details/<int:order_id>')
 @login_required
 def order_dashboard_details(order_id):
+    """
+    Displays the details of a seller's orders
+    """
     seller_id = current_user.id
 
     # Get the updated order metadata
@@ -221,9 +212,13 @@ def order_dashboard_details(order_id):
 @bp.route('/update_item_fulfillment_status', methods=['POST'])
 @login_required
 def update_item_fulfillment_status():
+    """
+    Updates the fulfillment status of line items in an order
+    """
     order_id = request.form.get('order_id', type=int)
     product_id = request.form.get('product_id', type=int)
     new_status = request.form.get('new_status')
+    seller_id = current_user.id  # Assuming the current user is the seller
 
     # Validate that the new status is acceptable
     allowed_statuses = ['Incomplete', 'Fulfilled']
@@ -231,7 +226,7 @@ def update_item_fulfillment_status():
         flash("Invalid fulfillment status.", "error")
         return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
 
-    Order.update_item_fulfillment_status(order_id, product_id, new_status)
+    Order.update_item_fulfillment_status(order_id, product_id, seller_id, new_status)
     
     flash(f"Item status updated successfully to {new_status}.", "success")
     return redirect(url_for('inventory.order_dashboard_details', order_id=order_id))
