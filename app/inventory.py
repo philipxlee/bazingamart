@@ -122,28 +122,40 @@ def add_new_product():
     Adds a new product to the seller's inventory.
     """
     if request.method == 'POST':
-        seller_id = current_user.id
-        product_name = request.form.get('product_name')
-        product_price = request.form.get('product_price', type=float)
-        product_quantity = request.form.get('product_quantity', type=int)
+        try: 
+            seller_id = current_user.id
+            product_name = request.form.get('product_name')
+            product_price = request.form.get('product_price', type=float)
+            product_quantity = request.form.get('product_quantity', type=int)
+            product_category = request.form.get('product_category')
+            product_description = request.form.get('product_description') or None
+            product_image = request.form.get('product_image') or None
 
-        try:
-            # Attempt to add the product
-            InventoryItems.add_new_product(seller_id, product_name, product_price, product_quantity)
+            # Step 1: Generate a new unique product_id
+            existing_product_ids = current_app.db.execute('''
+                SELECT MAX(product_id) FROM Products
+            ''')
+            
+            # Set product_id to be one more than the max value found, or 1 if there are no products
+            product_id = (existing_product_ids[0][0] or 0) + 1
+
+            # Step 2: Insert into the Products table
+            current_app.db.execute('''
+                INSERT INTO Products (product_id, product_name, price, available, seller_id, product_quantity, category, description, image)
+                VALUES (:product_id, :product_name, :product_price, TRUE, :seller_id, :product_quantity, :category, :description, :image)
+            ''', product_id=product_id, product_name=product_name, product_price=product_price,
+                seller_id=seller_id, product_quantity=product_quantity, category=product_category,
+                description=product_description, image=product_image)
+
+            flash('Product added successfully!', 'success')
             return redirect(url_for('inventory.view_inventory'))
-        except ValueError as ve:
-            # Flash a custom error message for duplicates
-            flash(str(ve), "danger")
-            return redirect(url_for('inventory.view_inventory'))  # Redirect with error
+
         except Exception as e:
             # Handle unexpected errors
-            flash("An unexpected error occurred. Please try again.", "danger")
-            return redirect(url_for('inventory.view_inventory'))
+            flash(f"An unexpected error occurred: {e}", "danger")
 
     # Render the form again with any errors
     return render_template('add_new_product.html')
-
-
 
 @bp.route('/orders_dashboard')
 @login_required
