@@ -58,10 +58,13 @@
           <h5 class="card-title">
             <a href="/product/{{ product.product_id }}/seller/{{ product.seller_id }}">
               {{ product.product_name }}
+            </a>
           </h5>
-          </a>
           <p class="card-text"><strong>Price: </strong>${{ product.price }}</p>
-          <p class="card-text"><strong>Average Rating: </strong>{{ product.average_rating }}/5</p>
+          <p class="card-text"><strong>Average Rating:</strong> {{ product.average_rating }}/5 
+            ({{ product.num_reviews }} review(s))
+        </p>
+        
           <p class="card-text"><strong>Seller ID:</strong> {{ product.seller_id }}</p>
 
           <!-- Add to Cart form -->
