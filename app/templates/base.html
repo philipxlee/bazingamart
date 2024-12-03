@@ -23,7 +23,7 @@
       overflow-x: hidden;
       padding-top: 20px;
       padding-left: 20px;
-      padding-right: 20px;
+      padding-right: 20px; 
     }
 
     .sidenav h1 {
@@ -61,7 +61,7 @@
     <a href="{{ url_for('index.index') }}" style="text-decoration: none;">
       <h1 style="color:rgb(0, 0, 0); padding-right: 20px;">BazingaMart!</h1>
     </a>
-    <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px">
+    <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px;">
       {% if current_user.is_authenticated %}
       <div style="color: #000000; font-size: 1.5rem; font-weight: bold; margin-bottom: 15px"> Hello
         <u><a href="{{ url_for('users.user_home') }}"
