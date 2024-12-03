@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from flask import current_app as app
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.cart_items import CartItems
 
 from .. import login
 
@@ -174,5 +175,29 @@ RETURNING id
             average = 0
         
         return round(average, 2)
+    
+    @staticmethod
+    def max_order_price(uid):
+        result = app.db.execute(
+            """
+            SELECT MAX(total_price)
+            FROM Orders 
+            WHERE user_id = :uid
+            """,
+            uid=uid,
+        )
+        return result[0][0] if result else 0
+    
+    @staticmethod
+    def min_order_price(uid):
+        result = app.db.execute(
+            """
+            SELECT MIN(total_price)
+            FROM Orders 
+            WHERE user_id = :uid
+            """,
+            uid=uid,
+        )
+        return result[0][0] if result else 0
     
     

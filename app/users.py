@@ -5,6 +5,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import datetime
+import base64
+import matplotlib.pyplot as plt
+import io
 
 from .models.user import User
 from .models.orders import Order
@@ -157,9 +160,44 @@ def user_public_view(id):
 
 @bp.route("/user_purchase_analytics/<int:uid>")
 def user_purchase_analytics(uid):
-    average = User.average_spent(uid)
+    average_price = User.average_spent(uid)
     num_orders = Order.count_orders(uid)
-    return render_template('user_purchase_analytics.html', uid=uid, average=average, num_orders=num_orders)
+    max_price = User.max_order_price(uid)
+    min_price = User.min_order_price(uid)
+    
+    # Step 1: Fetch orders for the user
+    orders = Order.get_all_orders(uid)
+    
+    # Step 2: Prepare data for the bar chart
+    order_ids = [order['order_id'] for order in orders]
+    total_prices = [order['total_price'] for order in orders]
+    
+    # Step 3: Create the bar chart in memory
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(order_ids, total_prices, color='skyblue')
+    ax.set_title(f'Order Prices for User {uid}', fontsize=16)
+    ax.set_xlabel('Order ID', fontsize=12)
+    ax.set_ylabel('Total Price ($)', fontsize=12)
+    plt.xticks(rotation=45)  # Rotate x-axis labels if necessary
+
+    # Step 4: Save the plot to a BytesIO object
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)  # Reset the pointer to the beginning of the image
+    plt.close(fig)
+
+    # Step 5: Convert the image to base64 encoding
+    chart_img = base64.b64encode(img.read()).decode('utf-8')  # Convert to base64 string
+
+    # Step 6: Pass data to the template
+    return render_template('user_purchase_analytics.html', 
+                           uid=uid, 
+                           average_price=average_price, 
+                           num_orders=num_orders, 
+                           max_price=max_price, 
+                           min_price=min_price, 
+                           chart_img=chart_img)
+ 
 
 @bp.route('/logout')
 def logout():
