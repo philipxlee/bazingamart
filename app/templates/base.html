@@ -78,9 +78,11 @@
       <option value="" disabled selected>Menu</option>
       <option value="{{ url_for('index.index') }}">Catalog</option>
       <option value="{{ url_for('carts.view_cart') }}">View Cart</option>
-      <option value="{{ url_for('users.logout') }}">Log out</option>
+      {% if current_user.seller %}
       <option value="{{ url_for('inventory.view_inventory') }}">View Inventory</option>
       <option value="{{ url_for('inventory.orders_dashboard') }}">Orders Dashboard</option>
+      {% endif %}
+      <option value="{{ url_for('users.logout') }}">Log out</option>
     </select>
   </div>
 </div>
