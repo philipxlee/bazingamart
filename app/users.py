@@ -165,20 +165,22 @@ def user_purchase_analytics(uid):
     max_price = User.max_order_price(uid)
     min_price = User.min_order_price(uid)
     
+    name = User.get(uid).firstname
+    
     # Step 1: Fetch orders for the user
     orders = Order.get_all_orders(uid)
     
     # Step 2: Prepare data for the bar chart
-    order_ids = [order['order_id'] for order in orders]
+    purchase_dates = [order['created_at'] for order in orders]
     total_prices = [order['total_price'] for order in orders]
     
     # Step 3: Create the bar chart in memory
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(order_ids, total_prices, color='skyblue')
-    ax.set_title(f'Order Prices for User {uid}', fontsize=16)
-    ax.set_xlabel('Order ID', fontsize=12)
+    ax.bar(purchase_dates, total_prices, color='skyblue')
+    ax.set_title(f'Order Prices for {name}', fontsize=16)
+    ax.set_xlabel('Purchase Date', fontsize=12)  # Update x-axis label
     ax.set_ylabel('Total Price ($)', fontsize=12)
-    plt.xticks(rotation=45)  # Rotate x-axis labels if necessary
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability if dates are long
 
     # Step 4: Save the plot to a BytesIO object
     img = io.BytesIO()
