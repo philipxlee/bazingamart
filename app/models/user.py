@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from flask import current_app as app
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.cart_items import CartItems
 
 from .. import login
 
@@ -150,3 +151,53 @@ RETURNING id
                 email=email,
                 address=address
             )
+            
+            
+    @staticmethod
+    def average_spent(uid):
+        # Import here to remove circular Import
+        from app.models.orders import Order 
+        
+        total_money = app.db.execute(
+            """
+            SELECT COALESCE(SUM(total_price), 0) AS total_money
+            FROM Orders
+            WHERE user_id = :uid
+            """,
+            uid=uid,
+        )[0][0]  
+        
+        total_orders = Order.count_orders(uid)
+        
+        if total_orders > 0:
+            average = total_money / total_orders
+        else:
+            average = 0
+        
+        return round(average, 2)
+    
+    @staticmethod
+    def max_order_price(uid):
+        result = app.db.execute(
+            """
+            SELECT MAX(total_price)
+            FROM Orders 
+            WHERE user_id = :uid
+            """,
+            uid=uid,
+        )
+        return result[0][0] if result else 0
+    
+    @staticmethod
+    def min_order_price(uid):
+        result = app.db.execute(
+            """
+            SELECT MIN(total_price)
+            FROM Orders 
+            WHERE user_id = :uid
+            """,
+            uid=uid,
+        )
+        return result[0][0] if result else 0
+    
+    

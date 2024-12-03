@@ -22,6 +22,14 @@ def create_app():
     from .products import bp as products_bp
     from .reviews import bp as reviews_bp
     from .orders import bp as orders_bp
+    import base64
+
+    @app.template_filter('b64encode')
+    def b64encode_filter(value):
+        """Base64 encode the image data."""
+        if value:
+            return base64.b64encode(value).decode('utf-8')
+        return value
     
     app.register_blueprint(products_bp)
     app.register_blueprint(reviews_bp)

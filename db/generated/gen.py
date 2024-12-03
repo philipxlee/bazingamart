@@ -24,16 +24,26 @@ def gen_users(num_users):
         writer = get_csv_writer(f)
         print('Users...', end=' ', flush=True)
         custom_user_id = 0
-        custom_email = 'test@test.com'
+        custom_email = 'seller@seller.com'
         custom_password = generate_password_hash('123')
-        custom_firstname = 'Test'
-        custom_lastname = 'Test'
-        custom_address = '123 Towerview St, Durham, NC'
+        custom_firstname = 'Seller'
+        custom_lastname = 'Seller'
+        custom_address = '123 Towerview St, Durham, NC 27708'
         custom_seller = True
         custom_balance = 500.00
         writer.writerow([custom_user_id, custom_email, custom_password, custom_firstname, custom_lastname, custom_address, custom_seller, custom_balance])
         if custom_seller:
             seller_user_ids.append(custom_user_id)
+            
+        custom_user_id = 1
+        custom_email = 'buyer@buyer.com'
+        custom_password = generate_password_hash('123')
+        custom_firstname = 'Buyer'
+        custom_lastname = 'Buyer'
+        custom_address = '420 Chapel Dr, Durham, NC 27708'
+        custom_seller = False
+        custom_balance = 1000.00
+        writer.writerow([custom_user_id, custom_email, custom_password, custom_firstname, custom_lastname, custom_address, custom_seller, custom_balance])
         
         for uid in range(1, num_users + 1):
             if uid % 10 == 0:
