@@ -45,7 +45,7 @@ def gen_users(num_users):
         custom_balance = 1000.00
         writer.writerow([custom_user_id, custom_email, custom_password, custom_firstname, custom_lastname, custom_address, custom_seller, custom_balance])
         
-        for uid in range(1, num_users + 1):
+        for uid in range(2, num_users + 1):
             if uid % 10 == 0:
                 print(f'{uid}', end=' ', flush=True)
             profile = fake.profile()

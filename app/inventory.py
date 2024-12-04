@@ -197,7 +197,18 @@ def add_new_product():
             product_description = request.form.get('product_description') or None
             product_image = request.form.get('product_image') or None
 
-            # Step 1: Generate a new unique product_id
+            # Step 1: Check for an existing product with the same name for the seller
+            existing_product = current_app.db.execute('''
+                SELECT product_id
+                FROM Products
+                WHERE product_name = :product_name AND seller_id = :seller_id
+            ''', product_name=product_name, seller_id=seller_id)
+
+            if existing_product:
+                flash(f"A product with the name '{product_name}' already exists in your inventory.", "danger")
+                return render_template('add_new_product.html')
+
+            # Step 2: Generate a new unique product_id
             existing_product_ids = current_app.db.execute('''
                 SELECT MAX(product_id) FROM Products
             ''')
@@ -205,7 +216,7 @@ def add_new_product():
             # Set product_id to be one more than the max value found, or 1 if there are no products
             product_id = (existing_product_ids[0][0] or 0) + 1
 
-            # Step 2: Insert into the Products table
+            # Step 3: Insert into the Products table
             current_app.db.execute('''
                 INSERT INTO Products (product_id, product_name, price, available, seller_id, product_quantity, category, description, image)
                 VALUES (:product_id, :product_name, :product_price, TRUE, :seller_id, :product_quantity, :category, :description, :image)

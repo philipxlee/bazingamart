@@ -12,14 +12,17 @@ def product_detail(product_id):
     product = Product.get(product_id)    # Fetch product details
     sellers = InventoryItems.get_all_by_product(product_id)   # Fetch sellers for this product
     reviews = Reviews.get_reviews_by_product(product_id)  # Fetch reviews for this product
+    seller_id = current_user.id
+
 
     return render_template(
         'product_detail.html',
         product=product,
         sellers=sellers,
+        seller = sellers[0] if sellers else None,
+        seller_id=seller_id,
         reviews=reviews
     )
-
 
 
 
