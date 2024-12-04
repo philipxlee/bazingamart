@@ -3,7 +3,7 @@ from werkzeug.urls import url_parse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Regexp
 import datetime
 import base64
 import matplotlib.pyplot as plt
@@ -113,7 +113,13 @@ class UpdateForm(FlaskForm):
     firstname = StringField('First Name')
     lastname = StringField('Last Name')
     email = StringField('Email')
-    address = StringField('Address')
+    address = StringField('Address', validators=[
+        DataRequired(),
+        Regexp(
+            r'^\d+\s[\w\s]+,\s[\w\s]+,\s[A-Z]{2}\s\d{5}$',  # Regex for address with street number, street name, city, state, zip code
+            message="Address must be in the format: '123 Main St, Springfield, IL 62701'."
+        )
+    ])
     password = PasswordField('Password')
     password2 = PasswordField(
         'Repeat Password', validators=[EqualTo('password')])
