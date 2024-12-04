@@ -49,7 +49,7 @@ def seller_detail(product_id, seller_id):
         product=product,
         sellers=sellers,
         seller=seller_info,
-        seller_id=seller_id# pass the current seller information to the template
+        seller_id=seller_id,
         #reviews=reviews
     )
 
