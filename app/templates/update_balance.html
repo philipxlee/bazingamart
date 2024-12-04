@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<strong>Balance:</strong> {{ current_user.balance }}  
+<strong>Balance:</strong> ${{ current_user.balance }}  
 <form method="POST" action="{{ url_for('users.update_balance') }}">
     <label for="add_amount">Enter an amount to add to balance:</label>
     <input type="number" name="amount" id="add_amount" required value="{{ add_amount }}" step="0.01">
