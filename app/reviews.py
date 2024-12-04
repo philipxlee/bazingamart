@@ -29,8 +29,12 @@ def product_reviews(product_id):
     return render_template('product_reviews.html', reviews=reviews, product=product)
 
 @bp.route('/add_review', methods=['POST'])
+@login_required
 def add_review():
     """Handles adding a new review."""
+    if not current_user.is_authenticated:
+        flash('You need to be logged in to leave a review', 'danger')
+        return redirect(url_for('auth.login'))
     user_id = current_user.id  # Get the current user ID
     product_id = int(request.form['product_id'])  # Get the product ID from the form
     stars = int(request.form['stars'])  # Get the rating (stars) from the form
