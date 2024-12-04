@@ -16,6 +16,8 @@ def index():
     search = request.args.get('search', '').strip()
     category = request.args.get('category', '').strip()
     sort = request.args.get('sort', '').strip()
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
 
     # Base query with average rating and review count calculation
     query = """
@@ -29,6 +31,15 @@ def index():
     WHERE p.available = TRUE
     """
     params = {}
+
+    # Apply price range filter
+    if min_price is not None:
+        query += " AND p.price >= :min_price"
+        params['min_price'] = min_price
+    if max_price is not None:
+        query += " AND p.price <= :max_price"
+        params['max_price'] = max_price
+
 
     # Apply search filter
     if search:
