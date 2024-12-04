@@ -48,22 +48,103 @@ def view_inventory_item(product_id):
     if not inventory_item:
         flash("Item not found in your inventory.", "error")
         return redirect(url_for('inventory.view_inventory'))
+    
+    # Enum categories defined in the database schema
+    product_categories = [
+        'Electronics', 'Home & Kitchen', 'Books', 'Clothing',
+        'Beauty & Personal Care', 'Sports & Outdoors', 'Toys & Games',
+        'Food & Beverages', 'Automotive', 'Health & Wellness'
+    ]
 
-    return render_template('view_inventory_item.html', inventory_item=inventory_item)
+    return render_template('view_inventory_item.html', inventory_item=inventory_item, product_categories=product_categories
+)
+
+@bp.route('/update_inventory_item_all', methods=['POST'])
+@login_required
+def update_inventory_item_all():
+    """
+    Updates all fields of a product in the seller's inventory.
+    """
+    seller_id = current_user.id
+    product_id = request.form.get('product_id', type=int)
+
+    # Fetch updated fields from the form
+    product_name = request.form.get('product_name')
+    product_quantity = request.form.get('product_quantity', type=int)
+    product_price = request.form.get('product_price', type=float)
+    product_category = request.form.get('product_category')
+    product_description = request.form.get('product_description') or None
+    product_image = request.form.get('product_image') or None
+
+    try:
+        # Update the inventory item with all fields
+        InventoryItems.update_inventory_item(
+            seller_id=seller_id,
+            product_id=product_id,
+            product_name=product_name,
+            product_quantity=product_quantity,
+            product_price=product_price,
+            product_category=product_category,
+            product_description=product_description,
+            product_image=product_image,
+        )
+        flash("Product details updated successfully.", "success")
+
+        # Fetch updated product data to display updated information
+        inventory_item = InventoryItems.get_detailed_inventory_item(seller_id, product_id)
+
+        # Redirect to the view_inventory_item page with updated details
+        return render_template('view_inventory_item.html', inventory_item=inventory_item, product_categories=[
+            'Electronics', 'Home & Kitchen', 'Books', 'Clothing',
+            'Beauty & Personal Care', 'Sports & Outdoors', 'Toys & Games',
+            'Food & Beverages', 'Automotive', 'Health & Wellness'
+        ])
+
+    except Exception as e:
+        flash(f"An unexpected error occurred while updating the product: {e}", "danger")
+        return redirect(url_for('inventory.view_inventory'))
+
+
 
 @bp.route('/update_inventory_item', methods=['POST'])
 @login_required
 def update_inventory_item():
     """
-    Updates the quantity of a product in the seller's inventory.
+    Updates the product details in the seller's inventory.
     """
-    seller_id = current_user.id
-    product_id = request.form.get('product_id', type=int)
-    new_quantity = request.form.get('new_quantity', type=int)
+    try:
+        seller_id = current_user.id
+        product_id = request.form.get('product_id', type=int)
+        
+        # Retrieve updated data from the form
+        product_name = request.form.get('product_name')
+        product_quantity = request.form.get('product_quantity', type=int)
+        product_price = request.form.get('product_price', type=float)
+        product_category = request.form.get('product_category')
+        product_description = request.form.get('product_description') or None
+        product_image = request.form.get('product_image') or None
 
-    InventoryItems.update_inventory_item_quantity(seller_id, product_id, new_quantity)
-    flash("Item quantity updated successfully.", "success")
-    return redirect(url_for('inventory.view_inventory_item', product_id=product_id))
+        # Call the update method on InventoryItems
+        InventoryItems.update_inventory_item(
+            seller_id, product_id, product_name, product_quantity,
+            product_price, product_category, product_description, product_image
+        )
+
+        flash("Product updated successfully.", "success")
+        
+        # Fetch updated product data
+        updated_inventory_item = InventoryItems.get_detailed_inventory_item(seller_id, product_id)
+
+        # Redirect to the view_inventory_item page with updated details
+        return render_template('view_inventory_item.html', inventory_item=updated_inventory_item)
+
+    except ValueError as ve:
+        flash(f"An error occurred: {ve}", "danger")
+    except Exception as e:
+        flash(f"An unexpected error occurred: {e}", "danger")
+
+    return redirect(url_for('inventory.view_inventory'))
+
 
 @bp.route('/update_inventory_item_price', methods=['POST'])
 @login_required

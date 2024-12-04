@@ -10,64 +10,60 @@
     <h2 class="text-center">Product Details</h2>
     <p class="text-center">Details for Product ID: {{ inventory_item.product_id }}</p>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Field</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Product Name</td>
-                    <td>{{ inventory_item.product_name }}</td>
-                </tr>
-                <tr>
-                    <td>Product Quantity</td>
-                    <td>{{ inventory_item.product_quantity }}</td>
-                </tr>
-                <tr>
-                    <td>Product Price</td>
-                    <td>${{ inventory_item.product_price }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <form method="POST" action="{{ url_for('inventory.update_inventory_item_all') }}">
+        <input type="hidden" name="product_id" value="{{ inventory_item.product_id }}">
+    
+        <!-- Product Name -->
+        <div class="form-group">
+            <label for="product_name">Product Name:</label>
+            <input type="text" id="product_name" name="product_name" value="{{ inventory_item.product_name }}" class="form-control">
+        </div>
+    
+        <!-- Product Quantity -->
+        <div class="form-group">
+            <label for="product_quantity">Product Quantity:</label>
+            <input type="number" id="product_quantity" name="product_quantity" value="{{ inventory_item.product_quantity }}" class="form-control">
+        </div>
+    
+        <!-- Product Price -->
+        <div class="form-group">
+            <label for="product_price">Product Price:</label>
+            <input type="number" step="0.01" id="product_price" name="product_price" value="{{ inventory_item.product_price }}" class="form-control">
+        </div>
+    
+        <!-- Product Category -->
+        <div class="form-group">
+            <label for="product_category">Product Category:</label>
+            <select id="product_category" name="product_category" class="form-control">
+                {% for category in product_categories %}
+                    <option value="{{ category }}" {% if category == inventory_item.category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <!-- Product Description -->
+        <div class="form-group">
+            <label for="product_description">Product Description (Optional):</label>
+            <textarea id="product_description" name="product_description" class="form-control">{{ inventory_item.description }}</textarea>
+        </div>
+    
+        <!-- Product Image URL -->
+        <div class="form-group">
+            <label for="product_image">Product Image URL (Optional):</label>
+            <input type="text" id="product_image" name="product_image" value="{{ inventory_item.image }}" class="form-control">
+        </div>
+    
+        <!-- Save Changes Button -->
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+    
 
     <!-- Delete Product Button -->
-    <div class="d-flex justify-content-end mb-4">
+    <div class="d-flex justify-content-end mt-4">
         <form action="{{ url_for('inventory.delete_inventory_item') }}" method="post">
             <input type="hidden" name="product_id" value="{{ inventory_item.product_id }}">
             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">Delete Product</button>
         </form>
-    </div>
-
-    <!-- Update Quantity and Price Section -->
-    <div class="row mt-4">
-        <!-- Update Quantity Form -->
-        <div class="col-md-6">
-            <form action="{{ url_for('inventory.update_inventory_item') }}" method="post" class="mb-3">
-                <input type="hidden" name="product_id" value="{{ inventory_item.product_id }}">
-                <div class="form-group">
-                    <label for="new_quantity"><strong>Update Quantity:</strong></label>
-                    <input type="number" name="new_quantity" min="0" required class="form-control" placeholder="Enter new quantity">
-                </div>
-                <button type="submit" class="btn btn-warning btn-block">Update Quantity</button>
-            </form>
-        </div>
-
-        <!-- Update Price Form -->
-        <div class="col-md-6">
-            <form action="{{ url_for('inventory.update_inventory_item_price') }}" method="post" class="mb-3">
-                <input type="hidden" name="product_id" value="{{ inventory_item.product_id }}">
-                <div class="form-group">
-                    <label for="new_price"><strong>Update Price:</strong></label>
-                    <input type="number" name="new_price" min="0" step="0.01" required class="form-control" placeholder="Enter new price">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Update Price</button>
-            </form>
-        </div>
     </div>
 </div>
 
