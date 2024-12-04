@@ -3,12 +3,15 @@ from app.models.orders import Order
 from app.models.helpers.db_exceptions_wrapper import handle_db_exceptions
 
 class InventoryItems:
-    def __init__(self, product_id, product_name, product_quantity, product_price=None, available=True):
+    def __init__(self, product_id, product_name, product_quantity, product_price=None, available=True, category=None, description=None, image=None):
         self.product_id = product_id
         self.product_name = product_name
         self.product_quantity = product_quantity
         self.product_price = product_price
         self.available = available
+        self.description = description
+        self.image = image
+        self.category = category
     
     # Fetch all products given a seller ID
     @staticmethod
@@ -32,18 +35,48 @@ class InventoryItems:
         ''', product_id=product_id)
         return [{"seller_id": row[0], "product_quantity": row[1], "price": row[2]} for row in rows]
 
-
+    #Updates the details of a product in the seller's inventory.
+    @staticmethod
+    def update_inventory_item(seller_id, product_id, product_name, product_quantity, product_price, product_category, product_description, product_image):
+        app.db.execute('''
+            UPDATE Products
+            SET product_name = :product_name,
+                product_quantity = :product_quantity,
+                price = :product_price,
+                category = :product_category,
+                description = :product_description,
+                image = :product_image
+            WHERE product_id = :product_id AND seller_id = :seller_id
+        ''', product_name=product_name, product_quantity=product_quantity, product_price=product_price,
+            product_category=product_category, product_description=product_description,
+            product_image=product_image, product_id=product_id, seller_id=seller_id)
 
     # Fetch detailed information for a specific product in the seller's inventory
     @staticmethod
     def get_detailed_inventory_item(seller_id, product_id):
         row = app.db.execute('''
-        SELECT p.product_id, p.product_name, p.product_quantity, p.price, p.available
-            FROM Products p
-            WHERE p.seller_id = :seller_id AND p.product_id = :product_id
+        SELECT p.product_id, p.product_name, p.product_quantity, p.price, p.available,
+            p.category, p.description, p.image
+        FROM Products p
+        WHERE p.seller_id = :seller_id AND p.product_id = :product_id
         ''', seller_id=seller_id, product_id=product_id)
 
-        return InventoryItems(*row[0]) if row else None
+        if row:
+            row = row[0]  # Get the first (and only) row from the results
+            return InventoryItems(
+                product_id=row[0],
+                product_name=row[1],
+                product_quantity=row[2],
+                product_price=row[3],
+                available=row[4],
+                category=row[5],
+                description=row[6],
+                image=row[7]
+            )
+        else:
+            return None
+
+
 
     # Update the quantity of a specific product in the seller's inventory
     @staticmethod

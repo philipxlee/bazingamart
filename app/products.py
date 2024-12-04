@@ -20,6 +20,9 @@ def product_detail(product_id):
         reviews=reviews
     )
 
+
+
+
 @bp.route('/product/<int:product_id>/seller/<int:seller_id>', methods=['GET'])
 def seller_detail(product_id, seller_id):
     
