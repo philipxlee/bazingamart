@@ -54,6 +54,9 @@
       background-color: #000 !important;
       color: #fff;
     }
+    .custom-padding-right {
+      padding-right: 55px;
+    }
   </style>
 </head>
 
@@ -65,7 +68,7 @@
     </a>
     <div style="color: rgb(0, 0, 0); text-align: right; margin-bottom: 25px;">
       {% if current_user.is_authenticated %}
-      <div style="color: #000000; font-size: 1.5rem; font-weight: bold; margin-bottom: 15px"> Hello
+      <div style="color: #000000; font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; padding-right: 50px"> Hello
         <u><a href="{{ url_for('users.user_home') }}"
           style="color: #0000FF; font-size: 1.5rem; font-weight: bold">
            {{current_user.firstname}}!
@@ -73,11 +76,12 @@
       </div>
 <!-- Dropdown Menu -->
 <div class="row justify-content-end">
-  <div class="col-md-4">
+  <div class="col-md-4 custom-padding-right">
     <select class="form-select" onchange="window.location.href=this.value;">
       <option value="" disabled {% if not request.endpoint or request.endpoint == 'index.index' %}selected{% endif %}>Menu</option>
       <option value="{{ url_for('index.index') }}" {% if request.endpoint == 'index.index' %}selected{% endif %}>Catalog</option>
       <option value="{{ url_for('carts.view_cart') }}" {% if request.endpoint == 'carts.view_cart' %}selected{% endif %}>View Cart</option>
+      <option value="{{ url_for('users.user_home') }}" {% if request.endpoint == 'users.user_home' %}selected{% endif %}>User Home</option>
       {% if current_user.seller %}
       <option value="{{ url_for('inventory.view_inventory') }}" {% if request.endpoint == 'inventory.view_inventory' %}selected{% endif %}>View Inventory</option>
       <option value="{{ url_for('inventory.orders_dashboard') }}" {% if request.endpoint == 'inventory.orders_dashboard' %}selected{% endif %}>Orders Dashboard</option>

@@ -1,18 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+  .align-right {
+    text-align: right;
+    margin-top: -140px;
+    padding-right: 200px;
+  }
+  .align-left {
+    text-align: left;
+    margin-top: 20px;
+    padding-left: 200px;
+  }
+</style>
 <p>
+<div class="align-left">
   <strong>User ID:</strong> {{ current_user.id }}<br />
   <strong>First Name:</strong> {{ current_user.firstname }}<br />
   <strong>Last Name:</strong> {{ current_user.lastname }}<br />
   <strong>Email:</strong> {{ current_user.email }}<br />
   <strong>Address:</strong> {{ current_user.address if current_user.address not in [None, '', ' '] else 'No address on
   file.' }}<br />
-  <strong>Balance:</strong> {{ current_user.balance }} <br />
-  <a href="{{ url_for('users.update_balance') }}" class="btn btn-primary">Add or Withdraw Balance</a>
-  <a href="{{ url_for('users.update_user_info') }}" class="btn btn-primary">Update User Info</a>
-  <a href="{{ url_for('users.user_public_view', id=current_user.id) }}" class="btn btn-primary">See Public View</a>
-  <a href="{{ url_for('users.user_purchase_analytics', uid=current_user.id) }}" class="btn btn-primary">See Purchase Analytics</a>
+  <strong>Balance:</strong> ${{ current_user.balance }} <a href="{{ url_for('users.update_balance') }}" class="btn btn-primary mb-2" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Add or Withdraw Balance</a><br>
+
+</div>
+  <div class="align-right">
+    <a href="{{ url_for('users.update_user_info') }}" class="btn btn-primary mb-2">Update User Info</a><br>
+    <a href="{{ url_for('users.user_public_view', id=current_user.id) }}" class="btn btn-primary mb-2">See Public View</a><br>
+    <a href="{{ url_for('users.user_purchase_analytics', uid=current_user.id) }}" class="btn btn-primary mb-2">See Purchase Analytics</a><br>
+  </div>
 </p>
 
 <div class="container mt-5">
