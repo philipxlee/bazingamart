@@ -7,14 +7,41 @@
 <strong>Last Name:</strong> {{ user.lastname }}<br />
 <br />
 
-{% if current_user.seller %}
+{% if user.email %}
     <strong>Email:</strong> {{ user.email }}<br />
-    <strong>Address:</strong> {{ user.address }}<br />
-    <br />
-    <h4>Reviews Recieved:</h4>
-    <br />
 {% endif %}
+{% if user.address %}
+    <strong>Address:</strong> {{ user.address }}<br />
+{% endif %}
+<br />
 
-<h4>Reviews Written:</h4>
+<h4>Reviews Given:</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Rating</th>
+            <th>Review</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for review in reviews_given %}
+        <tr>
+            <td>{{ review.product_id }}</td>
+            <td>{{ review.stars }}</td>
+            <td>{{ review.review_text }}</td>
+            <td>{{ review.time_written }}</td>
+            <td>
+                <a href="{{ url_for('reviews.edit_review', review_id=review.review_id, next=url_for('users.user_public_view', id=current_user.id)) }}" class="btn btn-warning btn-sm">Edit</a>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
 
 {% endblock %}

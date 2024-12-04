@@ -17,30 +17,43 @@ def index():
     category = request.args.get('category', '').strip()
     sort = request.args.get('sort', '').strip()
 
-    # Start with base query for products that are available
+    # Base query with average rating and review count calculation
     query = """
-        SELECT * FROM Products
-        WHERE available = TRUE
-    """ 
+    SELECT p.product_id, p.product_name, p.price, p.available, 
+           p.seller_id, p.product_quantity, p.description, 
+           p.image, p.category, 
+           COALESCE(ROUND(AVG(r.stars), 1), 0) AS average_rating,
+           COUNT(r.review_id) AS num_reviews
+    FROM Products p
+    LEFT JOIN Reviews r ON p.product_id = r.product_id
+    WHERE p.available = TRUE
+    """
     params = {}
 
     # Apply search filter
     if search:
         query += """
-            AND (product_name ILIKE :search OR description ILIKE :search)
+            AND (p.product_name ILIKE :search OR p.description ILIKE :search)
         """
         params['search'] = f"%{search}%"
 
     # Apply category filter
     if category:
-        query += " AND category = :category"
+        query += " AND p.category = :category"
         params['category'] = category
+
+    # Group by product ID to calculate average rating and review count
+    query += """
+        GROUP BY p.product_id, p.product_name, p.price, p.available, 
+                 p.seller_id, p.product_quantity, p.description, 
+                 p.image, p.category
+    """
 
     # Apply sorting by price
     if sort == 'asc':
-        query += " ORDER BY price ASC"
+        query += " ORDER BY p.price ASC"
     elif sort == 'desc':
-        query += " ORDER BY price DESC"
+        query += " ORDER BY p.price DESC"
     
     # Calculate the offset for pagination
     offset = (page - 1) * items_per_page
@@ -53,17 +66,17 @@ def index():
 
     # Get the total count of products for calculating total pages
     count_query = """
-        SELECT COUNT(*) FROM Products
-        WHERE available = TRUE
+        SELECT COUNT(*) FROM Products p
+        WHERE p.available = TRUE
     """
     count_params = {}  # Use a separate params dictionary for count query
     if search:
         count_query += """
-            AND (product_name ILIKE :search OR description ILIKE :search)
+            AND (p.product_name ILIKE :search OR p.description ILIKE :search)
         """
         count_params['search'] = f"%{search}%"
     if category:
-        count_query += " AND category = :category"
+        count_query += " AND p.category = :category"
         count_params['category'] = category
 
     total_items_result = current_app.db.execute(count_query, **count_params)
@@ -83,3 +96,5 @@ def index():
         page=page,
         total_pages=total_pages
     )
+
+

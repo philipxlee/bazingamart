@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import io
 
 from .models.user import User
+from .models.reviews import Reviews 
 from .models.orders import Order
 from flask import Blueprint
 
@@ -156,7 +157,14 @@ def user_public_view(id):
     user = User.get(id)
     if not user:
         return "User not found", 404
-    return render_template('user_public_view.html', user=user)
+
+    # Fetch all reviews given by the user
+    reviews_given = Reviews.get_recent_feedback(id)
+
+    # Pass the user and their reviews to the template
+    return render_template('user_public_view.html', user=user, reviews_given=reviews_given)
+
+
 
 @bp.route("/user_purchase_analytics/<int:uid>")
 def user_purchase_analytics(uid):

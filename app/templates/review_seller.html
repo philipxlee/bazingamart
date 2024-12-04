@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Review Seller</h2>
+    <form method="POST" action="{{ url_for('reviews.review_seller', seller_id=seller_id) }}">
+        <label for="stars">Rating (1-5):</label>
+        <select name="stars" id="stars" required>
+            <option value="" disabled selected>Select a rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+    
+        <label for="review_text">Review:</label>
+        <textarea name="review_text" id="review_text" rows="4" required></textarea>
+    
+        <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+    </form>
+    
+</div>
+{% endblock %}
