@@ -49,7 +49,7 @@ def add_review():
     existing_review = Reviews.get_review_by_user_and_product(user_id, product_id)
     if existing_review:
         flash("You have already reviewed this product.", "danger")
-        return redirect(url_for('products.product_detail', product_id=product_id))  # Adjusted for blueprint
+        return redirect(url_for('products.seller_detail', product_id=product_id, seller_id=seller_id))  # Adjusted for blueprint
 
     # Add the new review, passing the seller_id
     review_id = Reviews.add_review(user_id, product_id, stars, review_text, seller_id)
@@ -58,7 +58,7 @@ def add_review():
     else:
         flash('Error while adding review', 'danger')
 
-    return redirect(url_for('products.product_detail', product_id=product_id))  # Adjusted for blueprint
+    return redirect(url_for('products.seller_detail', product_id=product_id, seller_id=seller_id))  # Adjusted for blueprint
 
 
 @bp.route('/edit_review/<int:review_id>', methods=['GET', 'POST'])

@@ -40,14 +40,15 @@ def seller_detail(product_id, seller_id):
 
     # Fetch reviews specific to this seller (use real logic when reviews are ready)
     #reviews = Reviews.get_reviews_by_seller(product_id, seller_id) if hasattr(Reviews, 'get_reviews_by_seller') else []
+    reviews = Reviews.get_reviews_by_product(product_id)
 
     return render_template(
         'product_detail.html',
         product=product,
         sellers=sellers,
         seller=seller_info,
-        seller_id=seller_id# pass the current seller information to the template
-        #reviews=reviews
+        seller_id=seller_id, # pass the current seller information to the template
+        reviews=reviews
     )
 
 @bp.route('/search_by_price', methods=['GET', 'POST'])
