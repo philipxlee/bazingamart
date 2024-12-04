@@ -42,7 +42,8 @@ def seller_detail(product_id, seller_id):
         'product_detail.html',
         product=product,
         sellers=sellers,
-        seller=seller_info,  # pass the current seller information to the template
+        seller=seller_info,
+        seller_id=seller_id# pass the current seller information to the template
         #reviews=reviews
     )
 
