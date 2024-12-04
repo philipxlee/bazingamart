@@ -7,6 +7,7 @@
 
     <label for="email">Email:</label>
     {{ form.email(size=32) }}
+    <br>
     {% for error in form.email.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
@@ -14,6 +15,7 @@
 
     <label for="firstname">First Name:</label>
     {{ form.firstname(size=32) }}
+    <br>
     {% for error in form.firstname.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
@@ -21,6 +23,7 @@
 
     <label for="lastname">Last Name:</label>
     {{ form.lastname(size=32) }}
+    <br>
     {% for error in form.lastname.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
@@ -28,6 +31,7 @@
 
     <label for="address">Address:</label>
     {{ form.address(size=32) }}
+    <br>
     {% for error in form.address.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
@@ -35,6 +39,7 @@
 
     <label for="password">Password:</label>
     {{ form.password(size=32) }}
+    <br>
     {% for error in form.password.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
@@ -42,6 +47,7 @@
 
     <label for="password2">Repeat Password:</label>
     {{ form.password2(size=32) }}
+    <br>
     {% for error in form.password2.errors %}
         <span style="color: red;">{{ error }}</span>
     {% endfor %}
