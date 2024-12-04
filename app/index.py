@@ -60,11 +60,17 @@ def index():
                  p.image, p.category
     """
 
-    # Apply sorting by price
-    if sort == 'asc':
+    # Apply sorting based on request parameter
+    if sort == 'price_asc':
         query += " ORDER BY p.price ASC"
-    elif sort == 'desc':
+    elif sort == 'price_desc':
         query += " ORDER BY p.price DESC"
+# Future sorting options, such as sorting by rating
+    elif sort == 'rating_high':
+        query += " ORDER BY average_rating DESC"
+    elif sort == 'rating_low':
+        query += " ORDER BY average_rating ASC"
+
     
     # Calculate the offset for pagination
     offset = (page - 1) * items_per_page
