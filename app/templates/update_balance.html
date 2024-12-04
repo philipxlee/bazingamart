@@ -14,6 +14,12 @@
     <button type="submit" class="btn btn-primary" name="action" value="withdraw">Withdraw</button>
 </form>   
 
+<div>
+    <br>
+<a href="{{ url_for('users.user_home') }}" class="btn btn-primary mb-2">Return to User Home</a>
+</div>
+
+
 {% if error %}
     <br>
     <div class="alert alert-danger" role="alert">
