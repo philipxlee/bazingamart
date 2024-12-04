@@ -16,6 +16,7 @@
             <h1>{{ product.product_name }}</h1>
             <p><strong>Price:</strong> ${{ seller.product_price }}</p> <!-- Display seller-specific price -->
             <p><strong>Availability:</strong> {% if seller.available %}{{ seller.product_quantity }} In Stock{% else %}Out of Stock{% endif %}</p>
+            <p><strong>Seller:</strong> <a href="{{ url_for('users.user_public_view', id=seller_id) }}">Seller {{ seller_id }}</a> </p>
 
             <!-- Include a description if available -->
             {% if product.description %}

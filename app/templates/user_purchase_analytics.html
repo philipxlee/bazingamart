@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+<br>
+<h4><strong>Shopping Analytics:</strong> <br></h4>
 <p>
-    <strong>Shopping Analytics:</strong> <br>
     Number of Orders: {{ num_orders }} <br>
     Average Spent Per Order: ${{ average_price }} <br>
     Max Spent: ${{ max_price }} <br>
     Min Spent: ${{ min_price }} <br>
 </p>
+<br>
 
+<h4><strong>Shopping Trends:</strong></h4>
 <p>
-    <strong>Shopping Trends:</strong> <br> 
     <img src="data:image/png;base64,{{ chart_img }}" alt="Order Prices Chart">
 </p>
+
+<div style="padding-bottom: 50px;"></div>
 
 {% endblock %}
