@@ -10,9 +10,9 @@
   <form method="GET" action="{{ url_for('index.index') }}" class="row g-3 align-items-center">
 
     <!-- Category and Search Integrated -->
-    <div class="col-md-9 d-flex">
+    <div class="col-md-7 d-flex">
       <!-- Category Filter -->
-      <select name="category" class="form-select integrated-category">
+      <select name="category" class="form-select integrated-category me-2">
         <option value="">All Categories</option>
         {% for category in categories %}
         <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
@@ -23,25 +23,29 @@
 
       <!-- Keyword Search -->
       <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search products..."
-        class="form-control integrated-search">
+        class="form-control integrated-search me-2">
+      
+      <!-- Search Button -->
+      <button type="submit" class="btn btn-primary">Search</button>
     </div>
 
     <!-- Sort By Dropdown Button (right-aligned) -->
-    <div class="col-md-3 d-flex justify-content-end">
+    <div class="col-md-5 d-flex justify-content-end">
       <div class="dropdown" style="display: inline-block;">
         <button class="btn btn-light dropdown-toggle" type="button" id="sortByDropdown" data-bs-toggle="dropdown"
           aria-expanded="false" style="border: 1px solid #ced4da;">
           Sort by
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortByDropdown">
-          <li><a class="dropdown-item" href="?sort=price_asc">Lowest Price</a></li>
-          <li><a class="dropdown-item" href="?sort=price_desc">Highest Price</a></li>
+          <li><a class="dropdown-item" href="?sort=price_asc">Price: Low to High</a></li>
+          <li><a class="dropdown-item" href="?sort=price_desc">Price: High to Low</a></li>
         </ul>
       </div>
     </div>
 
   </form>
 </div>
+
 
 <!-- Display Products -->
 <div class="container">
