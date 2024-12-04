@@ -2,46 +2,81 @@
 
 {% block content %}
 <h4>Basic Information:</h4>
-<strong>User ID:</strong> {{ user.id }}<br />
-<strong>First Name:</strong> {{ user.firstname }}<br />
-<strong>Last Name:</strong> {{ user.lastname }}<br />
-<br />
+<div class="mb-3">
+    <strong>User ID:</strong> {{ user.id }}<br />
+    <strong>First Name:</strong> {{ user.firstname }}<br />
+    <strong>Last Name:</strong> {{ user.lastname }}<br />
+</div>
 
-{% if user.email %}
+{% if current_user.seller %}
+<div class="mb-3">
     <strong>Email:</strong> {{ user.email }}<br />
-{% endif %}
-{% if user.address %}
     <strong>Address:</strong> {{ user.address }}<br />
+</div>
 {% endif %}
+
+<h4>Reviews Received:</h4>
+{% if reviews_received %}
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Product ID</th>
+                <th>Seller ID</th>
+                <th>Rating</th>
+                <th>Review</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews_received %}
+            <tr>
+                <td>{{ review.product_id }}</td>
+                <td>{{ review.seller_id }}</td>
+                <td>{{ review.stars }}</td>
+                <td>{{ review.review_text }}</td>
+                <td>{{ review.time_written }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No reviews received yet.</p>
+{% endif %}
+
 <br />
 
 <h4>Reviews Given:</h4>
-<table>
-    <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Rating</th>
-            <th>Review</th>
-            <th>Date</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for review in reviews_given %}
-        <tr>
-            <td>{{ review.product_id }}</td>
-            <td>{{ review.stars }}</td>
-            <td>{{ review.review_text }}</td>
-            <td>{{ review.time_written }}</td>
-            <td>
-                <a href="{{ url_for('reviews.edit_review', review_id=review.review_id, next=url_for('users.user_public_view', id=current_user.id)) }}" class="btn btn-warning btn-sm">Edit</a>
-
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-
+{% if reviews_given %}
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Product ID</th>
+                <th>Seller ID</th>
+                <th>Rating</th>
+                <th>Review</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews_given %}
+            <tr>
+                <td>{{ review.product_id }}</td>
+                <td>{{ review.seller_id }}</td>
+                <td>{{ review.stars }}</td>
+                <td>{{ review.review_text }}</td>
+                <td>{{ review.time_written }}</td>
+                <td>
+                    <a href="{{ url_for('reviews.edit_review', review_id=review.review_id, next=url_for('users.user_public_view', id=current_user.id)) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form action="{{ url_for('reviews.delete_review', review_id=review.review_id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No reviews given yet.</p>
+{% endif %}
 
 {% endblock %}

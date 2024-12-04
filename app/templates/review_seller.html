@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Review Seller</h2>
-    <form method="POST" action="{{ url_for('reviews.review_seller', seller_id=seller_id) }}">
+    <form method="POST" action="{{ url_for('reviews.review_seller', seller_id=seller_id, order_id=order_id) }}">
         <label for="stars">Rating (1-5):</label>
         <select name="stars" id="stars" required>
             <option value="" disabled selected>Select a rating</option>

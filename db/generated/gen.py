@@ -226,7 +226,7 @@ def gen_reviews(num_reviews=500, num_users=num_users, num_products=num_products)
                 print(f'{review_id}', end=' ', flush=True)
             user_id = fake.random_int(min=0, max=num_users)  
             seller_id = random.choice(seller_user_ids) if seller_user_ids else 1
-            reviewer_type = random.choice(['buyer', 'seller'])
+            reviewer_type = random.choice(['product', 'seller'])
             product_id, seller_id = random.choice(product_ids)  # Get the combination
             stars = fake.random_int(min=1, max=5)
             review_text = fake.text(max_nb_chars=200)

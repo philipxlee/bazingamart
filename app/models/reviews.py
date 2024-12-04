@@ -39,31 +39,49 @@ class Reviews:
             ORDER BY time_written DESC
         ''', user_id=user_id)
         return rows
+    
+    @staticmethod
+    def get_reviews_received_by_seller(seller_id):
+        rows = app.db.execute('''
+            SELECT review_id, user_id, reviewer_type, product_id, stars, review_text, time_written
+            FROM Reviews
+            WHERE reviewer_type = 'seller' AND seller_id = :seller_id
+            ORDER BY time_written DESC
+        ''', seller_id=seller_id)
+        return rows
+
 
 
     @staticmethod
     def add_review(user_id, product_id, stars, review_text, seller_id):
-        """Insert a new review into the Reviews table with reviewer_type set to 'buyer'."""
+        """Insert a new review into the Reviews table with reviewer_type set to 'product'."""
+        reviewer_type = 'product'  # Set reviewer_type explicitly for a product review
+        
         result = app.db.execute('''
             INSERT INTO Reviews (user_id, product_id, stars, review_text, seller_id, reviewer_type, time_written)
-            VALUES (:user_id, :product_id, :stars, :review_text, :seller_id, 'buyer', current_timestamp)
+            VALUES (:user_id, :product_id, :stars, :review_text, :seller_id, :reviewer_type, current_timestamp)
             RETURNING review_id
-        ''', user_id=user_id, product_id=product_id, stars=stars, review_text=review_text, seller_id=seller_id)
+        ''', user_id=user_id, product_id=product_id, stars=stars, review_text=review_text, seller_id=seller_id, reviewer_type=reviewer_type)
 
         # If the insert was successful
         return result[0][0] if result else None
+
     
     @staticmethod
-    def add_seller_review(user_id, product_id, stars, review_text, seller_id):
-        """Insert a new review into the Reviews table with reviewer_type set to 'buyer'."""
-        result = app.db.execute('''
-            INSERT INTO Reviews (user_id, stars, review_text, seller_id, reviewer_type, time_written)
-            VALUES (:user_id, :product_id, :stars, :review_text, :seller_id, 'seller', current_timestamp)
-            RETURNING review_id
-        ''', user_id=user_id, stars=stars, review_text=review_text, seller_id=seller_id)
+    def add_seller_review(seller_id, reviewer_id, stars, review_text):
+        """
+        Adds a new review for a seller.
+        """
+        app.db.execute('''
+            INSERT INTO Reviews (seller_id, user_id, reviewer_type, stars, review_text, time_written, product_id)
+            VALUES (:seller_id, :reviewer_id, 'seller', :stars, :review_text, NOW(), NULL)
+        ''', 
+        seller_id=seller_id, 
+        reviewer_id=reviewer_id, 
+        stars=stars, 
+        review_text=review_text)
 
-        # If the insert was successful, return the review_id
-        return result[0]['review_id'] if result else None
+
 
 
     @staticmethod

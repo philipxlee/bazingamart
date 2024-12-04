@@ -161,8 +161,16 @@ def user_public_view(id):
     # Fetch all reviews given by the user
     reviews_given = Reviews.get_recent_feedback(id)
 
+    # Fetch reviews received by the seller (if the current user is a seller)
+    if current_user.seller:
+        reviews_received = Reviews.get_reviews_received_by_seller(id)
+    else:
+        reviews_received = []
+
     # Pass the user and their reviews to the template
-    return render_template('user_public_view.html', user=user, reviews_given=reviews_given)
+    return render_template('user_public_view.html', user=user, reviews_given=reviews_given, reviews_received=reviews_received)
+
+
 
 
 

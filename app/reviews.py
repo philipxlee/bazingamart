@@ -117,52 +117,36 @@ def delete_review(review_id):
 
     return redirect(request.referrer)
 
-@bp.route('/seller/<int:seller_id>', methods=['GET', 'POST'])
+@bp.route('/review_seller/<int:seller_id>/<int:order_id>', methods=['GET', 'POST'])
 @login_required
-def review_seller(seller_id):
+def review_seller(seller_id, order_id):
     if request.method == 'POST':
+        # Process the form submission
         stars = request.form.get('stars')
-        review_text = request.form.get('review_text', '').strip()
-        order_id = request.args.get('order_id')  # Retrieve order_id from query parameters
+        review_text = request.form.get('review_text')
 
-        if not order_id:
-            flash("Review submitted", "danger")
-            return redirect(url_for('index.index'))
-
-        if stars is None:
-            flash("Please select a valid rating.", "danger")
-            return redirect(request.url)
+        if not stars or not review_text:
+            flash('All fields are required!', 'danger')
+            return redirect(url_for('reviews.review_seller', seller_id=seller_id, order_id=order_id))
 
         try:
-            stars = int(stars)
-            if not 1 <= stars <= 5:
-                flash("Rating must be between 1 and 5 stars.", "danger")
-                return redirect(request.url)
-        except ValueError:
-            flash("Invalid rating provided.", "danger")
-            return redirect(request.url)
-
-        # Insert the review into the database
-        try:
-            current_app.db.execute("""
-                INSERT INTO Reviews (user_id, product_id, seller_id, stars, review_text, review_type, review_date)
-                VALUES (:user_id, NULL, :seller_id, :stars, :review_text, 'seller', NOW())
-            """, 
-            user_id=current_user.id,
-            seller_id=seller_id,
-            stars=stars,
-            review_text=review_text)
-
-            flash("Your review has been submitted successfully!", "success")
+            # Add the review (implement `add_seller_review` in your Reviews model)
+            Reviews.add_seller_review(
+                seller_id=seller_id,
+                reviewer_id=current_user.id,
+                stars=int(stars),
+                review_text=review_text
+            )
+            flash('Review submitted successfully!', 'success')
         except Exception as e:
-            print(f"Error while adding seller review: {e}")
-            flash("An error occurred while submitting your review.", "danger")
-        
-        # Redirect back to the order details page
+            flash(f'An error occurred: {e}', 'danger')
+
+        # Redirect back to order_details page
         return redirect(url_for('orders.order_details', order_id=order_id))
 
-    # Render review form
-    return render_template('review_seller.html', seller_id=seller_id)
+    # Render the review form
+    return render_template('review_seller.html', seller_id=seller_id, order_id=order_id)
+
 
 
 

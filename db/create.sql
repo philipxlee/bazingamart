@@ -77,10 +77,10 @@ CREATE TABLE Reviews (
     user_id INT NOT NULL REFERENCES Users(id),
     seller_id INT NOT NULL REFERENCES Users(id),
     reviewer_type VARCHAR(50) NOT NULL,
-    product_id INT NOT NULL,
+    product_id INT,
     stars INT CHECK (stars BETWEEN 1 AND 5),
     review_text TEXT,
     time_written TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
     upvotes INT NOT NULL DEFAULT 0,
-    FOREIGN KEY (product_id, seller_id) REFERENCES Products(product_id, seller_id)
+    CONSTRAINT fk_product FOREIGN KEY (product_id, seller_id) REFERENCES Products(product_id, seller_id) ON DELETE CASCADE
 );
